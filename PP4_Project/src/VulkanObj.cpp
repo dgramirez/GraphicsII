@@ -32,13 +32,13 @@ bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_w
 	if (!SetPhysicalDevice())						{ LOG("Set Physical Device Has Failed!");			return false; }
 	if (!CreateLogicalDevice())						{ LOG("Create Logical Device Has Failed!");			return false; }
 	if (!CreateSwapChain(win_width, win_height))	{ LOG("Create Swap Chain Has Failed!");				return false; }
-	if (!CreateRenderPass())						{ LOG("Create Render Pass Has Failed");				return false; }
-//	if (!CreateGraphicsPipeline()) { LOG("X"); return false; }
-//	if (!CreateImageView())							{ LOG("Create Image View Has Failed!");				return false; }
-//	if (!CreateFrameBuffers())						{ LOG("Create Frame Buffers Has Failed");			return false; }
-//	if (!CreateCommandPool())						{ LOG("Create Command Pool Has Failed!");			return false; }
-//	if (!CreateCommandBuffers())					{ LOG("Create Command Buffer Has Failed!");			return false; }
-//	if (!CreateSemaphore())							{ LOG("Create Semaphore Has Failed!");				return false; }
+	if (!CreateImageView())							{ LOG("Create Image View Has Failed!");				return false; }
+	if (!CreateRenderPass())						{ LOG("Create Render Pass Has Failed!");			return false; }
+	if (!CreateGraphicsPipeline())					{ LOG("Create Graphics Pipeline Has Failed!");		return false; }
+	if (!CreateFrameBuffers())						{ LOG("Create Frame Buffers Has Failed");			return false; }
+	if (!CreateCommandPool())						{ LOG("Create Command Pool Has Failed!");			return false; }
+	if (!CreateCommandBuffers())					{ LOG("Create Command Buffer Has Failed!");			return false; }
+	if (!CreateSemaphore())							{ LOG("Create Semaphore Has Failed!");				return false; }
 	return true;
 }
 
@@ -435,13 +435,13 @@ bool VulkanObj::CreateGraphicsPipeline()
 	vertex_shader_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertex_shader_create_info.stage = VK_SHADER_STAGE_VERTEX_BIT;
 	vertex_shader_create_info.module = shader_vertex_module;
-	vertex_shader_create_info.pName = "vert_shader";
+	vertex_shader_create_info.pName = "main";
 
 	VkPipelineShaderStageCreateInfo fragment_shader_create_info = {};
-	vertex_shader_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	vertex_shader_create_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	vertex_shader_create_info.module = shader_fragment_module;
-	vertex_shader_create_info.pName = "frag_shader";
+	fragment_shader_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	fragment_shader_create_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+	fragment_shader_create_info.module = shader_fragment_module;
+	fragment_shader_create_info.pName = "main";
 
 	VkPipelineShaderStageCreateInfo shader_stages[] = { vertex_shader_create_info, fragment_shader_create_info };
 
@@ -488,7 +488,7 @@ bool VulkanObj::CreateGraphicsPipeline()
 
 #pragma region Rasterizer
 
-	VkPipelineRasterizationStateCreateInfo rasterization_create_info;
+	VkPipelineRasterizationStateCreateInfo rasterization_create_info = {};
 	rasterization_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	rasterization_create_info.rasterizerDiscardEnable = false;
 	rasterization_create_info.polygonMode = VK_POLYGON_MODE_FILL;
@@ -599,7 +599,7 @@ bool VulkanObj::CreateGraphicsPipeline()
 
 	pipeline_create_info.layout = prv_PipelineLayout;
 	pipeline_create_info.renderPass = prv_RenderPass;
-	pipeline_create_info.subpass = 1;
+	pipeline_create_info.subpass = 0;
 
 	pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
 	pipeline_create_info.basePipelineIndex = -1;
@@ -997,7 +997,7 @@ VkShaderModule VulkanObj::CreateShaderModule(const std::vector<char>& shader)
 	VkShaderModuleCreateInfo create_info = {};
 	create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 	create_info.codeSize = shader.size();
-	create_info.pCode = (uint32_t*)shader.data();
+	create_info.pCode = reinterpret_cast<const uint32_t*>(shader.data());
 	
 	VkShaderModule shader_module;
 	if (vkCreateShaderModule(prv_Device, &create_info, nullptr, &shader_module))
