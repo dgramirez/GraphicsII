@@ -20,6 +20,8 @@
 
 #pragma endregion This contains defines and includes with GLFW and Vulkan
 
+#define MAX_FRAMES_FLIGHT 2
+
 #include <optional>
 #include <set>
 #include <algorithm>
@@ -34,15 +36,14 @@ public:
 	VulkanObj();
 	~VulkanObj();
 
-	VkSwapchainKHR prv_Swapchain;
-	VkDevice prv_Device;
-	VkSemaphore prv_ImageAvailableSemaphore;
-
 	bool init(const char* title, GLFWwindow* window, unsigned short win_width, unsigned short win_height);
 	void draw_frames();
 	void cleanup();
+	void idle_device();
 
 private:
+	uint32_t prv_Frame = 0;
+
 	const std::vector<const char*> prv_DeviceExt = 
 	{
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -72,8 +73,10 @@ private:
 	VkQueue prv_QueueGraphics;
 	VkQueue prv_QueuePresent;
 
+	VkDevice prv_Device;
 	VkSurfaceKHR prv_Surface;
 
+	VkSwapchainKHR prv_Swapchain;
 	std::vector<VkImage> prv_SwapchainImages;
 	std::vector<VkImageView> prv_SwapchainImageViews;
 	std::vector<VkFramebuffer> prv_SwapchainFrameBuffers;
@@ -87,7 +90,10 @@ private:
 	VkCommandPool prv_CommandPool;
 	std::vector<VkCommandBuffer> prv_CommandBuffers;
 
-	VkSemaphore prv_RenderFinishedSemaphore;
+	std::vector<VkSemaphore> prv_ImageAvailableSemaphore;
+	std::vector<VkSemaphore> prv_RenderFinishedSemaphore;
+	std::vector<VkFence> prv_Fences;
+
 
 	struct SwapChainSupportDetails
 	{

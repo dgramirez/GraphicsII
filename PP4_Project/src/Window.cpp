@@ -56,6 +56,8 @@ void Window::MainLoop()
 			glfwPollEvents();
 			DrawFrames();
 		}
+
+		Vobj->idle_device();
 	}
 
 }

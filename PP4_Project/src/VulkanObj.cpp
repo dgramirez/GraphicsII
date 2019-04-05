@@ -5,8 +5,12 @@ VulkanObj::~VulkanObj() { cleanup(); }
 
 void VulkanObj::cleanup()
 {
-	if (prv_RenderFinishedSemaphore) vkDestroySemaphore(prv_Device, prv_RenderFinishedSemaphore, nullptr);
-	if (prv_ImageAvailableSemaphore) vkDestroySemaphore(prv_Device, prv_ImageAvailableSemaphore, nullptr);
+	for (unsigned int i = 0; i < MAX_FRAMES_FLIGHT; ++i)
+	{
+		if (prv_RenderFinishedSemaphore[i]) vkDestroySemaphore(prv_Device, prv_RenderFinishedSemaphore[i], nullptr);
+		if (prv_ImageAvailableSemaphore[i]) vkDestroySemaphore(prv_Device, prv_ImageAvailableSemaphore[i], nullptr);
+		if (prv_Fences[i])					vkDestroyFence(prv_Device, prv_Fences[i], nullptr);
+	}
 
 	for (unsigned int i = 0; i < prv_SwapchainFrameBuffers.size(); ++i)
 		vkDestroyFramebuffer(prv_Device, prv_SwapchainFrameBuffers[i], nullptr);
@@ -22,6 +26,11 @@ void VulkanObj::cleanup()
 	if (prv_Surface)				vkDestroySurfaceKHR(prv_Instance, prv_Surface, nullptr);
 	if (validation_layers_enabled)	CustomVkDestroyDebugUtilsMessengerEXT(prv_Instance, prv_Debugger, nullptr);
 	if (prv_Instance)				vkDestroyInstance(prv_Instance, nullptr);
+}
+
+void VulkanObj::idle_device()
+{
+	vkDeviceWaitIdle(prv_Device);
 }
 
 bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_width, unsigned short win_height)
@@ -44,12 +53,15 @@ bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_w
 
 void VulkanObj::draw_frames()
 {
+	vkWaitForFences(prv_Device, 1, &prv_Fences[prv_Frame], true, std::numeric_limits<uint64_t>::max());
+	vkResetFences(prv_Device, 1, &prv_Fences[prv_Frame]);
+
 	uint32_t image_index;
 	vkAcquireNextImageKHR(prv_Device, prv_Swapchain, std::numeric_limits<uint64_t>::max(), 
-		prv_ImageAvailableSemaphore, VK_NULL_HANDLE, &image_index);
+		prv_ImageAvailableSemaphore[prv_Frame], VK_NULL_HANDLE, &image_index);
 
-	VkSemaphore wait_semaphores[] = { prv_ImageAvailableSemaphore };
-	VkSemaphore signal_semaphore[] = { prv_RenderFinishedSemaphore };
+	VkSemaphore wait_semaphores[] = { prv_ImageAvailableSemaphore[prv_Frame] };
+	VkSemaphore signal_semaphore[] = { prv_RenderFinishedSemaphore[prv_Frame] };
 	VkPipelineStageFlags wait_stages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 
 	VkSubmitInfo submit_info = {};
@@ -61,7 +73,7 @@ void VulkanObj::draw_frames()
 	submit_info.signalSemaphoreCount = 1;
 	submit_info.pSignalSemaphores = signal_semaphore;
 
-	if (vkQueueSubmit(prv_QueueGraphics, 1, &submit_info, VK_NULL_HANDLE))
+	if (vkQueueSubmit(prv_QueueGraphics, 1, &submit_info, prv_Fences[prv_Frame]))
 	{
 		LOG("Failed to Submit Queue");
 	}
@@ -78,6 +90,10 @@ void VulkanObj::draw_frames()
 	present_info.pResults = nullptr;
 
 	vkQueuePresentKHR(prv_QueuePresent, &present_info);
+
+	vkQueueWaitIdle(prv_QueuePresent);
+
+	prv_Frame = (prv_Frame + 1) % MAX_FRAMES_FLIGHT;
 }
 
 bool VulkanObj::CreateInstance(const char* title)
@@ -726,18 +742,36 @@ bool VulkanObj::CreateCommandBuffers()
 
 bool VulkanObj::CreateSemaphore()
 {
+	prv_ImageAvailableSemaphore.resize(MAX_FRAMES_FLIGHT);
+	prv_RenderFinishedSemaphore.resize(MAX_FRAMES_FLIGHT);
+	prv_Fences.resize(MAX_FRAMES_FLIGHT);
+
 	VkSemaphoreCreateInfo semaphore_create_info = {};
 	semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-	if (vkCreateSemaphore(prv_Device, &semaphore_create_info, nullptr, &prv_ImageAvailableSemaphore))
+
+	VkFenceCreateInfo fence_create_info = {};
+	fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fence_create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+	for (unsigned int i = 0; i < MAX_FRAMES_FLIGHT; ++i)
 	{
-		LOG("Semaphore Creation for Image Available Semaphore has Failed!");
-		return false;
+		if (vkCreateSemaphore(prv_Device, &semaphore_create_info, nullptr, &prv_ImageAvailableSemaphore[i]))
+		{
+			LOG("Semaphore Creation for Image Available Semaphore has Failed!");
+			return false;
+		}
+		if (vkCreateSemaphore(prv_Device, &semaphore_create_info, nullptr, &prv_RenderFinishedSemaphore[i]))
+		{
+			LOG("Semaphore Creation for Render Finished Semaphore has Failed!");
+			return false;
+		}
+		if (vkCreateFence(prv_Device, &fence_create_info, nullptr, &prv_Fences[i]))
+		{
+			LOG("Fence Creation has Failed!");
+			return false;
+		}
 	}
-	if (vkCreateSemaphore(prv_Device, &semaphore_create_info, nullptr, &prv_RenderFinishedSemaphore))
-	{
-		LOG("Semaphore Creation for Render Finished Semaphore has Failed!");
-		return false;
-	}
+
 	return true;
 }
 
