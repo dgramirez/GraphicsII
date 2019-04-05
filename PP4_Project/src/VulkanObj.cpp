@@ -44,40 +44,40 @@ bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_w
 
 void VulkanObj::draw_frames()
 {
-// 	uint32_t image_index;
-// 	vkAcquireNextImageKHR(prv_Device, prv_Swapchain, std::numeric_limits<uint64_t>::max(), 
-// 		prv_ImageAvailableSemaphore, VK_NULL_HANDLE, &image_index);
-// 
-// 	VkSemaphore wait_semaphores[] = { prv_ImageAvailableSemaphore };
-// 	VkSemaphore signal_semaphore[] = { prv_RenderFinishedSemaphore };
-// 	VkPipelineStageFlags wait_stages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-// 
-// 	VkSubmitInfo submit_info = {};
-// 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-// 	submit_info.pWaitSemaphores = wait_semaphores;
-// 	submit_info.pWaitDstStageMask = wait_stages;
-// 	submit_info.commandBufferCount = 1;
-// 	submit_info.pCommandBuffers = &prv_CommandBuffers[image_index];
-// 	submit_info.signalSemaphoreCount = 1;
-// 	submit_info.pSignalSemaphores = signal_semaphore;
-// 
-// 	if (vkQueueSubmit(prv_QueueGraphics, 1, &submit_info, VK_NULL_HANDLE))
-// 	{
-// 		LOG("Failed to Submit Queue");
-// 	}
-// 
-// 	VkSwapchainKHR swapchains[] = { prv_Swapchain };
-// 
-// 	VkPresentInfoKHR present_info = {};
-// 	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-// 	present_info.waitSemaphoreCount = 1;
-// 	present_info.pWaitSemaphores = wait_semaphores;
-// 	present_info.swapchainCount = 1;
-// 	present_info.pSwapchains = swapchains;
-// 	present_info.pImageIndices = &image_index;
-// 	present_info.pResults = nullptr;
-// 
-// 	vkQueuePresentKHR(prv_QueuePresent, &present_info);
+	uint32_t image_index;
+	vkAcquireNextImageKHR(prv_Device, prv_Swapchain, std::numeric_limits<uint64_t>::max(), 
+		prv_ImageAvailableSemaphore, VK_NULL_HANDLE, &image_index);
+
+	VkSemaphore wait_semaphores[] = { prv_ImageAvailableSemaphore };
+	VkSemaphore signal_semaphore[] = { prv_RenderFinishedSemaphore };
+	VkPipelineStageFlags wait_stages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+	VkSubmitInfo submit_info = {};
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.pWaitSemaphores = wait_semaphores;
+	submit_info.pWaitDstStageMask = wait_stages;
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &prv_CommandBuffers[image_index];
+	submit_info.signalSemaphoreCount = 1;
+	submit_info.pSignalSemaphores = signal_semaphore;
+
+	if (vkQueueSubmit(prv_QueueGraphics, 1, &submit_info, VK_NULL_HANDLE))
+	{
+		LOG("Failed to Submit Queue");
+	}
+
+	VkSwapchainKHR swapchains[] = { prv_Swapchain };
+
+	VkPresentInfoKHR present_info = {};
+	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	present_info.waitSemaphoreCount = 1;
+	present_info.pWaitSemaphores = wait_semaphores;
+	present_info.swapchainCount = 1;
+	present_info.pSwapchains = swapchains;
+	present_info.pImageIndices = &image_index;
+	present_info.pResults = nullptr;
+
+	vkQueuePresentKHR(prv_QueuePresent, &present_info);
 }
 
 bool VulkanObj::CreateInstance(const char* title)
