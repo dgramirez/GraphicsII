@@ -29,6 +29,7 @@
 #include "vulkan/vulkan.h"
 #include <vector>
 #include <fstream>
+#include <array>
 
 class VulkanObj
 {
@@ -42,16 +43,63 @@ public:
 	void idle_device();
 
 private:
+
 	uint32_t prv_Frame = 0;
 
-	const std::vector<const char*> prv_DeviceExt = 
-	{
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+#pragma region Instance
+	VkInstance prv_Instance;
+	std::vector<const char*> GetRequiredExtensions();
+
+	bool CreateInstance(const char* title);
+	bool CheckValidationLayerSupport();
+
+#pragma endregion
+
+#pragma region Validation Debugger
+
+	const std::vector<const char*> validation_layers = {
+	"VK_LAYER_LUNARG_standard_validation"
 	};
 
-	VkInstance prv_Instance;
+#ifdef NDEBUG
+	const bool validation_layers_enabled = false;
+#else
+	const bool validation_layers_enabled = true;
+#endif
 
-	VkPhysicalDevice prv_PhysicalDevice;
+	VkDebugUtilsMessengerEXT prv_Debugger;
+	bool CreateValidationDebugger();
+
+	static VKAPI_ATTR VkBool32 VKAPI_CALL Callback_Debug(
+		VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
+		VkDebugUtilsMessageTypeFlagsEXT message_type,
+		const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
+		void* user_data
+	);
+
+	VkResult CustomVkCreateDebugUtilsMessengerEXT(
+		VkInstance instance,
+		const VkDebugUtilsMessengerCreateInfoEXT* create_info,
+		const VkAllocationCallbacks* allocator,
+		VkDebugUtilsMessengerEXT* debug_messenger
+	);
+
+	void CustomVkDestroyDebugUtilsMessengerEXT(
+		VkInstance instance,
+		VkDebugUtilsMessengerEXT debug_messenger,
+		const VkAllocationCallbacks* allocator
+	);
+
+#pragma endregion 
+	
+#pragma region Surface
+
+	VkSurfaceKHR prv_Surface;
+	bool CreateSurface(GLFWwindow* window);
+
+#pragma endregion
+	
+#pragma region Physical Device
 
 	struct QueueFamilyIndices {
 		std::optional<uint32_t> Family_Graphics;
@@ -60,40 +108,32 @@ private:
 		bool IsComplete() { return Family_Graphics.has_value() && Family_Present.has_value(); }
 	};
 
-#ifdef NDEBUG
-	const bool validation_layers_enabled = false;
-#else
-	const bool validation_layers_enabled = true;
-#endif
-	const std::vector<const char*> validation_layers = {
-	"VK_LAYER_LUNARG_standard_validation"
-	};
-	VkDebugUtilsMessengerEXT prv_Debugger;
+	VkPhysicalDevice prv_PhysicalDevice;
+	
+	bool SetPhysicalDevice();
+
+	bool DeviceCompatible(VkPhysicalDevice device);
+	bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
+	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
+
+#pragma endregion
+
+#pragma region Logical Device
 
 	VkQueue prv_QueueGraphics;
 	VkQueue prv_QueuePresent;
-
 	VkDevice prv_Device;
-	VkSurfaceKHR prv_Surface;
 
-	VkSwapchainKHR prv_Swapchain;
-	std::vector<VkImage> prv_SwapchainImages;
-	std::vector<VkImageView> prv_SwapchainImageViews;
-	std::vector<VkFramebuffer> prv_SwapchainFrameBuffers;
-	VkFormat prv_SwapchainFormat;
-	VkExtent2D prv_SwapchainExtent;
+	bool CreateLogicalDevice();
 
-	VkPipelineLayout prv_PipelineLayout;
-	VkRenderPass prv_RenderPass;
-	VkPipeline prv_GraphicsPipeline;
+#pragma endregion
 
-	VkCommandPool prv_CommandPool;
-	std::vector<VkCommandBuffer> prv_CommandBuffers;
+#pragma region Swapchain | Image View | Frame Buffers
 
-	std::vector<VkSemaphore> prv_ImageAvailableSemaphore;
-	std::vector<VkSemaphore> prv_RenderFinishedSemaphore;
-	std::vector<VkFence> prv_Fences;
-
+	const std::vector<const char*> prv_DeviceExt =
+	{
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
 
 	struct SwapChainSupportDetails
 	{
@@ -102,51 +142,58 @@ private:
 		std::vector<VkPresentModeKHR> presentModes;
 	};
 
-	bool CreateInstance(const char* title);
-	bool CreateValidationDebugger();
-	bool CreateSurface(GLFWwindow* window);
-	bool SetPhysicalDevice();
-	bool CreateLogicalDevice();
+	VkSwapchainKHR prv_Swapchain;
+	std::vector<VkImage> prv_SwapchainImages;
+	std::vector<VkImageView> prv_SwapchainImageViews;
+	std::vector<VkFramebuffer> prv_SwapchainFrameBuffers;
+	VkFormat prv_SwapchainFormat;
+	VkExtent2D prv_SwapchainExtent;
+
+
 	bool CreateSwapChain(unsigned short win_width, unsigned short win_height);
 	bool CreateImageView();
-	bool CreateRenderPass();
-	bool CreateGraphicsPipeline();
-	bool CreateFrameBuffers();
-	bool CreateCommandPool();
-	bool CreateCommandBuffers();
-	bool CreateSemaphore();
 
-	bool CheckValidationLayerSupport();
-	bool DeviceCompatible(VkPhysicalDevice device);
-	bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
+	bool CreateFrameBuffers();	//Usage comes AFTER Render Pass
+								//and Graphics Pipeline
 
-	std::vector<const char*> GetRequiredExtensions();
-	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 	SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
 	VkSurfaceFormatKHR SelectSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats);
 	VkPresentModeKHR SelectSwapPresentMode(const std::vector<VkPresentModeKHR>& mode);
 	VkExtent2D SelectSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, unsigned short win_width, unsigned short win_height);
+#pragma endregion
 
-	static VKAPI_ATTR VkBool32 VKAPI_CALL Callback_Debug(
-		VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
-		VkDebugUtilsMessageTypeFlagsEXT message_type,
-		const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
-		void* user_data
-		);
-	VkResult CustomVkCreateDebugUtilsMessengerEXT(
-		VkInstance instance,
-		const VkDebugUtilsMessengerCreateInfoEXT* create_info,
-		const VkAllocationCallbacks* allocator,
-		VkDebugUtilsMessengerEXT* debug_messenger
-	);
-	void CustomVkDestroyDebugUtilsMessengerEXT(
-		VkInstance instance,
-		VkDebugUtilsMessengerEXT debug_messenger,
-		const VkAllocationCallbacks* allocator
-	);
+#pragma region Render Pass | Graphics Pipeline
 
-	static std::vector<char> ReadFile(const std::string& filename);
+	VkRenderPass prv_RenderPass;
+	VkPipelineLayout prv_PipelineLayout;
+	VkPipeline prv_GraphicsPipeline;
+
+	bool CreateRenderPass();
+	bool CreateGraphicsPipeline();
+	static std::vector<char> ReadShaderFile(const std::string& filename);
 	VkShaderModule CreateShaderModule(const std::vector<char>& shader);
+
+#pragma endregion
+
+#pragma region  Command Pool | Command Buffer
+
+	VkCommandPool prv_CommandPool;
+	std::vector<VkCommandBuffer> prv_CommandBuffers;
+
+	bool CreateCommandPool();
+	bool CreateCommandBuffers();
+
+#pragma endregion
+
+#pragma region Semaphore | Fences
+
+	std::vector<VkSemaphore> prv_ImageAvailableSemaphore;
+	std::vector<VkSemaphore> prv_RenderFinishedSemaphore;
+	std::vector<VkFence> prv_Fences;
+
+	bool SyncSemaphoreAndFences();
+
+#pragma endregion
 
 };
 

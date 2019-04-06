@@ -47,7 +47,7 @@ bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_w
 	if (!CreateFrameBuffers())						{ LOG("Create Frame Buffers Has Failed");			return false; }
 	if (!CreateCommandPool())						{ LOG("Create Command Pool Has Failed!");			return false; }
 	if (!CreateCommandBuffers())					{ LOG("Create Command Buffer Has Failed!");			return false; }
-	if (!CreateSemaphore())							{ LOG("Create Semaphore Has Failed!");				return false; }
+	if (!SyncSemaphoreAndFences())					{ LOG("Create Semaphore Has Failed!");				return false; }
 	return true;
 }
 
@@ -203,8 +203,7 @@ bool VulkanObj::SetPhysicalDevice()
 	std::vector<VkPhysicalDevice> physical_device_list(device_count);
 	vkEnumeratePhysicalDevices(prv_Instance, &device_count, physical_device_list.data());
 	for (size_t i = 0; i < physical_device_list.size(); ++i)
-		if (DeviceCompatible(physical_device_list[i]))
-		{
+		if (DeviceCompatible(physical_device_list[i])) {
 			prv_PhysicalDevice = physical_device_list[i];
 			return true;
 		}
@@ -221,44 +220,43 @@ bool VulkanObj::CreateLogicalDevice()
 #pragma region Setup Queue Families for Create Info
 
 	QueueFamilyIndices indices = FindQueueFamilies(prv_PhysicalDevice);
-	std::set<uint32_t> uniqueQueueFamilies = { indices.Family_Graphics.value(), indices.Family_Present.value() };
-	
-	std::vector<VkDeviceQueueCreateInfo> QueueCreateInfoArray(uniqueQueueFamilies.size());
+	std::set<uint32_t> inique_queue_families = { indices.Family_Graphics.value(), indices.Family_Present.value() };
+	std::vector<VkDeviceQueueCreateInfo> queue_create_info_array(inique_queue_families.size());
 
 #pragma endregion
 
 #pragma region Setting up Create Info for Queue Families
 
-
 	float priority = 1.0f;
-	for (uint32_t i : uniqueQueueFamilies)
+
+	for (uint32_t i : inique_queue_families)
 	{
-		VkDeviceQueueCreateInfo qCreateInfo = {};
+		VkDeviceQueueCreateInfo create_info = {};
 
-		qCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		qCreateInfo.queueFamilyIndex = i;
-		qCreateInfo.queueCount = 1;
-		qCreateInfo.pQueuePriorities = &priority;
+		create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		create_info.queueFamilyIndex = i;
+		create_info.queueCount = 1;
+		create_info.pQueuePriorities = &priority;
 
-		QueueCreateInfoArray[i] = qCreateInfo;
+		queue_create_info_array[i] = create_info;
 	}
 
 #pragma endregion
 
 #pragma region Setup for Logical Device
 
-	VkPhysicalDeviceFeatures deviceFeatures = {};
+	VkPhysicalDeviceFeatures device_features = {};
 	
-	VkDeviceCreateInfo createInfo = {};
-	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	createInfo.pQueueCreateInfos = QueueCreateInfoArray.data();
-	createInfo.queueCreateInfoCount = (uint32_t)QueueCreateInfoArray.size();
-	createInfo.pEnabledFeatures = &deviceFeatures;
+	VkDeviceCreateInfo create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	create_info.pQueueCreateInfos = queue_create_info_array.data();
+	create_info.queueCreateInfoCount = (uint32_t)queue_create_info_array.size();
+	create_info.pEnabledFeatures = &device_features;
 
-	createInfo.enabledExtensionCount = (unsigned int)prv_DeviceExt.size();
-	createInfo.ppEnabledExtensionNames = prv_DeviceExt.data();
+	create_info.enabledExtensionCount = (unsigned int)prv_DeviceExt.size();
+	create_info.ppEnabledExtensionNames = prv_DeviceExt.data();
 
-	if (vkCreateDevice(prv_PhysicalDevice, &createInfo, nullptr, &prv_Device))
+	if (vkCreateDevice(prv_PhysicalDevice, &create_info, nullptr, &prv_Device))
 	{
 		LOG("Failed to create Device");
 		return false;
@@ -431,8 +429,8 @@ bool VulkanObj::CreateGraphicsPipeline()
 {
 #pragma region Check and copy shader files
 
-	std::vector<char> shader_vertex_file = ReadFile("src/shaders/vert.spv");
-	std::vector<char> shader_fragment_file = ReadFile("src/shaders/frag.spv");
+	std::vector<char> shader_vertex_file = ReadShaderFile("src/shaders/vert.spv");
+	std::vector<char> shader_fragment_file = ReadShaderFile("src/shaders/frag.spv");
 
 	if (shader_vertex_file.empty() || shader_fragment_file.empty())
 	{
@@ -740,7 +738,7 @@ bool VulkanObj::CreateCommandBuffers()
 }
 
 
-bool VulkanObj::CreateSemaphore()
+bool VulkanObj::SyncSemaphoreAndFences()
 {
 	prv_ImageAvailableSemaphore.resize(MAX_FRAMES_FLIGHT);
 	prv_RenderFinishedSemaphore.resize(MAX_FRAMES_FLIGHT);
@@ -1005,7 +1003,7 @@ void VulkanObj::CustomVkDestroyDebugUtilsMessengerEXT(VkInstance instance, VkDeb
 		address(instance, debug_messenger, allocator);
 }
 
-std::vector<char> VulkanObj::ReadFile(const std::string & filename)
+std::vector<char> VulkanObj::ReadShaderFile(const std::string & filename)
 {
 	std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
