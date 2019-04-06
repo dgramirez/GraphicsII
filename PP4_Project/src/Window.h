@@ -2,21 +2,22 @@
 #define WINDOWS_H
 
 #include "VulkanObj.h"
+#include <memory>
 
 class Window
 {
 public:
 	//Constructor and Destructor
-	Window(unsigned short width, unsigned short height, const char* title);
+	Window(unsigned int width, unsigned int height, const char* title);
 	~Window();
 
 	//GLFW Methods
-	inline const unsigned short get_width() const { return prv_WinWidth; }
-	inline const unsigned short get_height() const { return prv_WinHeight; }
-	inline void set_width(unsigned short width) { prv_WinWidth = width; }
-	inline void set_height(unsigned short height) { prv_WinHeight = height; }
-	__declspec(property(get = get_width, put = set_width)) unsigned short win_width;
-	__declspec(property(get = get_height, put = set_height)) unsigned short win_height;
+	inline const unsigned int get_width() const { return prv_WinWidth; }
+	inline const unsigned int get_height() const { return prv_WinHeight; }
+	inline void set_width(unsigned int width) { prv_WinWidth = width; }
+	inline void set_height(unsigned int height) { prv_WinHeight = height; }
+	__declspec(property(get = get_width, put = set_width)) unsigned int win_width;
+	__declspec(property(get = get_height, put = set_height)) unsigned int win_height;
 	
 	void run();
 
@@ -35,6 +36,7 @@ private:
 	void MainLoop();
 	void Cleanup();
 	void DrawFrames();
+	static void WindowResizeCallback(GLFWwindow* window, int width, int height);
 };
 
 #endif

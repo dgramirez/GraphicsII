@@ -13,7 +13,7 @@
 
 #ifdef _DEBUG
 #include <iostream>
-#define LOG(x) std::cout << x << std::endl
+#define LOG(x) std::cout << x << std::endl;
 #else
 #define LOG(x) 
 #endif
@@ -41,6 +41,7 @@ public:
 	void draw_frames();
 	void cleanup();
 	void idle_device();
+	void reset_swapchain(unsigned short win_width, unsigned short win_height);
 
 private:
 
@@ -156,10 +157,12 @@ private:
 	bool CreateFrameBuffers();	//Usage comes AFTER Render Pass
 								//and Graphics Pipeline
 
+	void CleanupSwapchain();
 	SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
 	VkSurfaceFormatKHR SelectSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats);
 	VkPresentModeKHR SelectSwapPresentMode(const std::vector<VkPresentModeKHR>& mode);
 	VkExtent2D SelectSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, unsigned short win_width, unsigned short win_height);
+
 #pragma endregion
 
 #pragma region Render Pass | Graphics Pipeline

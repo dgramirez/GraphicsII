@@ -12,16 +12,8 @@ void VulkanObj::cleanup()
 		if (prv_Fences[i])					vkDestroyFence(prv_Device, prv_Fences[i], nullptr);
 	}
 
-	for (unsigned int i = 0; i < prv_SwapchainFrameBuffers.size(); ++i)
-		vkDestroyFramebuffer(prv_Device, prv_SwapchainFrameBuffers[i], nullptr);
+	CleanupSwapchain();
 
-	if (prv_GraphicsPipeline)		vkDestroyPipeline(prv_Device, prv_GraphicsPipeline, nullptr);
-	if (prv_PipelineLayout)			vkDestroyPipelineLayout(prv_Device, prv_PipelineLayout, nullptr);
-	if (prv_RenderPass)				vkDestroyRenderPass(prv_Device, prv_RenderPass, nullptr);
-
-	for (unsigned int i = 0; i < prv_SwapchainImageViews.size(); ++i)
-		vkDestroyImageView(prv_Device, prv_SwapchainImageViews[i], nullptr);
-	
 	if (prv_Device)					vkDestroyDevice(prv_Device, nullptr);
 	if (prv_Surface)				vkDestroySurfaceKHR(prv_Instance, prv_Surface, nullptr);
 	if (validation_layers_enabled)	CustomVkDestroyDebugUtilsMessengerEXT(prv_Instance, prv_Debugger, nullptr);
@@ -33,21 +25,35 @@ void VulkanObj::idle_device()
 	vkDeviceWaitIdle(prv_Device);
 }
 
+void VulkanObj::reset_swapchain(unsigned short win_width, unsigned short win_height)
+{
+	vkDeviceWaitIdle(prv_Device);
+
+	CleanupSwapchain();
+
+	CreateSwapChain(win_width, win_height);
+	CreateImageView();
+	CreateRenderPass();
+	CreateGraphicsPipeline();
+	CreateFrameBuffers();
+	CreateCommandBuffers();
+}
+
 bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_width, unsigned short win_height)
 {
-	if (!CreateInstance(title))						{ LOG("Create Instance Has Failed!");				return false; }
-	if (!CreateValidationDebugger())				{ LOG("Create Validation Debugger Has Failed!");	return false; }
-	if (!CreateSurface(window))						{ LOG("Create Surface Has Failed!");				return false; }
-	if (!SetPhysicalDevice())						{ LOG("Set Physical Device Has Failed!");			return false; }
-	if (!CreateLogicalDevice())						{ LOG("Create Logical Device Has Failed!");			return false; }
-	if (!CreateSwapChain(win_width, win_height))	{ LOG("Create Swap Chain Has Failed!");				return false; }
-	if (!CreateImageView())							{ LOG("Create Image View Has Failed!");				return false; }
-	if (!CreateRenderPass())						{ LOG("Create Render Pass Has Failed!");			return false; }
-	if (!CreateGraphicsPipeline())					{ LOG("Create Graphics Pipeline Has Failed!");		return false; }
-	if (!CreateFrameBuffers())						{ LOG("Create Frame Buffers Has Failed");			return false; }
-	if (!CreateCommandPool())						{ LOG("Create Command Pool Has Failed!");			return false; }
-	if (!CreateCommandBuffers())					{ LOG("Create Command Buffer Has Failed!");			return false; }
-	if (!SyncSemaphoreAndFences())					{ LOG("Create Semaphore Has Failed!");				return false; }
+	if (!CreateInstance(title))						{ LOG("Create Instance Has Failed!")				return false; }
+	if (!CreateValidationDebugger())				{ LOG("Create Validation Debugger Has Failed!")		return false; }
+	if (!CreateSurface(window))						{ LOG("Create Surface Has Failed!")					return false; }
+	if (!SetPhysicalDevice())						{ LOG("Set Physical Device Has Failed!")			return false; }
+	if (!CreateLogicalDevice())						{ LOG("Create Logical Device Has Failed!")			return false; }
+	if (!CreateSwapChain(win_width, win_height))	{ LOG("Create Swap Chain Has Failed!")				return false; }
+	if (!CreateImageView())							{ LOG("Create Image View Has Failed!")				return false; }
+	if (!CreateRenderPass())						{ LOG("Create Render Pass Has Failed!")				return false; }
+	if (!CreateGraphicsPipeline())					{ LOG("Create Graphics Pipeline Has Failed!")		return false; }
+	if (!CreateFrameBuffers())						{ LOG("Create Frame Buffers Has Failed")			return false; }
+	if (!CreateCommandPool())						{ LOG("Create Command Pool Has Failed!")			return false; }
+	if (!CreateCommandBuffers())					{ LOG("Create Command Buffer Has Failed!")			return false; }
+	if (!SyncSemaphoreAndFences())					{ LOG("Create Semaphore Has Failed!")				return false; }
 	return true;
 }
 
@@ -57,8 +63,16 @@ void VulkanObj::draw_frames()
 	vkResetFences(prv_Device, 1, &prv_Fences[prv_Frame]);
 
 	uint32_t image_index;
-	vkAcquireNextImageKHR(prv_Device, prv_Swapchain, std::numeric_limits<uint64_t>::max(), 
+	VkResult swapchain_result = vkAcquireNextImageKHR(prv_Device, prv_Swapchain, std::numeric_limits<uint64_t>::max(), 
 		prv_ImageAvailableSemaphore[prv_Frame], VK_NULL_HANDLE, &image_index);
+
+	if (swapchain_result == VK_ERROR_OUT_OF_DATE_KHR)
+		return;
+	else if (swapchain_result != VK_SUCCESS && swapchain_result != VK_SUBOPTIMAL_KHR)
+	{
+		LOG("CANNOT DRAW FRAME!!!!!");
+		return;
+	}
 
 	VkSemaphore wait_semaphores[] = { prv_ImageAvailableSemaphore[prv_Frame] };
 	VkSemaphore signal_semaphore[] = { prv_RenderFinishedSemaphore[prv_Frame] };
@@ -100,20 +114,21 @@ bool VulkanObj::CreateInstance(const char* title)
 {
 #pragma region Validation Layer Check
 
+#ifdef _DEBUG
 	if (validation_layers_enabled && !CheckValidationLayerSupport())
-		LOG("Validation Layers is true, but no support!");
-
+		LOG("Validation Layers is true, but no support!")
+#endif
 #pragma endregion
 
 #pragma region APPLICATION INFO
 
-	VkApplicationInfo AppInfo = {};
-	AppInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	AppInfo.pApplicationName = title;
-	AppInfo.applicationVersion = 1;
-	AppInfo.pEngineName = "";
-	AppInfo.engineVersion = 0;
-	AppInfo.apiVersion = VK_API_VERSION_1_0;
+	VkApplicationInfo app_info = {};
+	app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+	app_info.pApplicationName = title;
+	app_info.applicationVersion = 1;
+	app_info.pEngineName = "";
+	app_info.engineVersion = 0;
+	app_info.apiVersion = VK_API_VERSION_1_0;
 
 #pragma endregion Filling out application information
 
@@ -121,7 +136,7 @@ bool VulkanObj::CreateInstance(const char* title)
 
 	VkInstanceCreateInfo create_info = {};
 	create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	create_info.pApplicationInfo = &AppInfo;
+	create_info.pApplicationInfo = &app_info;
 
 	std::vector<const char*> extensions = GetRequiredExtensions();
 	create_info.enabledExtensionCount = (uint32_t)extensions.size();
@@ -162,7 +177,7 @@ bool VulkanObj::CreateValidationDebugger()
 
 	if (CustomVkCreateDebugUtilsMessengerEXT(prv_Instance, &create_info, nullptr, &prv_Debugger))
 	{
-		LOG("Failed to create Validation Layer");
+		LOG("Failed to create Validation Layer")
 		return false;
 	}
 
@@ -964,10 +979,7 @@ VkExtent2D VulkanObj::SelectSwapExtent(const VkSurfaceCapabilitiesKHR& capabilit
 		return capabilities.currentExtent;
 	else
 	{
-		VkExtent2D Extent = { win_width, win_height};
-		Extent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, Extent.width));
-		Extent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, Extent.height));
-		return Extent;
+		return { win_width, win_height };
 	}
 
 #pragma endregion
@@ -979,7 +991,9 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VulkanObj::Callback_Debug(
 	const VkDebugUtilsMessengerCallbackDataEXT * callback_data, 
 	void * user_data)
 {
+#ifdef _DEBUG
 	std::cerr << "Validation Layer: " << callback_data->pMessage << std::endl;
+#endif
 	return VK_FALSE;
 }
 
@@ -1076,4 +1090,19 @@ VulkanObj::QueueFamilyIndices VulkanObj::FindQueueFamilies(VkPhysicalDevice devi
 #pragma endregion
 
 	return indices;
+}
+
+void VulkanObj::CleanupSwapchain()
+{
+	for (unsigned int i = 0; i < prv_SwapchainFrameBuffers.size(); ++i)
+		vkDestroyFramebuffer(prv_Device, prv_SwapchainFrameBuffers[i], nullptr);
+
+	if (prv_GraphicsPipeline)		vkDestroyPipeline(prv_Device, prv_GraphicsPipeline, nullptr);
+	if (prv_PipelineLayout)			vkDestroyPipelineLayout(prv_Device, prv_PipelineLayout, nullptr);
+	if (prv_RenderPass)				vkDestroyRenderPass(prv_Device, prv_RenderPass, nullptr);
+
+	for (unsigned int i = 0; i < prv_SwapchainImageViews.size(); ++i)
+		vkDestroyImageView(prv_Device, prv_SwapchainImageViews[i], nullptr);
+
+	if (prv_Swapchain)				vkDestroySwapchainKHR(prv_Device, prv_Swapchain, nullptr);
 }

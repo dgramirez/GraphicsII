@@ -1,6 +1,6 @@
 #include "Window.h"
 
-Window::Window(unsigned short width, unsigned short height, const char* title)
+Window::Window(unsigned int width, unsigned int height, const char* title)
 {
 	prv_WinWidth = width;
 	prv_WinHeight = height;
@@ -38,6 +38,9 @@ void Window::Init()
 		return;
 	}
 	glfwMakeContextCurrent(window);
+	glfwSetWindowUserPointer(window, this);
+	
+	glfwSetWindowSizeCallback(window, WindowResizeCallback);
 
 	//Setting up Vulkan
 	Vobj = new VulkanObj();
@@ -76,4 +79,14 @@ void Window::Cleanup()
 void Window::DrawFrames()
 {
 	Vobj->draw_frames();
+}
+
+void Window::WindowResizeCallback(GLFWwindow* window, int width, int height)
+{
+	Window* win =(Window*)glfwGetWindowUserPointer(window);
+	
+	win->win_width = width;
+	win->win_height = height;
+
+	win->Vobj->reset_swapchain(width, height);
 }
