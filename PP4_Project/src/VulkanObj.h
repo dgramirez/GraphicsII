@@ -1,35 +1,8 @@
 #ifndef VULKANOBJ_H
 #define VULKANOBJ_H
 
-#pragma region VULKAN_INCLUDE_AND_DEFINES
-
-#define GLFW_INCLUDE_VULKAN
-#include "GLFW/glfw3.h"
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include "glm/vec4.hpp"
-#include "glm/mat4x4.hpp"
-
-#ifdef _DEBUG
-#include <iostream>
-#define LOG(x) std::cout << x << std::endl;
-#else
-#define LOG(x) 
-#endif
-
-#pragma endregion This contains defines and includes with GLFW and Vulkan
-
-#define MAX_FRAMES_FLIGHT 2
-
-#include <optional>
-#include <set>
-#include <algorithm>
-#include <cstring>
-#include "vulkan/vulkan.h"
-#include <vector>
-#include <fstream>
-#include <array>
+#include "Defines.h"
+#include "Maths.h"
 
 class VulkanObj
 {
@@ -46,6 +19,7 @@ public:
 private:
 
 	uint32_t prv_Frame = 0;
+	GLFWwindow* win;
 
 #pragma region Instance
 	VkInstance prv_Instance;
@@ -151,7 +125,7 @@ private:
 	VkExtent2D prv_SwapchainExtent;
 
 
-	bool CreateSwapChain(unsigned short win_width, unsigned short win_height);
+	bool CreateSwapChain(unsigned int win_width, unsigned int win_height);
 	bool CreateImageView();
 
 	bool CreateFrameBuffers();	//Usage comes AFTER Render Pass
@@ -197,6 +171,11 @@ private:
 	bool SyncSemaphoreAndFences();
 
 #pragma endregion
+
+	VkBuffer prv_VertexBuffer;
+	VkDeviceMemory prv_VertexBufferMemory;
+	bool CreateVertexBuffer();
+	uint32_t FindMemoryType(uint32_t filter, VkMemoryPropertyFlags property_flags);
 
 };
 

@@ -40,7 +40,7 @@ void Window::Init()
 	glfwMakeContextCurrent(window);
 	glfwSetWindowUserPointer(window, this);
 	
-	glfwSetWindowSizeCallback(window, WindowResizeCallback);
+	glfwSetFramebufferSizeCallback(window, WindowResizeCallback);
 
 	//Setting up Vulkan
 	Vobj = new VulkanObj();
