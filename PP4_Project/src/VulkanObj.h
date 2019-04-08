@@ -176,6 +176,12 @@ private:
 	VkDeviceMemory prv_VertexBufferMemory;
 	bool CreateVertexBuffer();
 	uint32_t FindMemoryType(uint32_t filter, VkMemoryPropertyFlags property_flags);
+	void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage_flags, VkMemoryPropertyFlags property_flags, VkBuffer& buffer, VkDeviceMemory& buffer_memory);
+	void CopyBuffer(VkBuffer source_buffer, VkBuffer destination_buffer, VkDeviceSize device_size);
+
+	VkBuffer prv_IndexBuffer;
+	VkDeviceMemory prv_IndexBufferMemory;
+	bool CreateIndexBuffer();
 
 };
 

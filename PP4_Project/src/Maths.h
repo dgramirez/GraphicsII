@@ -52,18 +52,28 @@ const std::vector<Vertex> pyramid = {
 #else
 
 const std::vector<Vertex> pyramid = {
-	{{ 0.0f, -0.5f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}},
-	{{ 0.5f,  0.5f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-	{{-0.5f,  0.5f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}}
+	{{-0.5f, -0.5f, 0.0f, 1.0f},	V_COLOR_RED},
+	{{ 0.5f, -0.5f, 0.0f, 1.0f},	V_COLOR_GREEN},
+	{{ 0.5f,  0.5f, 0.0f, 1.0f},	V_COLOR_BLUE},
+	{{-0.5f,  0.5f, 0.0f, 1.0f},	V_COLOR_WHITE}
 };
 
 #endif
 
+#if 1
 const std::vector<uint32_t> pyramid_indices = {
 	0, 1, 2,
 	0, 2, 3,
 	0, 3, 4,
-	0, 4, 1
+	0, 4, 1,
+	1, 2, 3,
+	1, 3, 4
 };
+#else
+const std::vector<uint32_t> pyramid_indices = {
+	0, 1, 2,
+	2, 3, 0
+};
+#endif
 
 #endif

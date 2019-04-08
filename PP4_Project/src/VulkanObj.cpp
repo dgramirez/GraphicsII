@@ -3,23 +3,24 @@
 VulkanObj::VulkanObj()	{}
 VulkanObj::~VulkanObj() { cleanup(); }
 
-void VulkanObj::cleanup()
+bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_width, unsigned short win_height)
 {
-	for (unsigned int i = 0; i < MAX_FRAMES_FLIGHT; ++i)
-	{
-		if (prv_RenderFinishedSemaphore[i]) vkDestroySemaphore(prv_Device, prv_RenderFinishedSemaphore[i], nullptr);
-		if (prv_ImageAvailableSemaphore[i]) vkDestroySemaphore(prv_Device, prv_ImageAvailableSemaphore[i], nullptr);
-		if (prv_Fences[i])					vkDestroyFence(prv_Device, prv_Fences[i], nullptr);
-	}
-
-	CleanupSwapchain();
-	if (prv_VertexBuffer)			vkDestroyBuffer(prv_Device, prv_VertexBuffer, nullptr);
-	if (prv_VertexBufferMemory)		vkFreeMemory(prv_Device, prv_VertexBufferMemory, nullptr);
-	if (prv_CommandPool)			vkDestroyCommandPool(prv_Device, prv_CommandPool, nullptr);
-	if (prv_Device)					vkDestroyDevice(prv_Device, nullptr);
-	if (prv_Surface)				vkDestroySurfaceKHR(prv_Instance, prv_Surface, nullptr);
-	if (validation_layers_enabled)	CustomVkDestroyDebugUtilsMessengerEXT(prv_Instance, prv_Debugger, nullptr);
-	if (prv_Instance)				vkDestroyInstance(prv_Instance, nullptr);
+	if (!CreateInstance(title))						{ LOG("Create Instance Has Failed!")			return false; }
+	if (!CreateValidationDebugger())				{ LOG("Create Validation Debugger Has Failed!")	return false; }
+	if (!CreateSurface(window))						{ LOG("Create Surface Has Failed!")				return false; }
+	if (!SetPhysicalDevice())						{ LOG("Set Physical Device Has Failed!")		return false; }
+	if (!CreateLogicalDevice())						{ LOG("Create Logical Device Has Failed!")		return false; }
+	if (!CreateSwapChain(win_width, win_height))	{ LOG("Create Swap Chain Has Failed!")			return false; }
+	if (!CreateImageView())							{ LOG("Create Image View Has Failed!")			return false; }
+	if (!CreateRenderPass())						{ LOG("Create Render Pass Has Failed!")			return false; }
+	if (!CreateGraphicsPipeline())					{ LOG("Create Graphics Pipeline Has Failed!")	return false; }
+	if (!CreateFrameBuffers())						{ LOG("Create Frame Buffers Has Failed")		return false; }
+	if (!CreateCommandPool())						{ LOG("Create Command Pool Has Failed!")		return false; }
+	if (!CreateVertexBuffer())						{ LOG("Creating Vertex Buffer Has Failed!")		return false; }
+	if (!CreateIndexBuffer())						{ LOG("Creating Index Buffer Has Failed!")		return false; }
+	if (!CreateCommandBuffers())					{ LOG("Create Command Buffer Has Failed!")		return false; }
+	if (!SyncSemaphoreAndFences())					{ LOG("Create Semaphore Has Failed!")			return false; }
+	return true;
 }
 
 void VulkanObj::idle_device()
@@ -41,23 +42,25 @@ void VulkanObj::reset_swapchain(unsigned short win_width, unsigned short win_hei
 	CreateCommandBuffers();
 }
 
-bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_width, unsigned short win_height)
+void VulkanObj::cleanup()
 {
-	if (!CreateInstance(title))						{ LOG("Create Instance Has Failed!")			return false; }
-	if (!CreateValidationDebugger())				{ LOG("Create Validation Debugger Has Failed!")	return false; }
-	if (!CreateSurface(window))						{ LOG("Create Surface Has Failed!")				return false; }
-	if (!SetPhysicalDevice())						{ LOG("Set Physical Device Has Failed!")		return false; }
-	if (!CreateLogicalDevice())						{ LOG("Create Logical Device Has Failed!")		return false; }
-	if (!CreateSwapChain(win_width, win_height))	{ LOG("Create Swap Chain Has Failed!")			return false; }
-	if (!CreateImageView())							{ LOG("Create Image View Has Failed!")			return false; }
-	if (!CreateRenderPass())						{ LOG("Create Render Pass Has Failed!")			return false; }
-	if (!CreateGraphicsPipeline())					{ LOG("Create Graphics Pipeline Has Failed!")	return false; }
-	if (!CreateFrameBuffers())						{ LOG("Create Frame Buffers Has Failed")		return false; }
-	if (!CreateCommandPool())						{ LOG("Create Command Pool Has Failed!")		return false; }
-	if (!CreateVertexBuffer())						{ LOG("Creating Vertex Buffer Has Failed!");	return false; }
-	if (!CreateCommandBuffers())					{ LOG("Create Command Buffer Has Failed!")		return false; }
-	if (!SyncSemaphoreAndFences())					{ LOG("Create Semaphore Has Failed!")			return false; }
-	return true;
+	for (unsigned int i = 0; i < MAX_FRAMES_FLIGHT; ++i)
+	{
+		if (prv_RenderFinishedSemaphore[i]) vkDestroySemaphore(prv_Device, prv_RenderFinishedSemaphore[i], nullptr);
+		if (prv_ImageAvailableSemaphore[i]) vkDestroySemaphore(prv_Device, prv_ImageAvailableSemaphore[i], nullptr);
+		if (prv_Fences[i])					vkDestroyFence(prv_Device, prv_Fences[i], nullptr);
+	}
+
+	CleanupSwapchain();
+	if (prv_IndexBuffer)			vkDestroyBuffer(prv_Device, prv_IndexBuffer, nullptr);
+	if (prv_IndexBufferMemory)		vkFreeMemory(prv_Device, prv_IndexBufferMemory, nullptr);
+	if (prv_VertexBuffer)			vkDestroyBuffer(prv_Device, prv_VertexBuffer, nullptr);
+	if (prv_VertexBufferMemory)		vkFreeMemory(prv_Device, prv_VertexBufferMemory, nullptr);
+	if (prv_CommandPool)			vkDestroyCommandPool(prv_Device, prv_CommandPool, nullptr);
+	if (prv_Device)					vkDestroyDevice(prv_Device, nullptr);
+	if (prv_Surface)				vkDestroySurfaceKHR(prv_Instance, prv_Surface, nullptr);
+	if (validation_layers_enabled)	CustomVkDestroyDebugUtilsMessengerEXT(prv_Instance, prv_Debugger, nullptr);
+	if (prv_Instance)				vkDestroyInstance(prv_Instance, nullptr);
 }
 
 void VulkanObj::draw_frames()
@@ -116,6 +119,8 @@ void VulkanObj::draw_frames()
 
 	prv_Frame = (prv_Frame + 1) % MAX_FRAMES_FLIGHT;
 }
+
+
 
 bool VulkanObj::CreateInstance(const char* title)
 {
@@ -705,39 +710,50 @@ bool VulkanObj::CreateCommandPool()
 
 bool VulkanObj::CreateVertexBuffer()
 {
-	VkBufferCreateInfo vertex_buffer_create_info = {};
-	vertex_buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	vertex_buffer_create_info.size = sizeof(pyramid[0]) * pyramid.size();
-	vertex_buffer_create_info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	vertex_buffer_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	VkDeviceSize buffer_size = sizeof(pyramid[0]) * pyramid.size();
+	VkBuffer staging_buffer;
+	VkDeviceMemory staging_buffer_memory;
 
-	if (vkCreateBuffer(prv_Device, &vertex_buffer_create_info, nullptr, &prv_VertexBuffer))
-	{
-		LOG("Failed to create the vertex buffer!")
-		return false;
-	}
-
-	VkMemoryRequirements memory_requirement;
-	vkGetBufferMemoryRequirements(prv_Device, prv_VertexBuffer, &memory_requirement);
-
-	VkMemoryAllocateInfo memory_allocate_info = {};
-	memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	memory_allocate_info.allocationSize = memory_requirement.size;
-	memory_allocate_info.memoryTypeIndex = FindMemoryType(memory_requirement.memoryTypeBits, 
-											VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-	if (vkAllocateMemory(prv_Device, &memory_allocate_info, nullptr, &prv_VertexBufferMemory))
-	{
-		LOG("FAILED TO ALLOCATE ");
-		return false;
-	}
-
-	vkBindBufferMemory(prv_Device, prv_VertexBuffer, prv_VertexBufferMemory, 0);
+	CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		staging_buffer, staging_buffer_memory);
 
 	void* data;
-	vkMapMemory(prv_Device, prv_VertexBufferMemory, 0, vertex_buffer_create_info.size, 0, &data);
-	memcpy(data, pyramid.data(), (uint32_t)vertex_buffer_create_info.size);
-	vkUnmapMemory(prv_Device, prv_VertexBufferMemory);
+	vkMapMemory(prv_Device, staging_buffer_memory, 0, buffer_size, 0, &data);
+	memcpy(data, pyramid.data(), (uint32_t)buffer_size);
+	vkUnmapMemory(prv_Device, staging_buffer_memory);
+
+	CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		prv_VertexBuffer, prv_VertexBufferMemory);
+
+	CopyBuffer(staging_buffer, prv_VertexBuffer, buffer_size);
+
+	vkDestroyBuffer(prv_Device, staging_buffer, nullptr);
+	vkFreeMemory(prv_Device, staging_buffer_memory, nullptr);
+
+	return true;
+}
+
+bool VulkanObj::CreateIndexBuffer()
+{
+	VkDeviceSize buffer_size = sizeof(pyramid_indices[0]) * pyramid_indices.size();
+	VkBuffer staging_buffer;
+	VkDeviceMemory staging_buffer_memory;
+
+	CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		staging_buffer, staging_buffer_memory);
+
+	void* data;
+	vkMapMemory(prv_Device, staging_buffer_memory, 0, buffer_size, 0, &data);
+	memcpy(data, pyramid_indices.data(), (uint32_t)buffer_size);
+	vkUnmapMemory(prv_Device, staging_buffer_memory);
+
+	CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		prv_IndexBuffer, prv_IndexBufferMemory);
+
+	CopyBuffer(staging_buffer, prv_IndexBuffer, buffer_size);
+
+	vkDestroyBuffer(prv_Device, staging_buffer, nullptr);
+	vkFreeMemory(prv_Device, staging_buffer_memory, nullptr);
 
 	return true;
 }
@@ -788,8 +804,9 @@ bool VulkanObj::CreateCommandBuffers()
 			VkBuffer vertex_buffers[] = { prv_VertexBuffer };
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers(prv_CommandBuffers[i], 0, 1, vertex_buffers, offsets);
+			vkCmdBindIndexBuffer(prv_CommandBuffers[i], prv_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-			vkCmdDraw(prv_CommandBuffers[i], (uint32_t)pyramid.size(), 1, 0, 0);
+			vkCmdDrawIndexed(prv_CommandBuffers[i], (uint32_t)pyramid_indices.size(), 1, 0, 0, 0);
 		vkCmdEndRenderPass(prv_CommandBuffers[i]);
 
 		if (vkEndCommandBuffer(prv_CommandBuffers[i]))
@@ -1175,4 +1192,65 @@ uint32_t VulkanObj::FindMemoryType(uint32_t filter, VkMemoryPropertyFlags proper
 	LOG("FAILED TO GET MEMORY TYPE!");
 
 	return -1;
+}
+
+void VulkanObj::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage_flags, VkMemoryPropertyFlags property_flags, VkBuffer & buffer, VkDeviceMemory & buffer_memory)
+{
+	VkBufferCreateInfo buffer_create_info = {};
+	buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	buffer_create_info.size = size;
+	buffer_create_info.usage = usage_flags;
+	buffer_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	if (vkCreateBuffer(prv_Device, &buffer_create_info, nullptr, &buffer))
+		LOG("Failed to create the vertex buffer!")
+
+	VkMemoryRequirements memory_requirement;
+	vkGetBufferMemoryRequirements(prv_Device, buffer, &memory_requirement);
+
+	VkMemoryAllocateInfo memory_allocate_info = {};
+	memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	memory_allocate_info.allocationSize = memory_requirement.size;
+	memory_allocate_info.memoryTypeIndex = FindMemoryType(memory_requirement.memoryTypeBits, property_flags);
+
+	if (vkAllocateMemory(prv_Device, &memory_allocate_info, nullptr, &buffer_memory))
+		LOG("FAILED TO ALLOCATE ");
+
+	vkBindBufferMemory(prv_Device, buffer, buffer_memory, 0);
+}
+
+void VulkanObj::CopyBuffer(VkBuffer source_buffer, VkBuffer destination_buffer, VkDeviceSize device_size)
+{
+	VkCommandBufferAllocateInfo command_buffer_allocate_info = {};
+	command_buffer_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	command_buffer_allocate_info.commandPool = prv_CommandPool;
+	command_buffer_allocate_info.commandBufferCount = 1;
+
+	VkCommandBuffer command_buffer;
+	vkAllocateCommandBuffers(prv_Device, &command_buffer_allocate_info, &command_buffer);
+
+	VkCommandBufferBeginInfo command_buffer_begin_info = {};
+	command_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+	vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info);
+
+	VkBufferCopy copy_buffer = {};
+	copy_buffer.srcOffset = 0;
+	copy_buffer.dstOffset = 0;
+	copy_buffer.size = device_size;
+	vkCmdCopyBuffer(command_buffer, source_buffer, destination_buffer, 1, &copy_buffer);
+
+	vkEndCommandBuffer(command_buffer);
+
+	VkSubmitInfo submit_info = {};
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &command_buffer;
+
+	vkQueueSubmit(prv_QueueGraphics, 1, &submit_info, VK_NULL_HANDLE);
+	vkQueueWaitIdle(prv_QueueGraphics);
+
+	vkFreeCommandBuffers(prv_Device, prv_CommandPool, 1, &command_buffer);
 }
