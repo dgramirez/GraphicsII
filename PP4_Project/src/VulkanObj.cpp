@@ -13,11 +13,15 @@ bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_w
 	if (!CreateSwapChain(win_width, win_height))	{ LOG("Create Swap Chain Has Failed!")			return false; }
 	if (!CreateImageView())							{ LOG("Create Image View Has Failed!")			return false; }
 	if (!CreateRenderPass())						{ LOG("Create Render Pass Has Failed!")			return false; }
+	if (!CreateDescriptorSetLayout())				{ LOG("Create Descriptor Set Layout Failed!")	return false; }
 	if (!CreateGraphicsPipeline())					{ LOG("Create Graphics Pipeline Has Failed!")	return false; }
 	if (!CreateFrameBuffers())						{ LOG("Create Frame Buffers Has Failed")		return false; }
 	if (!CreateCommandPool())						{ LOG("Create Command Pool Has Failed!")		return false; }
 	if (!CreateVertexBuffer())						{ LOG("Creating Vertex Buffer Has Failed!")		return false; }
 	if (!CreateIndexBuffer())						{ LOG("Creating Index Buffer Has Failed!")		return false; }
+	if (!CreateUniformBuffer())						{ LOG("Create Uniform Buffer Has Failed!")		return false; }
+	if (!CreateDescriptorPool())					{ LOG("Create Descriptor Pool Has Failed!")		return false; }
+	if (!CreateDescriptorSets())					{ LOG("Create Desriptor Sets Has Failed!")		return false; }
 	if (!CreateCommandBuffers())					{ LOG("Create Command Buffer Has Failed!")		return false; }
 	if (!SyncSemaphoreAndFences())					{ LOG("Create Semaphore Has Failed!")			return false; }
 	return true;
@@ -52,6 +56,16 @@ void VulkanObj::cleanup()
 	}
 
 	CleanupSwapchain();
+
+	if (prv_DescriptorPool)			vkDestroyDescriptorPool(prv_Device, prv_DescriptorPool, nullptr);
+
+	for (uint32_t i = 0; i < prv_SwapchainImages.size(); ++i)
+	{
+		vkDestroyBuffer(prv_Device, prv_UniformBuffers[i], nullptr);
+		vkFreeMemory(prv_Device, prv_UniformBuffersMemory[i], nullptr);
+	}
+
+	if (prv_DescriptorSetLayout)	vkDestroyDescriptorSetLayout(prv_Device, prv_DescriptorSetLayout, nullptr);
 	if (prv_IndexBuffer)			vkDestroyBuffer(prv_Device, prv_IndexBuffer, nullptr);
 	if (prv_IndexBufferMemory)		vkFreeMemory(prv_Device, prv_IndexBufferMemory, nullptr);
 	if (prv_VertexBuffer)			vkDestroyBuffer(prv_Device, prv_VertexBuffer, nullptr);
@@ -81,6 +95,8 @@ void VulkanObj::draw_frames()
 	VkSemaphore wait_semaphores[] = { prv_ImageAvailableSemaphore[prv_Frame] };
 	VkPipelineStageFlags wait_stages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 	VkSemaphore signal_semaphore[] = { prv_RenderFinishedSemaphore[prv_Frame] };
+
+	UpdateUniformBuffer(image_index);
 
 	VkSubmitInfo submit_info = {};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -450,6 +466,29 @@ bool VulkanObj::CreateRenderPass()
 	return true;
 }
 
+bool VulkanObj::CreateDescriptorSetLayout()
+{
+	VkDescriptorSetLayoutBinding mvp_layout_binding = {};
+	mvp_layout_binding.binding = 0;
+	mvp_layout_binding.descriptorCount = 1;
+	mvp_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	mvp_layout_binding.pImmutableSamplers = nullptr;
+	mvp_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+	VkDescriptorSetLayoutCreateInfo create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	create_info.bindingCount = 1;
+	create_info.pBindings = &mvp_layout_binding;
+
+	if (vkCreateDescriptorSetLayout(prv_Device, &create_info, nullptr, &prv_DescriptorSetLayout))
+	{
+		LOG("Failed to create Descriptor Set Layout");
+		return false;
+	}
+
+	return true;
+}
+
 bool VulkanObj::CreateGraphicsPipeline()
 {
 #pragma region Check and copy shader files
@@ -536,7 +575,7 @@ bool VulkanObj::CreateGraphicsPipeline()
 	rasterization_create_info.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterization_create_info.lineWidth = 1.0f;
 	rasterization_create_info.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterization_create_info.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterization_create_info.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterization_create_info.depthClampEnable = false;
 	rasterization_create_info.depthBiasEnable = false;
 	rasterization_create_info.depthBiasClamp = 0.0f;
@@ -611,8 +650,8 @@ bool VulkanObj::CreateGraphicsPipeline()
 
 	VkPipelineLayoutCreateInfo pipeline_layout_create_info = {};
 	pipeline_layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipeline_layout_create_info.setLayoutCount = 0;
-	pipeline_layout_create_info.pSetLayouts = nullptr;
+	pipeline_layout_create_info.setLayoutCount = 1;
+	pipeline_layout_create_info.pSetLayouts = &prv_DescriptorSetLayout;
 	pipeline_layout_create_info.pushConstantRangeCount = 0;
 	pipeline_layout_create_info.pPushConstantRanges = nullptr;
 
@@ -758,6 +797,84 @@ bool VulkanObj::CreateIndexBuffer()
 	return true;
 }
 
+bool VulkanObj::CreateUniformBuffer()
+{
+	VkDeviceSize buffer_size = sizeof(mvp_object);
+
+	prv_UniformBuffers.resize(prv_SwapchainImages.size());
+	prv_UniformBuffersMemory.resize(prv_SwapchainImages.size());
+
+	for (uint32_t i = 0; i < prv_SwapchainImages.size(); ++i)
+	{
+		CreateBuffer(buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			prv_UniformBuffers[i], prv_UniformBuffersMemory[i]);
+	}
+
+	return true;
+}
+
+bool VulkanObj::CreateDescriptorPool()
+{
+	VkDescriptorPoolSize descriptor_pool_size = {};
+	descriptor_pool_size.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptor_pool_size.descriptorCount = (uint32_t)prv_SwapchainImages.size();
+
+	VkDescriptorPoolCreateInfo create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	create_info.poolSizeCount = 1;
+	create_info.pPoolSizes = &descriptor_pool_size;
+	create_info.maxSets = (uint32_t)prv_SwapchainImages.size();
+
+	if (vkCreateDescriptorPool(prv_Device, &create_info, nullptr, &prv_DescriptorPool))
+	{
+		LOG("Failed to create a Desriptor Pool");
+		return false;
+	}
+
+	return true;
+}
+
+bool VulkanObj::CreateDescriptorSets()
+{
+	std::vector<VkDescriptorSetLayout> descriptor_set_layout(prv_SwapchainImages.size(), prv_DescriptorSetLayout);
+
+	VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {};
+	descriptor_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	descriptor_set_allocate_info.descriptorSetCount = (uint32_t)prv_SwapchainImages.size();
+	descriptor_set_allocate_info.descriptorPool = prv_DescriptorPool;
+	descriptor_set_allocate_info.pSetLayouts = descriptor_set_layout.data();
+
+	prv_DescriptorSets.resize(prv_SwapchainImages.size());
+	if (vkAllocateDescriptorSets(prv_Device, &descriptor_set_allocate_info, prv_DescriptorSets.data()))
+	{
+		LOG("Failed to Allocate Descriptor Set");
+		return false;
+	}
+
+	for (uint32_t i = 0; i < prv_SwapchainImages.size(); ++i)
+	{
+		VkDescriptorBufferInfo descriptor_buffer_info = {};
+		descriptor_buffer_info.buffer = prv_UniformBuffers[i];
+		descriptor_buffer_info.offset = 0;
+		descriptor_buffer_info.range = sizeof(mvp_object);
+
+		VkWriteDescriptorSet write_descriptor_set = {};
+		write_descriptor_set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_descriptor_set.dstSet = prv_DescriptorSets[i];
+		write_descriptor_set.dstBinding = 0;
+		write_descriptor_set.dstArrayElement = 0;
+		write_descriptor_set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		write_descriptor_set.descriptorCount = 1;
+		write_descriptor_set.pBufferInfo = &descriptor_buffer_info;
+		write_descriptor_set.pImageInfo = nullptr;
+		write_descriptor_set.pTexelBufferView = nullptr;
+
+		vkUpdateDescriptorSets(prv_Device, 1, &write_descriptor_set, 0, nullptr);
+	}
+
+	return true;
+}
+
 bool VulkanObj::CreateCommandBuffers()
 {
 	prv_CommandBuffers.resize(prv_SwapchainFrameBuffers.size());
@@ -806,6 +923,8 @@ bool VulkanObj::CreateCommandBuffers()
 			vkCmdBindVertexBuffers(prv_CommandBuffers[i], 0, 1, vertex_buffers, offsets);
 			vkCmdBindIndexBuffer(prv_CommandBuffers[i], prv_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
+			vkCmdBindDescriptorSets(prv_CommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, prv_PipelineLayout, 0, 1, &prv_DescriptorSets[i], 0, nullptr);
+
 			vkCmdDrawIndexed(prv_CommandBuffers[i], (uint32_t)pyramid_indices.size(), 1, 0, 0, 0);
 		vkCmdEndRenderPass(prv_CommandBuffers[i]);
 
@@ -850,6 +969,27 @@ bool VulkanObj::SyncSemaphoreAndFences()
 			return false;
 		}
 	}
+
+	return true;
+}
+
+bool VulkanObj::UpdateUniformBuffer(uint32_t current_image)
+{
+	static auto start_time = std::chrono::high_resolution_clock::now();
+	auto current_time = std::chrono::high_resolution_clock::now();
+	float delta_time = std::chrono::duration<float, std::chrono::seconds::period>(current_time - start_time).count();
+
+	mvp_object mvp;
+	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	mvp.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	mvp.projection = glm::perspective(glm::radians(45.0f), prv_SwapchainExtent.width / (float)prv_SwapchainExtent.height, 0.1f, 10.0f);
+
+	mvp.projection[1][1] = -mvp.projection[1][1];
+
+	void* data;
+	vkMapMemory(prv_Device, prv_UniformBuffersMemory[current_image], 0, sizeof(mvp_object), 0, &data);
+		memcpy(data, &mvp, sizeof(mvp_object));
+	vkUnmapMemory(prv_Device, prv_UniformBuffersMemory[current_image]);
 
 	return true;
 }
@@ -1165,7 +1305,7 @@ void VulkanObj::CleanupSwapchain()
 	for (unsigned int i = 0; i < prv_SwapchainFrameBuffers.size(); ++i)
 		vkDestroyFramebuffer(prv_Device, prv_SwapchainFrameBuffers[i], nullptr);
 
-	vkFreeCommandBuffers(prv_Device, prv_CommandPool, prv_CommandBuffers.size(), prv_CommandBuffers.data());
+	vkFreeCommandBuffers(prv_Device, prv_CommandPool, (uint32_t)prv_CommandBuffers.size(), prv_CommandBuffers.data());
 
 	if (prv_GraphicsPipeline)		vkDestroyPipeline(prv_Device, prv_GraphicsPipeline, nullptr);
 	if (prv_PipelineLayout)			vkDestroyPipelineLayout(prv_Device, prv_PipelineLayout, nullptr);

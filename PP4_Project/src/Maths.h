@@ -40,6 +40,13 @@ struct Vertex
 	}
 };
 
+struct mvp_object
+{
+	glm::mat4 model;
+	glm::mat4 view;
+	glm::mat4 projection;
+};
+
 //Vulkan is a right hand system, with Y pointing down.
 #if 1
 const std::vector<Vertex> pyramid = {
@@ -62,12 +69,10 @@ const std::vector<Vertex> pyramid = {
 
 #if 1
 const std::vector<uint32_t> pyramid_indices = {
+	0, 2, 4,
 	0, 1, 2,
-	0, 2, 3,
-	0, 3, 4,
-	0, 4, 1,
-	1, 2, 3,
-	1, 3, 4
+	0, 3, 1,
+	0, 4, 3
 };
 #else
 const std::vector<uint32_t> pyramid_indices = {

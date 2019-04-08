@@ -183,6 +183,18 @@ private:
 	VkDeviceMemory prv_IndexBufferMemory;
 	bool CreateIndexBuffer();
 
+	std::vector<VkBuffer> prv_UniformBuffers;
+	std::vector<VkDeviceMemory> prv_UniformBuffersMemory;
+	bool CreateUniformBuffer();
+	bool UpdateUniformBuffer(uint32_t current_image);
+
+	VkDescriptorSetLayout prv_DescriptorSetLayout;
+	VkDescriptorPool prv_DescriptorPool;
+	std::vector<VkDescriptorSet> prv_DescriptorSets;
+	bool CreateDescriptorSetLayout();
+	bool CreateDescriptorPool();
+	bool CreateDescriptorSets();
+
 };
 
 #endif
