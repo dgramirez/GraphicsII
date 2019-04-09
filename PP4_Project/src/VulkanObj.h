@@ -195,6 +195,23 @@ private:
 	bool CreateDescriptorPool();
 	bool CreateDescriptorSets();
 
+	VkImage prv_TextureImage;
+	VkDeviceMemory prv_TextureImageMemory;
+	bool CreateTextureImage();
+	void CreateImage(VkExtent3D extent, uint32_t mip_levels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage_flags, 
+		VkMemoryPropertyFlags memory_property_flags, VkImage& image, VkDeviceMemory image_memory);
+
+	VkCommandBuffer StartSingleCommand();
+	void EndSingleCommand(VkCommandBuffer command_buffer);
+	void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout previous_layout, VkImageLayout current_layout);
+	void CopyBufferToImage(VkBuffer buffer, VkImage image, VkExtent3D extent);
+
+	VkImageView prv_TextureImageView;
+	bool CreateTextureImageView();
+	VkImageView CreateImageViewObject(VkImage image, VkFormat format, uint32_t base_mip_level);
+
+	VkSampler prv_Sampler;
+	bool CreateTextureSampler();
 };
 
 #endif

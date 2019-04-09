@@ -61,6 +61,7 @@ void Window::MainLoop()
 		}
 
 		Vobj->idle_device();
+
 	}
 
 }

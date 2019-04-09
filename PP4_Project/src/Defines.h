@@ -33,6 +33,8 @@
 #include <array>
 #include <chrono>
 
+#include "texture_h/celestial.h"
+
 
 #define V_COLOR_BLACK	{0.0f, 0.0f, 0.0f, 1.0f}
 #define V_COLOR_RED		{1.0f, 0.0f, 0.0f, 1.0f}

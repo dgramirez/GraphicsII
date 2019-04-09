@@ -166,6 +166,7 @@
   <ItemGroup>
     <ClInclude Include="src\Defines.h" />
     <ClInclude Include="src\Maths.h" />
+    <ClInclude Include="src\texture_h\celestial.h" />
     <ClInclude Include="src\Window.h" />
     <ClInclude Include="src\VulkanObj.h" />
   </ItemGroup>
