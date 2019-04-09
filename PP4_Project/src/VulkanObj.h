@@ -208,10 +208,18 @@ private:
 
 	VkImageView prv_TextureImageView;
 	bool CreateTextureImageView();
-	VkImageView CreateImageViewObject(VkImage image, VkFormat format, uint32_t base_mip_level);
+	VkImageView CreateImageViewObject(VkImage image, VkFormat format, VkImageAspectFlags image_aspect_flags = VK_IMAGE_ASPECT_COLOR_BIT, uint32_t base_mip_level = 0);
 
 	VkSampler prv_Sampler;
 	bool CreateTextureSampler();
+
+	VkImage prv_DepthBuffer;
+	VkDeviceMemory prv_DepthBufferMemory;
+	VkImageView prv_DepthBufferView;
+	bool CreateDepthResources();
+	VkFormat FindSupportedFormats(const std::vector<VkFormat>& formats, VkImageTiling tiling, VkFormatFeatureFlags format_features_flags);
+	VkFormat GetDepthFormat();
+	bool ContainsStencilFormat(VkFormat format);
 };
 
 #endif
