@@ -3,6 +3,8 @@
 
 #include "Defines.h"
 
+#define USE_PYRAMID true
+
 #define POSITION 0
 #define COLOR 1
 #define UV 2
@@ -72,7 +74,7 @@ struct Color
 };
 
 //Vulkan is a right hand system, with Y pointing down.
-#if 1
+#if USE_PYRAMID
 const std::vector<Vertex> pyramid = {
 	{ { 0.0f, -0.5f,  0.0f, 1.0f}, V_COLOR_RED	 , {0.5f, 0.0f} },	//Top point
 	{ { 0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_GREEN , {1.0f, 1.0f} },	//Bottom Vertex 1
@@ -91,7 +93,7 @@ const std::vector<Vertex> pyramid = {
 
 #endif
 
-#if 1
+#if USE_PYRAMID
 const std::vector<uint32_t> pyramid_indices = {
 	0, 2, 4,
 	0, 1, 2,

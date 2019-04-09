@@ -199,7 +199,7 @@ private:
 	VkDeviceMemory prv_TextureImageMemory;
 	bool CreateTextureImage();
 	void CreateImage(VkExtent3D extent, uint32_t mip_levels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage_flags, 
-		VkMemoryPropertyFlags memory_property_flags, VkImage& image, VkDeviceMemory image_memory);
+		VkMemoryPropertyFlags memory_property_flags, VkImage& image, VkDeviceMemory& image_memory);
 
 	VkCommandBuffer StartSingleCommand();
 	void EndSingleCommand(VkCommandBuffer command_buffer);

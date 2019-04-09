@@ -61,21 +61,19 @@ void VulkanObj::cleanup()
 	CleanupSwapchain();
 	if (prv_Sampler)				vkDestroySampler(prv_Device, prv_Sampler, nullptr);
 	if (prv_TextureImageView)		vkDestroyImageView(prv_Device, prv_TextureImageView, nullptr);
+
 	if (prv_TextureImage)			vkDestroyImage(prv_Device, prv_TextureImage, nullptr);
 	if (prv_TextureImageMemory)		vkFreeMemory(prv_Device, prv_TextureImageMemory, nullptr);
+	
 	if (prv_DescriptorPool)			vkDestroyDescriptorPool(prv_Device, prv_DescriptorPool, nullptr);
-
-	for (uint32_t i = 0; i < prv_SwapchainImages.size(); ++i)
-	{
-		vkDestroyBuffer(prv_Device, prv_UniformBuffers[i], nullptr);
-		vkFreeMemory(prv_Device, prv_UniformBuffersMemory[i], nullptr);
-	}
-
 	if (prv_DescriptorSetLayout)	vkDestroyDescriptorSetLayout(prv_Device, prv_DescriptorSetLayout, nullptr);
+	
 	if (prv_IndexBuffer)			vkDestroyBuffer(prv_Device, prv_IndexBuffer, nullptr);
 	if (prv_IndexBufferMemory)		vkFreeMemory(prv_Device, prv_IndexBufferMemory, nullptr);
+	
 	if (prv_VertexBuffer)			vkDestroyBuffer(prv_Device, prv_VertexBuffer, nullptr);
-	if (prv_VertexBufferMemory)		vkFreeMemory(prv_Device, prv_VertexBufferMemory, nullptr);
+	if (prv_VertexBufferMemory)		vkFreeMemory(prv_Device, prv_VertexBufferMemory, nullptr);	
+	
 	if (prv_CommandPool)			vkDestroyCommandPool(prv_Device, prv_CommandPool, nullptr);
 	if (prv_Device)					vkDestroyDevice(prv_Device, nullptr);
 	if (prv_Surface)				vkDestroySurfaceKHR(prv_Instance, prv_Surface, nullptr);
@@ -454,8 +452,6 @@ bool VulkanObj::CreateTextureSampler()
 bool VulkanObj::CreateTextureImageView()
 {
 	prv_TextureImageView = CreateImageViewObject(prv_TextureImage, VK_FORMAT_R8G8B8A8_UNORM, 0);
-	for (uint32_t i = 0; i < prv_SwapchainImages.size(); ++i)
-		prv_SwapchainImageViews[i] = CreateImageViewObject(prv_SwapchainImages[i], prv_SwapchainFormat, 0);
 	return true;
 }
 
@@ -1184,7 +1180,12 @@ bool VulkanObj::UpdateUniformBuffer(uint32_t current_image)
 	float delta_time = std::chrono::duration<float, std::chrono::seconds::period>(current_time - start_time).count();
 
 	Mvp_object mvp;
+
+#if USE_PYRAMID
 	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+#else
+	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+#endif
 	mvp.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	mvp.projection = glm::perspective(glm::radians(45.0f), prv_SwapchainExtent.width / (float)prv_SwapchainExtent.height, 0.1f, 10.0f);
 
@@ -1520,6 +1521,12 @@ void VulkanObj::CleanupSwapchain()
 		vkDestroyImageView(prv_Device, prv_SwapchainImageViews[i], nullptr);
 
 	if (prv_Swapchain)				vkDestroySwapchainKHR(prv_Device, prv_Swapchain, nullptr);
+	
+	for (uint32_t i = 0; i < prv_SwapchainImages.size(); ++i)
+	{
+		vkDestroyBuffer(prv_Device, prv_UniformBuffers[i], nullptr);
+		vkFreeMemory(prv_Device, prv_UniformBuffersMemory[i], nullptr);
+	}
 }
 
 uint32_t VulkanObj::FindMemoryType(uint32_t filter, VkMemoryPropertyFlags property_flags)
@@ -1578,7 +1585,7 @@ void VulkanObj::CopyBuffer(VkBuffer source_buffer, VkBuffer destination_buffer, 
 
 }
 
-void VulkanObj::CreateImage(VkExtent3D extent, uint32_t mip_levels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage_flags, VkMemoryPropertyFlags memory_property_flags, VkImage& image, VkDeviceMemory image_memory)
+void VulkanObj::CreateImage(VkExtent3D extent, uint32_t mip_levels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage_flags, VkMemoryPropertyFlags memory_property_flags, VkImage& image, VkDeviceMemory& image_memory)
 {
 	VkImageCreateInfo image_create_info = {};
 	image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
