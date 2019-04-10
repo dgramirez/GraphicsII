@@ -8,12 +8,16 @@
 #define POSITION 0
 #define COLOR 1
 #define UV 2
+#define NORMAL 3
+#define TANGENT 4
 
 struct Vertex
 {
 	glm::vec4 position;
 	glm::vec4 color;
 	glm::vec2 uv;
+	glm::vec3 normal;
+	glm::vec3 tangent;
 
 	static VkVertexInputBindingDescription get_binding_description()
 	{
@@ -26,9 +30,9 @@ struct Vertex
 		return vertex_input_binding_description;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 3> get_attribute_description()
+	static std::array<VkVertexInputAttributeDescription, 5> get_attribute_description()
 	{
-		std::array<VkVertexInputAttributeDescription, 3> attribute_description = {};
+		std::array<VkVertexInputAttributeDescription, 5> attribute_description = {};
 
 		attribute_description[POSITION].binding = 0;
 		attribute_description[POSITION].location = 0;
@@ -44,6 +48,16 @@ struct Vertex
 		attribute_description[UV].location = 2;
 		attribute_description[UV].format = VK_FORMAT_R32G32_SFLOAT;
 		attribute_description[UV].offset = offsetof(Vertex, uv);
+
+		attribute_description[NORMAL].binding = 0;
+		attribute_description[NORMAL].location = 3;
+		attribute_description[NORMAL].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attribute_description[NORMAL].offset = offsetof(Vertex, normal);
+
+		attribute_description[TANGENT].binding = 0;
+		attribute_description[TANGENT].location = 4;
+		attribute_description[TANGENT].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attribute_description[TANGENT].offset = offsetof(Vertex, tangent);
 
 		return attribute_description;
 	}

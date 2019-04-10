@@ -874,9 +874,7 @@ bool VulkanObj::CreateCommandPool()
 
 bool VulkanObj::CreateVertexBuffer()
 {
-	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
-	{
-		VkDeviceSize buffer_size = sizeof(prv_ObjectList[i].vertices[0]) * prv_ObjectList[i].vertices.size();
+		VkDeviceSize buffer_size = sizeof(prv_ObjectList[0].vertices[0]) * prv_ObjectList[0].vertices.size();
 		VkBuffer staging_buffer;
 		VkDeviceMemory staging_buffer_memory;
 
@@ -885,7 +883,7 @@ bool VulkanObj::CreateVertexBuffer()
 
 		void* data;
 		vkMapMemory(prv_Device, staging_buffer_memory, 0, buffer_size, 0, &data);
-		memcpy(data, prv_ObjectList[i].vertices.data(), (uint32_t)buffer_size);
+		memcpy(data, prv_ObjectList[0].vertices.data(), (uint32_t)buffer_size);
 		vkUnmapMemory(prv_Device, staging_buffer_memory);
 
 		CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -897,14 +895,11 @@ bool VulkanObj::CreateVertexBuffer()
 		vkFreeMemory(prv_Device, staging_buffer_memory, nullptr);
 
 		return true;
-	}
 }
 
 bool VulkanObj::CreateIndexBuffer()
 {
-	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
-	{
-		VkDeviceSize buffer_size = sizeof(prv_ObjectList[i].indices[0]) * prv_ObjectList[i].indices.size();
+		VkDeviceSize buffer_size = sizeof(prv_ObjectList[0].indices[0]) * prv_ObjectList[0].indices.size();
 		VkBuffer staging_buffer;
 		VkDeviceMemory staging_buffer_memory;
 
@@ -913,7 +908,7 @@ bool VulkanObj::CreateIndexBuffer()
 
 		void* data;
 		vkMapMemory(prv_Device, staging_buffer_memory, 0, buffer_size, 0, &data);
-		memcpy(data, prv_ObjectList[i].indices.data(), (uint32_t)buffer_size);
+		memcpy(data, prv_ObjectList[0].indices.data(), (uint32_t)buffer_size);
 		vkUnmapMemory(prv_Device, staging_buffer_memory);
 
 		CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -923,7 +918,6 @@ bool VulkanObj::CreateIndexBuffer()
 
 		vkDestroyBuffer(prv_Device, staging_buffer, nullptr);
 		vkFreeMemory(prv_Device, staging_buffer_memory, nullptr);
-	}
 
 	return true;
 }

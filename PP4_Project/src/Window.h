@@ -12,8 +12,8 @@ public:
 	~Window();
 
 	//GLFW Methods
-	inline const unsigned int get_width() const { return prv_WinWidth; }
-	inline const unsigned int get_height() const { return prv_WinHeight; }
+	inline const unsigned int get_width() { return prv_WinWidth; }
+	inline const unsigned int get_height() { return prv_WinHeight; }
 	inline void set_width(unsigned int width) { prv_WinWidth = width; }
 	inline void set_height(unsigned int height) { prv_WinHeight = height; }
 	__declspec(property(get = get_width, put = set_width)) unsigned int win_width;

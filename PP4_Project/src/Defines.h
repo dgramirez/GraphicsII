@@ -32,9 +32,12 @@
 #include <fstream>
 #include <array>
 #include <chrono>
+#include <random>
 
 #include "texture_h/celestial.h"
+#include "../vendor/fbxsdk/include/fbxsdk.h"
 
+#define RAND_NORMAL glm::vec3(rand()/float(RAND_MAX),rand()/float(RAND_MAX),rand()/float(RAND_MAX))
 
 #define V_COLOR_BLACK	{0.0f, 0.0f, 0.0f, 1.0f}
 #define V_COLOR_RED		{1.0f, 0.0f, 0.0f, 1.0f}
