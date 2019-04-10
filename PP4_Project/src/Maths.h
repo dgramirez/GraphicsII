@@ -3,7 +3,7 @@
 
 #include "Defines.h"
 
-#define USE_PYRAMID false
+#define USE_PYRAMID true
 
 #define POSITION 0
 #define COLOR 1
@@ -73,57 +73,5 @@ struct Color
 	Color(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
 		: r(red), g(green), b(blue), a(alpha) {}
 };
-
-//Vulkan is a right hand system, with Y pointing down.
-#if USE_PYRAMID
-const std::vector<Vertex> pyramid = {
-	{ { 0.0f, -0.5f,  0.0f, 1.0f}, V_COLOR_RED	 , {0.5f, 0.0f} },	//Top point
-	{ { 0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_GREEN , {1.0f, 1.0f} },	//Bottom Vertex 1
-	{ {-0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_BLUE  , {0.0f, 1.0f} },	//Bottom Vertex 2
-	{ { 0.5f,  0.5f, -0.5f, 1.0f}, V_COLOR_CYAN  , {0.0f, 1.0f} },	//Bottom Vertex 3
-	{ {-0.5f,  0.5f, -0.5f, 1.0f}, V_COLOR_YELLOW, {1.0f, 1.0f} }	//Bottom Vertex 4
-};
-#else
-
-const std::vector<Vertex> pyramid = {
-	{{-0.5f, -0.5f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
-	{{ 0.5f, -0.5f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-	{{ 0.5f,  0.5f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-	{{-0.5f,  0.5f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-
-	{{-0.5f, -0.5f, -0.5f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
-	{{ 0.5f, -0.5f, -0.5f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-	{{ 0.5f,  0.5f, -0.5f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-	{{-0.5f,  0.5f, -0.5f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-};
-
-#endif
-
-#if USE_PYRAMID
-const std::vector<Vertex> pyramid2 = {
-	{ { 0.0f, -0.5f,  0.0f, 1.0f}, V_COLOR_RED	 , {0.5f, 0.0f} },	//Top point
-	{ { 0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_GREEN , {1.0f, 1.0f} },	//Bottom Vertex 1
-	{ {-0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_BLUE  , {0.0f, 1.0f} },	//Bottom Vertex 2
-	{ { 0.5f,  0.5f, -0.5f, 1.0f}, V_COLOR_CYAN  , {0.0f, 1.0f} },	//Bottom Vertex 3
-	{ {-0.5f,  0.5f, -0.5f, 1.0f}, V_COLOR_YELLOW, {1.0f, 1.0f} }	//Bottom Vertex 4
-};
-#endif
-
-
-#if USE_PYRAMID
-const std::vector<uint32_t> pyramid_indices = {
-	0, 2, 4,
-	0, 1, 2,
-	0, 3, 1,
-	0, 4, 3
-};
-#else
-const std::vector<uint32_t> pyramid_indices = {
-	0, 1, 2,
-	2, 3, 0,
-	4, 5, 6,
-	6, 7, 4
-};
-#endif
 
 #endif

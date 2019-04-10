@@ -54,6 +54,16 @@ void VulkanObj::reset_swapchain(unsigned short win_width, unsigned short win_hei
 	CreateCommandBuffers();
 }
 
+void VulkanObj::setup_object_list(uint32_t size)
+{
+	prv_ObjectList.resize(size);
+}
+
+void VulkanObj::add_to_object_list(const Object & object)
+{
+	prv_ObjectList.push_back(object);
+}
+
 void VulkanObj::cleanup()
 {
 	for (unsigned int i = 0; i < MAX_FRAMES_FLIGHT; ++i)
@@ -864,50 +874,56 @@ bool VulkanObj::CreateCommandPool()
 
 bool VulkanObj::CreateVertexBuffer()
 {
-	VkDeviceSize buffer_size = sizeof(pyramid[0]) * pyramid.size();
-	VkBuffer staging_buffer;
-	VkDeviceMemory staging_buffer_memory;
+	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
+	{
+		VkDeviceSize buffer_size = sizeof(prv_ObjectList[i].vertices[0]) * prv_ObjectList[i].vertices.size();
+		VkBuffer staging_buffer;
+		VkDeviceMemory staging_buffer_memory;
 
-	CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		staging_buffer, staging_buffer_memory);
+		CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			staging_buffer, staging_buffer_memory);
 
-	void* data;
-	vkMapMemory(prv_Device, staging_buffer_memory, 0, buffer_size, 0, &data);
-	memcpy(data, pyramid.data(), (uint32_t)buffer_size);
-	vkUnmapMemory(prv_Device, staging_buffer_memory);
+		void* data;
+		vkMapMemory(prv_Device, staging_buffer_memory, 0, buffer_size, 0, &data);
+		memcpy(data, prv_ObjectList[i].vertices.data(), (uint32_t)buffer_size);
+		vkUnmapMemory(prv_Device, staging_buffer_memory);
 
-	CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		prv_VertexBuffer, prv_VertexBufferMemory);
+		CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			prv_VertexBuffer, prv_VertexBufferMemory);
 
-	CopyBuffer(staging_buffer, prv_VertexBuffer, buffer_size);
+		CopyBuffer(staging_buffer, prv_VertexBuffer, buffer_size);
 
-	vkDestroyBuffer(prv_Device, staging_buffer, nullptr);
-	vkFreeMemory(prv_Device, staging_buffer_memory, nullptr);
+		vkDestroyBuffer(prv_Device, staging_buffer, nullptr);
+		vkFreeMemory(prv_Device, staging_buffer_memory, nullptr);
 
-	return true;
+		return true;
+	}
 }
 
 bool VulkanObj::CreateIndexBuffer()
 {
-	VkDeviceSize buffer_size = sizeof(pyramid_indices[0]) * pyramid_indices.size();
-	VkBuffer staging_buffer;
-	VkDeviceMemory staging_buffer_memory;
+	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
+	{
+		VkDeviceSize buffer_size = sizeof(prv_ObjectList[i].indices[0]) * prv_ObjectList[i].indices.size();
+		VkBuffer staging_buffer;
+		VkDeviceMemory staging_buffer_memory;
 
-	CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		staging_buffer, staging_buffer_memory);
+		CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			staging_buffer, staging_buffer_memory);
 
-	void* data;
-	vkMapMemory(prv_Device, staging_buffer_memory, 0, buffer_size, 0, &data);
-	memcpy(data, pyramid_indices.data(), (uint32_t)buffer_size);
-	vkUnmapMemory(prv_Device, staging_buffer_memory);
+		void* data;
+		vkMapMemory(prv_Device, staging_buffer_memory, 0, buffer_size, 0, &data);
+		memcpy(data, prv_ObjectList[i].indices.data(), (uint32_t)buffer_size);
+		vkUnmapMemory(prv_Device, staging_buffer_memory);
 
-	CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		prv_IndexBuffer, prv_IndexBufferMemory);
+		CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			prv_IndexBuffer, prv_IndexBufferMemory);
 
-	CopyBuffer(staging_buffer, prv_IndexBuffer, buffer_size);
+		CopyBuffer(staging_buffer, prv_IndexBuffer, buffer_size);
 
-	vkDestroyBuffer(prv_Device, staging_buffer, nullptr);
-	vkFreeMemory(prv_Device, staging_buffer_memory, nullptr);
+		vkDestroyBuffer(prv_Device, staging_buffer, nullptr);
+		vkFreeMemory(prv_Device, staging_buffer_memory, nullptr);
+	}
 
 	return true;
 }
@@ -1180,7 +1196,6 @@ bool VulkanObj::CreateCommandBuffers()
 		LOG("Failed to Allocate Command Buffer!");
 		return false;
 	}
-
 	for (unsigned int i = 0; i < prv_CommandBuffers.size(); ++i)
 	{
 		VkCommandBufferBeginInfo command_buffer_begin_info = {};
@@ -1218,7 +1233,7 @@ bool VulkanObj::CreateCommandBuffers()
 
 			vkCmdBindDescriptorSets(prv_CommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, prv_PipelineLayout, 0, 1, &prv_DescriptorSets[i], 0, nullptr);
 
-			vkCmdDrawIndexed(prv_CommandBuffers[i], (uint32_t)pyramid_indices.size(), 1, 0, 0, 0);
+			vkCmdDrawIndexed(prv_CommandBuffers[i], (uint32_t)prv_ObjectList[0].indices.size(), 1, 0, 0, 0);
 		vkCmdEndRenderPass(prv_CommandBuffers[i]);
 
 		if (vkEndCommandBuffer(prv_CommandBuffers[i]))
@@ -1692,7 +1707,7 @@ void VulkanObj::CreateImage(VkExtent3D extent, uint32_t mip_levels, VkFormat for
 	image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	image_create_info.imageType = VK_IMAGE_TYPE_2D;
 	image_create_info.extent = extent;
-	image_create_info.mipLevels = mip_levels;
+	image_create_info.mipLevels = 1;
 	image_create_info.arrayLayers = 1;
 	image_create_info.format = format;
 	image_create_info.tiling = tiling;

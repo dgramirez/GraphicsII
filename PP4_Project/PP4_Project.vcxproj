@@ -159,11 +159,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Object.cpp" />
+    <ClCompile Include="src\Assets.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\VulkanObj.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Object.h" />
+    <ClInclude Include="src\Assets.h" />
     <ClInclude Include="src\Defines.h" />
     <ClInclude Include="src\Maths.h" />
     <ClInclude Include="src\texture_h\celestial.h" />

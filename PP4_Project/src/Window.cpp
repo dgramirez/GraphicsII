@@ -5,6 +5,7 @@ Window::Window(unsigned int width, unsigned int height, const char* title)
 	prv_WinWidth = width;
 	prv_WinHeight = height;
 	prv_WinTitle = title;
+	Vobj = new VulkanObj();
 }
 
 
@@ -18,6 +19,12 @@ void Window::run()
 	Init();
 	MainLoop();
 	Cleanup();
+}
+
+void Window::setup_object_list(const std::vector<Object>& initial_objects)
+{
+	for (uint32_t i = 0; i < (uint32_t)initial_objects.size(); ++i)
+		Vobj->add_to_object_list(initial_objects[i]);
 }
 
 void Window::Init()
@@ -43,7 +50,6 @@ void Window::Init()
 	glfwSetFramebufferSizeCallback(window, WindowResizeCallback);
 
 	//Setting up Vulkan
-	Vobj = new VulkanObj();
 	if (!Vobj->init(prv_WinTitle, window, win_width, win_height))
 	{
 		LOG("Vulkan has failed its initialization.");

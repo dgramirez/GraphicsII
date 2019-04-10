@@ -3,6 +3,7 @@
 
 #include "Defines.h"
 #include "Maths.h"
+#include "Object.h"
 
 class VulkanObj
 {
@@ -15,11 +16,14 @@ public:
 	void cleanup();
 	void idle_device();
 	void reset_swapchain(unsigned short win_width, unsigned short win_height);
+	void setup_object_list(uint32_t size);
+	void add_to_object_list(const Object& object);
 
 private:
 
 	uint32_t prv_Frame = 0;
 	GLFWwindow* win;
+	std::vector<Object> prv_ObjectList;
 
 #pragma region Instance
 	VkInstance prv_Instance;
