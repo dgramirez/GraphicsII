@@ -59,7 +59,7 @@ void VulkanObj::setup_object_list(uint32_t size)
 	prv_ObjectList.resize(size);
 }
 
-void VulkanObj::add_to_object_list(const Object & object)
+void VulkanObj::add_to_object_list(const Object3D & object)
 {
 	prv_ObjectList.push_back(object);
 }
@@ -1020,7 +1020,7 @@ bool VulkanObj::CreateDescriptorSets()
 
 bool VulkanObj::CreateTextureImage()
 {
-	VkDeviceSize image_size = celestial_width * celestial_height * sizeof(unsigned int);
+	VkDeviceSize image_size = prv_ObjectList[0].texture->width * prv_ObjectList[0].texture->height* sizeof(unsigned int);
 
 	VkBuffer staging_buffer;
 	VkDeviceMemory staging_buffer_memory;
@@ -1028,10 +1028,10 @@ bool VulkanObj::CreateTextureImage()
 	CreateBuffer(image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, staging_buffer, staging_buffer_memory);
 
-	std::vector<unsigned int> converted_pixels(celestial_width * celestial_height);
+	std::vector<unsigned int> converted_pixels(prv_ObjectList[0].texture->width * prv_ObjectList[0].texture->height);
 	for (uint32_t i = 0; i < converted_pixels.size(); ++i)
 	{
-		Color current_pixel(celestial_pixels[i]);
+		Color current_pixel(prv_ObjectList[0].texture->data[i]);
 		Color new_pixel = (current_pixel.a << 24) | (current_pixel.b << 16) | (current_pixel.g << 8) | current_pixel.r;
 		converted_pixels[i] = new_pixel.color;
 	}
@@ -1041,11 +1041,11 @@ bool VulkanObj::CreateTextureImage()
 	memcpy(data, converted_pixels.data(), (unsigned int)image_size);
 	vkUnmapMemory(prv_Device, staging_buffer_memory);
 
-	CreateImage({ celestial_width, celestial_height, 1 }, celestial_numlevels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
+	CreateImage({ prv_ObjectList[0].texture->width, prv_ObjectList[0].texture->height, 1 }, prv_ObjectList[0].texture->mip_levels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
 		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, prv_TextureImage, prv_TextureImageMemory);
 
 	TransitionImageLayout(prv_TextureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	CopyBufferToImage(staging_buffer, prv_TextureImage, { celestial_width, celestial_height, 1 });
+	CopyBufferToImage(staging_buffer, prv_TextureImage, { prv_ObjectList[0].texture->width, prv_ObjectList[0].texture->height, 1 });
 	TransitionImageLayout(prv_TextureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	vkDestroyBuffer(prv_Device, staging_buffer, nullptr);
@@ -1284,7 +1284,7 @@ bool VulkanObj::UpdateUniformBuffer(uint32_t current_image)
 	Mvp_object mvp;
 
 #if USE_PYRAMID
-	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
 #else
 	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 #endif

@@ -1,55 +1,30 @@
 #include "Object.h"
 
-Object::Object(const std::vector<Vertex>& vertex, const std::vector<uint32_t>& index_buffer, const Texture& texture)
-{
-	prv_Vertices = vertex;
-	prv_Indices = index_buffer;
-	prv_Texture = texture;
-}
-
-
-Object::~Object()
-{
-
-}
-
-
-
 #pragma region OBJECT3D_CLASS
 
 Object3D::Object3D(const char* fbx_filename)
 {
-	// Change the following filename to a suitable filename value.
-	const char* lFilename = fbx_filename;
+	prv_TextureDotH = nullptr;
+	ImportFbx(fbx_filename);
+}
 
-	// Initialize the SDK manager. This object handles all our memory management.
-	FbxManager* lSdkManager = FbxManager::Create();
+Object3D::Object3D(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices, Texture* texture_dot_h)
+{
+	prv_Vertices = vertices;
+	prv_Indices = indices;
+	prv_TextureDotH = texture_dot_h;
+}
 
-	// Create the IO settings object.
-	FbxIOSettings *ios = FbxIOSettings::Create(lSdkManager, IOSROOT);
-	lSdkManager->SetIOSettings(ios);
+Object3D::Object3D(const char* fbx_filename, Texture* texture_dot_h)
+{
+	ImportFbx(fbx_filename);
+	prv_TextureDotH = texture_dot_h;
+}
 
-	// Create an importer using the SDK manager.
-	FbxImporter* lImporter = FbxImporter::Create(lSdkManager, "");
-
-	// Use the first argument as the filename for the importer.
-	if (!lImporter->Initialize(lFilename, -1, lSdkManager->GetIOSettings())) {
-		printf("Call to FbxImporter::Initialize() failed.\n");
-		printf("Error returned: %s\n\n", lImporter->GetStatus().GetErrorString());
-		exit(-1);
-	}
-
-	// Create a new scene so that it can be populated by the imported file.
-	FbxScene* lScene = FbxScene::Create(lSdkManager, "myScene");
-
-	// Import the contents of the file into the scene.
-	lImporter->Import(lScene);
-
-	// The file is imported; so get rid of the importer.
-	lImporter->Destroy();
-
-	// Process the scene and build DirectX Arrays
-	ProcessFbxMesh(lScene->GetRootNode());
+Object3D::~Object3D()
+{
+	if (prv_TextureDotH->on_heap)	delete prv_TextureDotH; 
+		else prv_TextureDotH = nullptr;
 }
 
 void Object3D::ProcessFbxMesh(FbxNode* node)
@@ -344,7 +319,7 @@ void Object3D::GetTextureFilename(FbxNode* child_node, const char* return_value)
  					 */
  
  					FbxString str = texture->GetRelativeFileName();
- 					uint32_t length = str.GetLen();
+ 					uint32_t length = (uint32_t)str.GetLen();
  					wchar_t* filename = new wchar_t[length + 1];
  					memset(filename,0, (length + 1) * sizeof(wchar_t));
  
@@ -359,16 +334,21 @@ void Object3D::GetTextureFilename(FbxNode* child_node, const char* return_value)
  					filename[2] = 'd';
  					filename[3] = 'd';
  
- 					const uint32_t inverse = (str.GetLen() - length - 1);
- 					const uint32_t invdiv2 = (int)ceil(inverse * 0.5f);
+ 					const uint32_t inverse = (uint32_t)(str.GetLen() - length - 1);
+ 					const uint32_t invdiv2 = (uint32_t)ceil(inverse * 0.5f);
  
- 					for (int i = 0; i < invdiv2; ++i)
+ 					for (uint32_t i = 0; i < invdiv2; ++i)
  					{
  						filename[i] ^= filename[inverse - i];
  						filename[inverse - i] ^= filename[i];
  						filename[i] ^= filename[inverse - i];
  					}
- 
+
+					int32_t str_len = (int32_t)wcslen(filename);
+					char* texture_filename = new char[str_len + 1];
+					for (int32_t i = str_len; i >= 0; --i)
+						texture_filename[i] = filename[i];
+					prv_TextureFilename = texture_filename;
  					//HRESULT hr;
  
  					// Load the Texture
@@ -382,6 +362,41 @@ void Object3D::GetTextureFilename(FbxNode* child_node, const char* return_value)
  			}
  		}
  	}
+}
+
+void Object3D::ImportFbx(const char* fbx_filename)
+{
+	// Change the following filename to a suitable filename value.
+	const char* lFilename = fbx_filename;
+
+	// Initialize the SDK manager. This object handles all our memory management.
+	FbxManager* lSdkManager = FbxManager::Create();
+
+	// Create the IO settings object.
+	FbxIOSettings *ios = FbxIOSettings::Create(lSdkManager, IOSROOT);
+	lSdkManager->SetIOSettings(ios);
+
+	// Create an importer using the SDK manager.
+	FbxImporter* lImporter = FbxImporter::Create(lSdkManager, "");
+
+	// Use the first argument as the filename for the importer.
+	if (!lImporter->Initialize(lFilename, -1, lSdkManager->GetIOSettings())) {
+		printf("Call to FbxImporter::Initialize() failed.\n");
+		printf("Error returned: %s\n\n", lImporter->GetStatus().GetErrorString());
+		exit(-1);
+	}
+
+	// Create a new scene so that it can be populated by the imported file.
+	FbxScene* lScene = FbxScene::Create(lSdkManager, "myScene");
+
+	// Import the contents of the file into the scene.
+	lImporter->Import(lScene);
+
+	// The file is imported; so get rid of the importer.
+	lImporter->Destroy();
+
+	// Process the scene and build DirectX Arrays
+	ProcessFbxMesh(lScene->GetRootNode());
 }
 
 #pragma endregion

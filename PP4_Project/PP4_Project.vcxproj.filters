@@ -53,5 +53,8 @@
     <ClInclude Include="src\Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\texture_h\axeTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

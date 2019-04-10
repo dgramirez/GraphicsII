@@ -2,51 +2,20 @@
 #include "Assets.h"
 #include "Object.h"
 
+Object3D create_pyramid();
+Object3D create_two_squares();
+Object3D create_axe();
+
 int main()
 {
 	Window* myWindow = new Window(800, 600, "My New Window");
 
-	std::vector<Vertex> pyramid_vertex = {
-	{ { 0.0f, -0.5f,  0.0f, 1.0f}, V_COLOR_RED	 , {0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Top point
-	{ { 0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_GREEN , {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 1
-	{ {-0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_BLUE  , {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 2
-	{ { 0.5f,  0.5f, -0.5f, 1.0f}, V_COLOR_CYAN  , {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 3
-	{ {-0.5f,  0.5f, -0.5f, 1.0f}, V_COLOR_YELLOW, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} }	//Bottom Vertex 4;
-	};
+	Object3D pyramid = create_pyramid();
+	Object3D two_squares = create_two_squares();
+	Object3D axe = create_axe();
 
-	const std::vector<uint32_t> pyramid_index = {
-	0, 2, 4,
-	0, 1, 2,
-	0, 3, 1,
-	0, 4, 3
-	};
-
-	std::vector<Vertex> two_squares = {
-	{{-0.5f, -0.5f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-	{{ 0.5f, -0.5f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-	{{ 0.5f,  0.5f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-	{{-0.5f,  0.5f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-																	   
-	{{-0.5f, -0.5f, -0.5f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-	{{ 0.5f, -0.5f, -0.5f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-	{{ 0.5f,  0.5f, -0.5f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-	{{-0.5f,  0.5f, -0.5f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}
-	};
-
-	const std::vector<uint32_t> two_squares_index = {
-	0, 1, 2,
-	2, 3, 0,
-	4, 5, 6,
-	6, 7, 4
-	};
-
-	Texture pyramid_texture(celestial_width, celestial_height, celestial_pixels, false);
-	Object Pyramid(pyramid_vertex, pyramid_index, pyramid_texture);
-	Object TwoSquare(two_squares, pyramid_index, pyramid_texture);
-	Object3D Axe("Axe.fbx");
-	std::vector<Object> Object_List;
-	Object_List.push_back(Pyramid);
-	Object_List.push_back(TwoSquare);
+	std::vector<Object3D> Object_List;
+	Object_List.push_back(axe);
 
 	myWindow->setup_object_list(Object_List);
 
@@ -68,4 +37,62 @@ int main()
 #endif
 
 	return 0;
+}
+
+Object3D create_pyramid()
+{
+	std::vector<Vertex> pyramid_vertex = {
+		{ { 0.0f, -0.5f,  0.0f, 1.0f}, V_COLOR_RED	 , {0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Top point
+		{ { 0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_GREEN , {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 1
+		{ {-0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_BLUE  , {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 2
+		{ { 0.5f,  0.5f, -0.5f, 1.0f}, V_COLOR_CYAN  , {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 3
+		{ {-0.5f,  0.5f, -0.5f, 1.0f}, V_COLOR_YELLOW, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} }	//Bottom Vertex 4;
+	};
+
+	const std::vector<uint32_t> pyramid_index = {
+	0, 2, 4,
+	0, 1, 2,
+	0, 3, 1,
+	0, 4, 3
+	};
+
+	Texture* celestial = new Texture(celestial_width, celestial_height, celestial_pixels, celestial_numlevels, false);
+
+	Object3D pyramid(pyramid_vertex, pyramid_index, celestial);
+
+	return pyramid;
+}
+Object3D create_two_squares()
+{
+	std::vector<Vertex> two_squares_vertices = {
+		{{-0.5f, -0.5f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+		{{ 0.5f, -0.5f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+		{{ 0.5f,  0.5f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+		{{-0.5f,  0.5f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+
+		{{-0.5f, -0.5f, -0.5f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+		{{ 0.5f, -0.5f, -0.5f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+		{{ 0.5f,  0.5f, -0.5f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+		{{-0.5f,  0.5f, -0.5f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}
+	};
+
+	const std::vector<uint32_t> two_squares_indices = {
+	0, 1, 2,
+	2, 3, 0,
+	4, 5, 6,
+	6, 7, 4
+	};
+
+	Texture* celestial = new Texture(celestial_width, celestial_height, celestial_pixels, celestial_numlevels, false);
+
+	Object3D two_squares(two_squares_vertices, two_squares_indices, celestial);
+
+	return two_squares;
+}
+Object3D create_axe()
+{
+	Texture* axeTexture = new Texture(axeTexture_width, axeTexture_height, axeTexture_pixels, axeTexture_numlevels, false);
+	Object3D axe("Axe.fbx", axeTexture);
+
+	return axe;
 }

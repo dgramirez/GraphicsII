@@ -20,7 +20,7 @@ public:
 	__declspec(property(get = get_height, put = set_height)) unsigned int win_height;
 	
 	void run();
-	void setup_object_list(const std::vector<Object>& initial_objects);
+	void setup_object_list(const std::vector<Object3D>& initial_objects);
 
 private:
 	//Private Variables, GLFW

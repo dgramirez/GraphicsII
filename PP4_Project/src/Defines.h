@@ -35,6 +35,7 @@
 #include <random>
 
 #include "texture_h/celestial.h"
+#include "texture_h/axeTexture.h"
 #include "../vendor/fbxsdk/include/fbxsdk.h"
 
 #define RAND_NORMAL glm::vec3(rand()/float(RAND_MAX),rand()/float(RAND_MAX),rand()/float(RAND_MAX))
