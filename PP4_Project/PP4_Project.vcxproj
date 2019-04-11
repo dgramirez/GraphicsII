@@ -89,7 +89,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FBXSDK_SHARED;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;$(ProjectDir)src\VulkanObj;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -106,7 +106,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FBXSDK_SHARED;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;$(ProjectDir)src\VulkanObj;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -125,7 +125,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FBXSDK_SHARED;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;$(ProjectDir)src\VulkanObj;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -146,7 +146,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FBXSDK_SHARED;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;$(ProjectDir)src\VulkanObj;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -162,8 +162,18 @@
     <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\Assets.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Window.cpp" />
+    <ClCompile Include="src\VulkanObj\VkObj_Buffers.cpp" />
+    <ClCompile Include="src\VulkanObj\VkObj_Command.cpp" />
+    <ClCompile Include="src\VulkanObj\VkObj_Devices.cpp" />
+    <ClCompile Include="src\VulkanObj\VkObj_RenderGraphicsPipeline.cpp" />
+    <ClCompile Include="src\VulkanObj\VkObj_SemaphoresAndFences.cpp" />
+    <ClCompile Include="src\VulkanObj\VkObj_Shared.cpp" />
+    <ClCompile Include="src\VulkanObj\VkObj_Swapchain.cpp" />
+    <ClCompile Include="src\VulkanObj\VkObj_Texture.cpp" />
+    <ClCompile Include="src\VulkanObj\VkObj_ValidationLayer.cpp" />
+    <ClCompile Include="src\VulkanObj\VkObj_WindowSetup.cpp" />
     <ClCompile Include="src\VulkanObj.cpp" />
+    <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Object.h" />
@@ -172,8 +182,18 @@
     <ClInclude Include="src\Maths.h" />
     <ClInclude Include="src\texture_h\axeTexture.h" />
     <ClInclude Include="src\texture_h\celestial.h" />
-    <ClInclude Include="src\Window.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_Buffers.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_Command.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_RenderGraphicsPipeline.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_SemaphoresAndFences.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_Texture.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_WindowSetup.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_Devices.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_Shared.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_Swapchain.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_ValidationLayer.h" />
     <ClInclude Include="src\VulkanObj.h" />
+    <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

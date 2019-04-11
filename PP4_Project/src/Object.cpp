@@ -347,7 +347,7 @@ void Object3D::GetTextureFilename(FbxNode* child_node, const char* return_value)
 					int32_t str_len = (int32_t)wcslen(filename);
 					char* texture_filename = new char[str_len + 1];
 					for (int32_t i = str_len; i >= 0; --i)
-						texture_filename[i] = filename[i];
+						texture_filename[i] = (char)filename[i];
 					prv_TextureFilename = texture_filename;
  					//HRESULT hr;
  
