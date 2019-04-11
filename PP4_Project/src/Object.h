@@ -28,7 +28,6 @@ public:
 
 	float scale = 10.0f;
 private:
-
 	std::vector<uint32_t> prv_Indices;
 	std::vector<Vertex> prv_Vertices;
 	Texture* prv_TextureDotH;

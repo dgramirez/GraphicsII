@@ -74,14 +74,13 @@ void VulkanObj::cleanup()
 	}
 
 	CleanupSwapchain();
+
+	if (prv_DescriptorSetLayout)	vkDestroyDescriptorSetLayout(prv_Device, prv_DescriptorSetLayout, nullptr);
 	if (prv_Sampler)				vkDestroySampler(prv_Device, prv_Sampler, nullptr);
 	if (prv_TextureImageView)		vkDestroyImageView(prv_Device, prv_TextureImageView, nullptr);
 
 	if (prv_TextureImage)			vkDestroyImage(prv_Device, prv_TextureImage, nullptr);
 	if (prv_TextureImageMemory)		vkFreeMemory(prv_Device, prv_TextureImageMemory, nullptr);
-	
-	if (prv_DescriptorPool)			vkDestroyDescriptorPool(prv_Device, prv_DescriptorPool, nullptr);
-	if (prv_DescriptorSetLayout)	vkDestroyDescriptorSetLayout(prv_Device, prv_DescriptorSetLayout, nullptr);
 	
 	if (prv_IndexBuffer)			vkDestroyBuffer(prv_Device, prv_IndexBuffer, nullptr);
 	if (prv_IndexBufferMemory)		vkFreeMemory(prv_Device, prv_IndexBufferMemory, nullptr);
@@ -1617,8 +1616,10 @@ void VulkanObj::CleanupSwapchain()
 	for (unsigned int i = 0; i < prv_SwapchainFrameBuffers.size(); ++i)
 		vkDestroyFramebuffer(prv_Device, prv_SwapchainFrameBuffers[i], nullptr);
 
+
 	vkFreeCommandBuffers(prv_Device, prv_CommandPool, (uint32_t)prv_CommandBuffers.size(), prv_CommandBuffers.data());
 
+	if (prv_DescriptorPool)			vkDestroyDescriptorPool(prv_Device, prv_DescriptorPool, nullptr);
 	if (prv_GraphicsPipeline)		vkDestroyPipeline(prv_Device, prv_GraphicsPipeline, nullptr);
 	if (prv_PipelineLayout)			vkDestroyPipelineLayout(prv_Device, prv_PipelineLayout, nullptr);
 	if (prv_RenderPass)				vkDestroyRenderPass(prv_Device, prv_RenderPass, nullptr);
