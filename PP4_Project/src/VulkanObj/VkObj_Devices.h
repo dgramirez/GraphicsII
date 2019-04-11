@@ -21,4 +21,6 @@ bool vk_create_logical_device(const VkPhysicalDevice& physical_device, const VkS
 bool vk_device_is_compatible(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface);
 bool vk_device_extension_supported(const VkPhysicalDevice& physical_device);
 
+VkSampleCountFlags get_highest_msaa_sample_count();
+
 #endif

@@ -12,6 +12,8 @@ struct VkObj_Texture {
 	VkImage depth_buffer;
 	VkDeviceMemory depth_buffer_memory;
 	VkImageView depth_buffer_view;
+
+	VkSampleCountFlagBits msaa_sample;
 };
 
 bool vk_create_texture_image(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkCommandPool &command_pool, const VkQueue graphics_queue,
@@ -21,8 +23,10 @@ bool vk_create_texture_sampler(const VkDevice &device, VkSampler &sampler);
 
 bool vk_create_depth_buffer(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue, const VkExtent3D &swapchain_extent_3d, VkImage &depth_buffer, VkDeviceMemory &depth_buffer_memory, VkImageView &depth_buffer_view);
 
-
 bool vk_create_image(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkExtent3D &extent, const uint32_t &mip_levels, const VkFormat &format, const VkImageTiling &tiling,
 	const VkImageUsageFlags &usage_flags, const VkMemoryPropertyFlags &memory_property_flags, VkImage &image, VkDeviceMemory &image_memory);
+
+bool vk_create_mipmaps(const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue,
+	const VkImage &texture_image, const uint32_t &texture_width, const uint32_t &texture_height, const uint32_t &mip_levels);
 
 #endif

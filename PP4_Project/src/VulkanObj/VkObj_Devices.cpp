@@ -91,6 +91,9 @@ bool vk_device_is_compatible(const VkPhysicalDevice& physical_device, const VkSu
 	VkPhysicalDeviceFeatures device_features;
 	vkGetPhysicalDeviceFeatures(physical_device, &device_features);
 
+	VkFormatProperties format_properties;
+	vkGetPhysicalDeviceFormatProperties(physical_device, VK_FORMAT_R8G8B8A8_UNORM, &format_properties);
+
 	//Look for Family Queues
 	QueueFamilyIndices indices = vk_find_queue_family(physical_device, surface);
 	bool extension_support = vk_device_extension_supported(physical_device);
@@ -110,6 +113,7 @@ bool vk_device_is_compatible(const VkPhysicalDevice& physical_device, const VkSu
 		&& indices.IsComplete()
 		&& extension_support
 		&& good_swapchain
+		&& format_properties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT
 		;
 }
 
@@ -131,4 +135,22 @@ bool vk_device_extension_supported(const VkPhysicalDevice& physical_device)
 
 	//If all of the required extensions has been removed from above, Then we have all the extensions available to us.
 	return required_extension.empty();
+}
+
+VkSampleCountFlags get_highest_msaa_sample_count(const VkPhysicalDevice &physical_device)
+{
+	VkPhysicalDeviceProperties physical_device_properties;
+	vkGetPhysicalDeviceProperties(physical_device, &physical_device_properties);
+
+	VkSampleCountFlags flags = std::min(physical_device_properties.limits.framebufferColorSampleCounts,
+		physical_device_properties.limits.framebufferDepthSampleCounts);
+
+	if (flags & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
+	if (flags & VK_SAMPLE_COUNT_32_BIT) { return VK_SAMPLE_COUNT_32_BIT; }
+	if (flags & VK_SAMPLE_COUNT_16_BIT) { return VK_SAMPLE_COUNT_16_BIT; }
+	if (flags & VK_SAMPLE_COUNT_8_BIT) { return VK_SAMPLE_COUNT_8_BIT; }
+	if (flags & VK_SAMPLE_COUNT_4_BIT) { return VK_SAMPLE_COUNT_4_BIT; }
+	if (flags & VK_SAMPLE_COUNT_2_BIT) { return VK_SAMPLE_COUNT_2_BIT; }
+
+	return VK_SAMPLE_COUNT_1_BIT;
 }

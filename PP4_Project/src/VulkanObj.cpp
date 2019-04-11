@@ -40,7 +40,7 @@ bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_w
  	if (!vk_create_texture_image(prv_VkDevices.physical_device, prv_VkDevices.logical_device, prv_CommandObjects.command_pool, prv_VkDevices.graphics_queue,
 		prv_ObjectList, { prv_ObjectList[0].texture->width,prv_ObjectList[0].texture->height, 1 }, prv_TextureObjects.image, prv_TextureObjects.image_memory))
 		{ LOG("Create Texture Image Has Failed!")		return false; }
- 	if (!vk_create_texture_image_view(prv_VkDevices.logical_device, prv_TextureObjects.image, VK_IMAGE_ASPECT_COLOR_BIT, 0, prv_TextureObjects.image_view))
+ 	if (!vk_create_texture_image_view(prv_VkDevices.logical_device, prv_TextureObjects.image, VK_IMAGE_ASPECT_COLOR_BIT, prv_ObjectList[0].texture->mip_levels, prv_TextureObjects.image_view))
 		{ LOG("Create Texture Image View Has Failed!")	return false; }
  	if (!vk_create_texture_sampler(prv_VkDevices.logical_device, prv_TextureObjects.sampler))
 		{ LOG("Create Texture Image View Has Failed!")	return false; }

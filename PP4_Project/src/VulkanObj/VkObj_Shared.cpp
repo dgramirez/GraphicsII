@@ -63,7 +63,7 @@ QueueFamilyIndices vk_find_queue_family(const VkPhysicalDevice& physical_device,
 	return indices;
 }
 
-VkImageView vk_create_image_view(const VkDevice &device, const VkImage &image, const VkFormat &format, const VkImageAspectFlags &image_aspect_flags, const uint32_t &base_mip_level)
+VkImageView vk_create_image_view(const VkDevice &device, const VkImage &image, const VkFormat &format, const VkImageAspectFlags &image_aspect_flags, const uint32_t &mip_level)
 {
 	//Image View Create Info
 	VkImageViewCreateInfo create_info = {};
@@ -72,8 +72,8 @@ VkImageView vk_create_image_view(const VkDevice &device, const VkImage &image, c
 	create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	create_info.format = format;
 	create_info.subresourceRange.aspectMask = image_aspect_flags;
-	create_info.subresourceRange.baseMipLevel = base_mip_level;
-	create_info.subresourceRange.levelCount = 1;
+	create_info.subresourceRange.baseMipLevel = 0;
+	create_info.subresourceRange.levelCount = mip_level;
 	create_info.subresourceRange.baseArrayLayer = 0;
 	create_info.subresourceRange.layerCount = 1;
 
@@ -133,22 +133,35 @@ VkCommandBuffer vk_start_single_command(const VkDevice &device, const VkCommandP
 	return command_buffer;
 }
 
-void vk_end_single_command(const VkDevice &device, const VkQueue &graphics_queue, const VkCommandPool &command_pool, VkCommandBuffer &command_buffer)
+bool vk_end_single_command(const VkDevice &device, const VkQueue &graphics_queue, const VkCommandPool &command_pool, VkCommandBuffer &command_buffer)
 {
-	vkEndCommandBuffer(command_buffer);
+	VkResult r = vkEndCommandBuffer(command_buffer);
+	if (r){
+		LOG("Failed to End Command Buffer! Error Code: " << r)
+		return false;
+	}
 
 	VkSubmitInfo submit_info = {};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submit_info.commandBufferCount = 1;
 	submit_info.pCommandBuffers = &command_buffer;
 
-	vkQueueSubmit(graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
-	vkQueueWaitIdle(graphics_queue);
+	r = vkQueueSubmit(graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
+	if (r) {
+		LOG("Failed to Submit to Graphics Queue While Ending Command Buffer! Error Code: " << r)
+			return false;
+	}
+	r = vkQueueWaitIdle(graphics_queue);
+	if (r) {
+		LOG("Failed to Idle Queue While Ending Command Buffer! Error Code: " << r)
+			return false;
+	}
 
 	vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
+	return true;
 }
 
-void vk_transition_image_layout(const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue, 
+void vk_transition_image_layout(const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue, const uint32_t &mip_level,
 	const VkImage &image, const VkFormat &format, const VkImageLayout &previous_layout, const VkImageLayout &current_layout)
 {
 	VkCommandBuffer command_buffer = vk_start_single_command(device, command_pool);
@@ -162,7 +175,7 @@ void vk_transition_image_layout(const VkDevice &device, const VkCommandPool &com
 	image_memory_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	image_memory_barrier.subresourceRange.baseMipLevel = 0;
-	image_memory_barrier.subresourceRange.levelCount = 1;
+	image_memory_barrier.subresourceRange.levelCount = mip_level;
 	image_memory_barrier.subresourceRange.layerCount = 1;
 	image_memory_barrier.subresourceRange.baseArrayLayer = 0;
 

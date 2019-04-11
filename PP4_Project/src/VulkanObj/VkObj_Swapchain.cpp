@@ -67,7 +67,7 @@ bool vk_create_swapchain_image_view(const VkDevice &device, const std::vector<Vk
 	//Create Info for Image View
 	swapchain_image_view.resize(swapchain_image.size());
 	for (uint32_t i = 0; i < (uint32_t)swapchain_image.size(); ++i)
-		swapchain_image_view[i] = vk_create_image_view(device, swapchain_image[i], format, VK_IMAGE_ASPECT_COLOR_BIT, 0);
+		swapchain_image_view[i] = vk_create_image_view(device, swapchain_image[i], format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 
 	//Swapchain Image View has been created successfully
 	return true;
