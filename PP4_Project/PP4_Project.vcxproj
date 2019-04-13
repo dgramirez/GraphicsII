@@ -95,7 +95,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;F:\School\PP4\GraphicsII_NewStart\PP4_Project\vendor\soil\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -112,7 +112,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;F:\School\PP4\GraphicsII_NewStart\PP4_Project\vendor\soil\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -133,7 +133,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;F:\School\PP4\GraphicsII_NewStart\PP4_Project\vendor\soil\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -154,7 +154,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;F:\School\PP4\GraphicsII_NewStart\PP4_Project\vendor\soil\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

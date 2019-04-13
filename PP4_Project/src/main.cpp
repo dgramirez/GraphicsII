@@ -26,13 +26,13 @@ int main()
 	}
 	catch (const std::exception& e)
 	{
-		std::cout << e.what() << std::endl;
+		LOG(e.what())
 	}
 #else
 	myWindow->run();
 #endif
 #if _DEBUG
-	std::cout << "\n\nPress the enter key once or twice to exit." << std::endl;
+	LOG("\n\nPress the enter key once or twice to exit.")
 	std::cin.ignore().get();
 #endif
 
@@ -91,8 +91,7 @@ Object3D create_two_squares()
 }
 Object3D create_axe()
 {
-	Texture* axeTexture = new Texture(axeTexture_width, axeTexture_height, axeTexture_pixels, axeTexture_numlevels, false);
-	Object3D axe("Axe.fbx", axeTexture);
+	Object3D axe("Axe.fbx");
 
 	return axe;
 }

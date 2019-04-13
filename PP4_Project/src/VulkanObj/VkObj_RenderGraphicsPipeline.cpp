@@ -211,17 +211,17 @@ bool vk_create_graphics_pipeline(const VkDevice &device, const VkExtent2D &swapc
 		VK_COLOR_COMPONENT_G_BIT |
 		VK_COLOR_COMPONENT_B_BIT |
 		VK_COLOR_COMPONENT_A_BIT;
-	color_blend_attachment_state.blendEnable = false;
-	color_blend_attachment_state.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-	color_blend_attachment_state.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+	color_blend_attachment_state.blendEnable = VK_TRUE;
+	color_blend_attachment_state.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_COLOR;
+	color_blend_attachment_state.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
 	color_blend_attachment_state.colorBlendOp = VK_BLEND_OP_ADD;
-	color_blend_attachment_state.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-	color_blend_attachment_state.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+	color_blend_attachment_state.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+	color_blend_attachment_state.dstAlphaBlendFactor = VK_BLEND_FACTOR_DST_ALPHA;
 	color_blend_attachment_state.alphaBlendOp = VK_BLEND_OP_ADD;
 
 	VkPipelineColorBlendStateCreateInfo color_blend_create_info = {};
 	color_blend_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-	color_blend_create_info.logicOpEnable = false;
+	color_blend_create_info.logicOpEnable = VK_FALSE;
 	color_blend_create_info.logicOp = VK_LOGIC_OP_COPY;
 	color_blend_create_info.attachmentCount = 1;
 	color_blend_create_info.pAttachments = &color_blend_attachment_state;

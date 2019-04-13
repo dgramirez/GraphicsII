@@ -1,30 +1,28 @@
 #include "Object.h"
 
-#pragma region OBJECT3D_CLASS
-
 Object3D::Object3D(const char* fbx_filename)
 {
-	prv_TextureDotH = nullptr;
 	ImportFbx(fbx_filename);
+	prv_Texture = new Texture(prv_TextureFilename);
 }
 
 Object3D::Object3D(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices, Texture* texture_dot_h)
 {
 	prv_Vertices = vertices;
 	prv_Indices = indices;
-	prv_TextureDotH = texture_dot_h;
+	prv_Texture = texture_dot_h;
 }
 
 Object3D::Object3D(const char* fbx_filename, Texture* texture_dot_h)
 {
 	ImportFbx(fbx_filename);
-	prv_TextureDotH = texture_dot_h;
+	prv_Texture = texture_dot_h;
 }
 
 Object3D::~Object3D()
 {
-	if (prv_TextureDotH->on_heap)	delete prv_TextureDotH; 
-		else prv_TextureDotH = nullptr;
+	if (prv_Texture->on_heap)	delete prv_Texture; 
+		else prv_Texture = nullptr;
 }
 
 void Object3D::ProcessFbxMesh(FbxNode* node)
@@ -32,7 +30,7 @@ void Object3D::ProcessFbxMesh(FbxNode* node)
 	//FBX Mesh stuff
 	int childrenCount = node->GetChildCount();
 
-	std::cout << "\nName:" << node->GetName();
+	LOG("\nName:" << node->GetName())
 
 	for (int i = 0; i < childrenCount; i++)
 	{
@@ -43,19 +41,19 @@ void Object3D::ProcessFbxMesh(FbxNode* node)
 
 		if (mesh != NULL)
 		{
-			std::cout << "\nMesh:" << childNode->GetName();
+			LOG("\nMesh:" << childNode->GetName())
 
 			// Get index count from mesh
 			int* PolygonIndices = mesh->GetPolygonVertices();
 			prv_Indices.resize(mesh->GetPolygonVertexCount());
-			std::cout << "\nIndice Count:" << indices.size();
+			LOG("\nIndice Count:" << indices.size())
 
  			// No need to allocate int array, FBX does for us
 			for (uint32_t i = 0; i < indices.size(); ++i)
 				prv_Indices[i] = PolygonIndices[i];
 
  			prv_Vertices.resize(mesh->GetControlPointsCount());
- 			std::cout << "\nVertex Count:" << prv_Vertices.size();
+ 			LOG("\nVertex Count:" << prv_Vertices.size())
  
  			// Get UV from mesh
  			SetUVs(TexUV, mesh);
@@ -63,14 +61,14 @@ void Object3D::ProcessFbxMesh(FbxNode* node)
 
  			// Get Normal count from mesh
  			mesh->GetPolygonVertexNormals(normalsVec);
- 			std::cout << "\nNormalVec Count:" << normalsVec.Size();
+ 			LOG("\nNormalVec Count:" << normalsVec.Size())
  
 			// Declare a new array for the second vertex array
 			// Note the size is numIndices not numVertices
  			std::vector<Vertex> vertices2(prv_Indices.size());
  
- 			std::cout << "\nindex count BEFORE/AFTER compaction " << prv_Indices.size();
- 			std::cout << "\nvertex count ORIGINAL (FBX source): " << prv_Vertices.size();
+ 			LOG("\nindex count BEFORE/AFTER compaction " << prv_Indices.size())
+ 			LOG("\nvertex count ORIGINAL (FBX source): " << prv_Vertices.size())
 
  			//================= Process Vertices ===================
  			for (int j = 0; j < prv_Vertices.size(); j++)
@@ -99,7 +97,7 @@ void Object3D::ProcessFbxMesh(FbxNode* node)
 				prv_Indices[j] = j;
  			}
  
-			std::cout << "\nvertex count AFTER expansion: " << prv_Indices.size();
+			LOG("\nvertex count AFTER expansion: " << prv_Indices.size())
  
 
 			if (true)
@@ -160,9 +158,9 @@ void Object3D::Compactify(const std::vector<Vertex>& vertex2)
 	}
 	
 	
-	std::cout << "\nvertex count AFTER compaction: " << prv_Vertices.size();
-	std::cout << "\nSize reduction: " << ((float)(prv_Indices.size() - prv_Vertices.size()) / (float)(prv_Indices.size())) * 100.00f << "%";
-	std::cout << "\nor " << prv_Vertices.size() / (float)prv_Indices.size() << " of the expanded size";
+	LOG("\nvertex count AFTER compaction: " << prv_Vertices.size())
+	LOG("\nSize reduction: " << ((float)(prv_Indices.size() - prv_Vertices.size()) / (float)(prv_Indices.size())) * 100.00f << "%")
+	LOG("\nor " << prv_Vertices.size() / (float)prv_Indices.size() << " of the expanded size")
 }
 
 void Object3D::SetUVs(FbxArray<FbxVector2>& uv, const FbxMesh* mesh)
@@ -267,7 +265,7 @@ void Object3D::GetTextureFilename(FbxNode* child_node, const char* return_value)
  
  		if (material != NULL)
  		{
- 			std::cout << "\nmaterial: " << material->GetName() << std::endl;
+ 			LOG("material: " << material->GetName())
  			// This only gets the material of type sDiffuse, you probably need to traverse all Standard Material Property by its name to get all possible textures.
  			FbxProperty prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
  
@@ -286,7 +284,7 @@ void Object3D::GetTextureFilename(FbxNode* child_node, const char* return_value)
  						FbxFileTexture* texture = FbxCast<FbxFileTexture>(layered_texture->GetSrcObject<FbxTexture>(k));
  						// Then, you can get all the properties of the texture, include its name
  						const char* textureName = texture->GetFileName();
- 						std::cout << textureName;
+ 						LOG(textureName)
  					}
  				}
  			}
@@ -299,7 +297,7 @@ void Object3D::GetTextureFilename(FbxNode* child_node, const char* return_value)
  					FbxFileTexture* texture = FbxCast<FbxFileTexture>(prop.GetSrcObject<FbxTexture>(j));
  					// Then, you can get all the properties of the texture, include its name
  					const char* textureName = texture->GetFileName();
- 					std::cout << textureName;
+ 					LOG(textureName)
  
  					/*Reading Filename:
  						The idea is to read it backwards, convert extension to dds, and then swap the letters.
@@ -330,9 +328,9 @@ void Object3D::GetTextureFilename(FbxNode* child_node, const char* return_value)
  
  						filename[i++] = str[length];
  					}
- 					filename[1] = 's';
- 					filename[2] = 'd';
- 					filename[3] = 'd';
+//  					filename[1] = 's';
+//  					filename[2] = 'd';
+//  					filename[3] = 'd';
  
  					const uint32_t inverse = (uint32_t)(str.GetLen() - length - 1);
  					const uint32_t invdiv2 = (uint32_t)ceil(inverse * 0.5f);
@@ -356,8 +354,9 @@ void Object3D::GetTextureFilename(FbxNode* child_node, const char* return_value)
  					//if (hr != S_OK)
  						//std::cout << "THERE IS SOMETHING WRONG!!!!!!!!!!!";
  					FbxProperty p = texture->RootProperty.Find("Filename");
- 					if (p.IsValid())
- 						std::cout << p.Get<FbxString>() << std::endl;
+					if (p.IsValid()) {
+						LOG(p.Get<FbxString>() << std::endl)
+					}
  				}
  			}
  		}
@@ -398,5 +397,3 @@ void Object3D::ImportFbx(const char* fbx_filename)
 	// Process the scene and build DirectX Arrays
 	ProcessFbxMesh(lScene->GetRootNode());
 }
-
-#pragma endregion

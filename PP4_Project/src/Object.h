@@ -17,10 +17,10 @@ public:
 
 	std::vector<Vertex> get_vertices() { return prv_Vertices; }
 	std::vector<uint32_t> get_indices() { return prv_Indices; }
-	Texture* get_texture() const { return prv_TextureDotH; }
+	Texture* get_texture() const { return prv_Texture; }
 	void set_vertex(const std::vector<Vertex>& vertex) { prv_Vertices = vertex; }
 	void set_index(const std::vector<uint32_t>& index) { prv_Indices = index; }
-	void set_texture(Texture* texture2d) { if (prv_TextureDotH->on_heap) delete prv_TextureDotH; prv_TextureDotH = texture2d; }
+	void set_texture(Texture* texture2d) { if (prv_Texture->on_heap) delete prv_Texture; prv_Texture = texture2d; }
 
 	__declspec(property(get = get_vertices, put = set_vertex)) std::vector<Vertex> vertices;
 	__declspec(property(get = get_texture, put = set_texture)) Texture* texture;
@@ -30,9 +30,9 @@ public:
 private:
 	std::vector<uint32_t> prv_Indices;
 	std::vector<Vertex> prv_Vertices;
-	Texture* prv_TextureDotH;
-
-	const char* prv_TextureFilename;
+	Texture *prv_Texture;
+	uint32_t tex2d;
+	const char *prv_TextureFilename;
 	void ProcessFbxMesh(FbxNode* node);
 	void Compactify(const std::vector<Vertex>& vertex2);
 	void SetUVs(FbxArray<FbxVector2>& uv, const FbxMesh* mesh);
