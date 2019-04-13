@@ -1,24 +1,38 @@
 #include "VkObj_RenderGraphicsPipeline.h"
 
-bool vk_create_render_pass(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkFormat &swapchain_format, VkRenderPass &render_pass)
+bool vk_create_render_pass(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkFormat &swapchain_format, const VkSampleCountFlagBits &msaa, VkRenderPass &render_pass)
 {
 	VkAttachmentDescription color_attachment_description = {};
 	color_attachment_description.format = swapchain_format;
-	color_attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
+	color_attachment_description.samples = msaa;
 	color_attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	color_attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	color_attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	color_attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	color_attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	color_attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	color_attachment_description.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 	VkAttachmentReference color_attachment_reference = {};
 	color_attachment_reference.attachment = 0;
 	color_attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+	VkAttachmentDescription color_attachment_resolve = {};
+	color_attachment_resolve.format = swapchain_format;
+	color_attachment_resolve.samples = VK_SAMPLE_COUNT_1_BIT;
+	color_attachment_resolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	color_attachment_resolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	color_attachment_resolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	color_attachment_resolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	color_attachment_resolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	color_attachment_resolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+	VkAttachmentReference color_attachment_resolve_reference = {};
+	color_attachment_resolve_reference.attachment = 2;
+	color_attachment_resolve_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
 	VkAttachmentDescription depth_attachment_description = {};
 	depth_attachment_description.format = vk_get_depth_format(physical_device);
-	depth_attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
+	depth_attachment_description.samples = msaa;
 	depth_attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	depth_attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 	depth_attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -35,6 +49,7 @@ bool vk_create_render_pass(const VkPhysicalDevice &physical_device, const VkDevi
 	subpass_description.colorAttachmentCount = 1;
 	subpass_description.pColorAttachments = &color_attachment_reference;
 	subpass_description.pDepthStencilAttachment = &depth_attachment_reference;
+	subpass_description.pResolveAttachments = &color_attachment_resolve_reference;
 
 	VkSubpassDependency subpass_dependency = {};
 	subpass_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -46,7 +61,7 @@ bool vk_create_render_pass(const VkPhysicalDevice &physical_device, const VkDevi
 		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
 		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
-	std::array<VkAttachmentDescription, 2> attachments = { color_attachment_description, depth_attachment_description };
+	std::array<VkAttachmentDescription, 3> attachments = { color_attachment_description, depth_attachment_description, color_attachment_resolve };
 	VkRenderPassCreateInfo render_pass_create_info = {};
 	render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 	render_pass_create_info.attachmentCount = (uint32_t)attachments.size();
@@ -65,7 +80,7 @@ bool vk_create_render_pass(const VkPhysicalDevice &physical_device, const VkDevi
 	return true;
 }
 
-bool vk_create_graphics_pipeline(const VkDevice &device, const VkExtent2D &swapchain_extent, const VkDescriptorSetLayout &descriptor_set_layout,
+bool vk_create_graphics_pipeline(const VkDevice &device, const VkExtent2D &swapchain_extent, const VkDescriptorSetLayout &descriptor_set_layout, const VkSampleCountFlagBits &msaa,
 	const VkRenderPass &render_pass, VkPipelineLayout &graphics_pipeline_layout, VkPipeline &graphics_pipeline)
 {
 #pragma region Check and copy shader files
@@ -166,7 +181,7 @@ bool vk_create_graphics_pipeline(const VkDevice &device, const VkExtent2D &swapc
 	VkPipelineMultisampleStateCreateInfo multisample_create_info = {};
 	multisample_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	multisample_create_info.sampleShadingEnable = false;
-	multisample_create_info.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+	multisample_create_info.rasterizationSamples = msaa;
 	multisample_create_info.minSampleShading = 1.0f;
 	multisample_create_info.pSampleMask = nullptr;
 	multisample_create_info.alphaToCoverageEnable = false;

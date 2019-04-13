@@ -74,7 +74,7 @@ bool vk_create_swapchain_image_view(const VkDevice &device, const std::vector<Vk
 }
 
 bool vk_create_swapchain_frame_buffer(const VkDevice &device, const VkRenderPass &render_pass, const std::vector<VkImageView> &swapchain_image_views, const VkExtent2D &swapchain_extent, 
-	const VkImageView& depth_buffer_view, std::vector<VkFramebuffer> &swapchain_frame_buffer)
+	const VkImageView &color_image_view, const VkImageView& depth_buffer_view, std::vector<VkFramebuffer> &swapchain_frame_buffer)
 {
 	//Resize the Swapchain Frame Buffer Vector
 	swapchain_frame_buffer.resize(swapchain_image_views.size());
@@ -82,9 +82,10 @@ bool vk_create_swapchain_frame_buffer(const VkDevice &device, const VkRenderPass
 	//Loop through the Swapchain Frame Buffers and set their create info
 	for (unsigned int i = 0; i < swapchain_frame_buffer.size(); ++i) {
 		// Create an array of image attachments for create info (swapchain image views and depth buffer view)
-		std::array<VkImageView, 2> image_attachments = {
-			swapchain_image_views[i],
-			depth_buffer_view
+		std::array<VkImageView, 3> image_attachments = {
+			color_image_view,
+			depth_buffer_view,
+			swapchain_image_views[i]
 		};
 
 		//Frame Buffer's Create Info

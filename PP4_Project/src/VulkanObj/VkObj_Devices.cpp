@@ -8,7 +8,7 @@ const std::vector<const char*> device_extensions = {
 
 
 //Setup or Creations of Devices
-bool vk_set_physical_device(const VkInstance& instance, const VkSurfaceKHR& surface, VkPhysicalDevice& physical_device)
+bool vk_set_physical_device(const VkInstance& instance, const VkSurfaceKHR& surface, VkPhysicalDevice& physical_device, VkSampleCountFlagBits &msaa)
 {
 	//Check for GPUs
 	uint32_t device_count = 0;
@@ -24,6 +24,7 @@ bool vk_set_physical_device(const VkInstance& instance, const VkSurfaceKHR& surf
 	for (size_t i = 0; i < physical_device_list.size(); ++i)
 		if (vk_device_is_compatible(physical_device_list[i], surface)) {
 			physical_device = physical_device_list[i];
+			msaa = get_highest_msaa_sample_count(physical_device);
 			return true;
 		}
 
@@ -137,7 +138,7 @@ bool vk_device_extension_supported(const VkPhysicalDevice& physical_device)
 	return required_extension.empty();
 }
 
-VkSampleCountFlags get_highest_msaa_sample_count(const VkPhysicalDevice &physical_device)
+VkSampleCountFlagBits get_highest_msaa_sample_count(const VkPhysicalDevice &physical_device)
 {
 	VkPhysicalDeviceProperties physical_device_properties;
 	vkGetPhysicalDeviceProperties(physical_device, &physical_device_properties);

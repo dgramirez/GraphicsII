@@ -23,7 +23,7 @@ bool vk_create_swapchain_image_view(const VkDevice &device, const std::vector<Vk
 
 //Usage comes AFTER Render Pass and Graphics Pipeline
 bool vk_create_swapchain_frame_buffer(const VkDevice &device, const VkRenderPass &render_pass, const std::vector<VkImageView> &swapchain_image_views, const VkExtent2D &swapchain_extent,
-	const VkImageView& depth_buffer_view, std::vector<VkFramebuffer> &swapchain_frame_buffer);
+	const VkImageView &color_image_view, const VkImageView& depth_buffer_view, std::vector<VkFramebuffer> &swapchain_frame_buffer);
 											
 
 VkSurfaceFormatKHR vk_select_swapchain_surface_format(const std::vector<VkSurfaceFormatKHR> &formats);

@@ -26,14 +26,14 @@ public:
 	void add_to_object_list(const Object3D& object);
 
 private:
-	VkObj_WindowSetup prv_VkWindow;
-	VkObj_ValidationLayer prv_VkValidationLayer;
-	VkObj_Devices prv_VkDevices;
-	VkObj_Swapchain prv_VkSwapchain;
+	VkObj_WindowSetup prv_Window;
+	VkObj_ValidationLayer prv_ValidationLayer;
+	VkObj_Devices prv_Devices;
+	VkObj_Swapchain prv_Swapchain;
 	VkObj_RenderGraphicsPipeline prv_RenderGraphicsPipeline;
-	VkObj_Texture prv_TextureObjects;
+	VkObj_Texture prv_Texture;
 	VkObj_Buffers prv_Buffers;
-	VkObj_Commands prv_CommandObjects;
+	VkObj_Commands prv_Command;
 	VkObj_SemaphoresAndFences prv_SemaphoreAndFences;
 
 	uint32_t prv_Frame = 0;

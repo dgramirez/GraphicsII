@@ -1,7 +1,7 @@
 #include "VkObj_Texture.h"
 
 bool vk_create_texture_image(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkCommandPool &command_pool, const VkQueue graphics_queue,
-std::vector<Object3D> &object_list, const VkExtent3D &texture_extent, VkImage &texture_image, VkDeviceMemory &texture_image_memory)
+std::vector<Object3D> &object_list, const VkExtent3D &texture_extent, VkSampleCountFlagBits &msaa_sample, VkImage &texture_image, VkDeviceMemory &texture_image_memory)
 {
 	VkDeviceSize image_size = object_list[0].texture->width * object_list[0].texture->height * sizeof(unsigned int);
 
@@ -24,12 +24,11 @@ std::vector<Object3D> &object_list, const VkExtent3D &texture_extent, VkImage &t
 	memcpy(data, converted_pixels.data(), (unsigned int)image_size);
 	vkUnmapMemory(device, staging_buffer_memory);
 
-	vk_create_image(physical_device, device, texture_extent, object_list[0].texture->mip_levels, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
+	vk_create_image(physical_device, device, texture_extent, object_list[0].texture->mip_levels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
 		VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture_image, texture_image_memory);
 
 	vk_transition_image_layout(device, command_pool, graphics_queue, object_list[0].texture->mip_levels, texture_image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	vk_copy_buffer_to_image(device, command_pool, graphics_queue, staging_buffer, texture_image, texture_extent);
-	//vk_transition_image_layout(device, command_pool, graphics_queue, object_list[0].texture->mip_levels, texture_image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	
 	vkDestroyBuffer(device, staging_buffer, nullptr);
 	vkFreeMemory(device, staging_buffer_memory, nullptr);
@@ -72,11 +71,29 @@ bool vk_create_texture_sampler(const VkDevice &device, VkSampler &sampler)
 	return true;
 }
 
-bool vk_create_depth_buffer(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue, const VkExtent3D &swapchain_extent_3d, VkImage &depth_buffer, VkDeviceMemory &depth_buffer_memory, VkImageView &depth_buffer_view)
+bool vk_create_color_buffer(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue, const uint32_t &mip_levels, 
+	const VkSampleCountFlagBits &msaa_sample, const VkExtent3D &swapchain_extent, const VkFormat &swapchain_format, VkImage &color_image, VkDeviceMemory &color_image_memory, VkImageView &color_image_view)
+{
+	VkFormat color_format = swapchain_format;
+
+	vk_create_image(physical_device, device, swapchain_extent, mip_levels, msaa_sample, color_format, VK_IMAGE_TILING_OPTIMAL,
+		VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		color_image, color_image_memory);
+
+	color_image_view = vk_create_image_view(device, color_image, color_format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+
+	vk_transition_image_layout(device, command_pool, graphics_queue, mip_levels, color_image, color_format,
+		VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+	return true;
+}
+
+bool vk_create_depth_buffer(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue, const VkExtent3D &swapchain_extent_3d, const VkSampleCountFlagBits &msaa_sample, 
+	VkImage &depth_buffer, VkDeviceMemory &depth_buffer_memory, VkImageView &depth_buffer_view)
 {
 	VkFormat depth_format = vk_get_depth_format(physical_device);
 
-	vk_create_image(physical_device, device, swapchain_extent_3d, 1, depth_format, VK_IMAGE_TILING_OPTIMAL,
+	vk_create_image(physical_device, device, swapchain_extent_3d, 1, msaa_sample, depth_format, VK_IMAGE_TILING_OPTIMAL,
 		VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depth_buffer, depth_buffer_memory);
 	depth_buffer_view = vk_create_image_view(device, depth_buffer, depth_format, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
@@ -85,8 +102,8 @@ bool vk_create_depth_buffer(const VkPhysicalDevice &physical_device, const VkDev
 	return true;
 }
 
-bool vk_create_image(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkExtent3D &extent, const uint32_t &mip_levels, const VkFormat &format, const VkImageTiling &tiling, 
-	const VkImageUsageFlags &usage_flags, const VkMemoryPropertyFlags &memory_property_flags, VkImage &image, VkDeviceMemory &image_memory)
+bool vk_create_image(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkExtent3D &extent, const uint32_t &mip_levels, const VkSampleCountFlagBits &msaa_sample, const VkFormat &format, const VkImageTiling &tiling, 
+	const VkImageUsageFlags &usage_flags, const VkMemoryPropertyFlags &memory_property_flags, VkImage &texture_image, VkDeviceMemory &texture_image_memory)
 {
 	VkImageCreateInfo image_create_info = {};
 	image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -99,30 +116,30 @@ bool vk_create_image(const VkPhysicalDevice &physical_device, const VkDevice &de
 	image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	image_create_info.usage = usage_flags;
 	image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	image_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
+	image_create_info.samples = msaa_sample;
 	image_create_info.flags = 0;
 
-	VkResult r = vkCreateImage(device, &image_create_info, nullptr, &image);
+	VkResult r = vkCreateImage(device, &image_create_info, nullptr, &texture_image);
 	if (r) {
 		LOG("Failed to Create Image! Error Code: " << r);
 		return false;
 	}
 
 	VkMemoryRequirements memory_requirements;
-	vkGetImageMemoryRequirements(device, image, &memory_requirements);
+	vkGetImageMemoryRequirements(device, texture_image, &memory_requirements);
 
 	VkMemoryAllocateInfo memory_allocate_info = {};
 	memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	memory_allocate_info.allocationSize = memory_requirements.size;
 	memory_allocate_info.memoryTypeIndex = vk_find_memory_type(physical_device, memory_requirements.memoryTypeBits, memory_property_flags);
 
-	r = vkAllocateMemory(device, &memory_allocate_info, nullptr, &image_memory);
+	r = vkAllocateMemory(device, &memory_allocate_info, nullptr, &texture_image_memory);
 	if (r) {
 		LOG("Failed to Allocate Memory in Create Image! Error Code: " << r);
 		return false;
 	}
 
-	r = vkBindImageMemory(device, image, image_memory, 0);
+	r = vkBindImageMemory(device, texture_image, texture_image_memory, 0);
 	if (r) {
 		LOG("Failed to Bind Image Memory! Error Code: " << r);
 	}

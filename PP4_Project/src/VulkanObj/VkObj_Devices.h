@@ -6,21 +6,20 @@
 struct VkObj_Devices
 {
 	//Queue Variables
-	QueueFamilyIndices family_queue;
-	VkQueue graphics_queue;
-	VkQueue present_queue;
+	VkQueue q_graphics;
+	VkQueue q_present;
 
 	//Device Variables
-	VkPhysicalDevice physical_device;
-	VkDevice logical_device;
+	VkPhysicalDevice physical;
+	VkDevice logical;
 };
 
-bool vk_set_physical_device(const VkInstance& instance, const VkSurfaceKHR& surface, VkPhysicalDevice& physical_device);
+bool vk_set_physical_device(const VkInstance& instance, const VkSurfaceKHR& surface, VkPhysicalDevice& physical_device, VkSampleCountFlagBits &msaa);
 bool vk_create_logical_device(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface, VkDevice& device, VkQueue& graphics_queue, VkQueue& present_queue);
 
 bool vk_device_is_compatible(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface);
 bool vk_device_extension_supported(const VkPhysicalDevice& physical_device);
 
-VkSampleCountFlags get_highest_msaa_sample_count();
+VkSampleCountFlagBits get_highest_msaa_sample_count(const VkPhysicalDevice &physical_device);
 
 #endif
