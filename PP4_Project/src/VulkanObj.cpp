@@ -127,12 +127,12 @@ void VulkanObj::add_to_object_list(const Object3D & object)
 
 void VulkanObj::CleanupSwapchain()
 {
-	if (prv_Texture.color_image)			vkDestroyImage(prv_Devices.logical, prv_Texture.depth_buffer, nullptr);
-	if (prv_Texture.color_image_memory)		vkFreeMemory(prv_Devices.logical, prv_Texture.depth_buffer_memory, nullptr);
 	if (prv_Texture.color_image_view)		vkDestroyImageView(prv_Devices.logical, prv_Texture.color_image_view, nullptr);
+	if (prv_Texture.color_image)			vkDestroyImage(prv_Devices.logical, prv_Texture.color_image, nullptr);
+	if (prv_Texture.color_image_memory)		vkFreeMemory(prv_Devices.logical, prv_Texture.color_image_memory, nullptr);
+	if (prv_Texture.depth_buffer_view)		vkDestroyImageView(prv_Devices.logical, prv_Texture.depth_buffer_view, nullptr);
 	if (prv_Texture.depth_buffer)			vkDestroyImage(prv_Devices.logical, prv_Texture.depth_buffer, nullptr);
 	if (prv_Texture.depth_buffer_memory)	vkFreeMemory(prv_Devices.logical, prv_Texture.depth_buffer_memory, nullptr);
-	if (prv_Texture.depth_buffer_view)		vkDestroyImageView(prv_Devices.logical, prv_Texture.depth_buffer_view, nullptr);
 
 	for (unsigned int i = 0; i < prv_Swapchain.frame_buffers.size(); ++i)
 		vkDestroyFramebuffer(prv_Devices.logical, prv_Swapchain.frame_buffers[i], nullptr);
@@ -159,6 +159,8 @@ void VulkanObj::CleanupSwapchain()
 
 void VulkanObj::cleanup()
 {
+	CleanupSwapchain();
+
 	for (unsigned int i = 0; i < MAX_FRAMES_FLIGHT; ++i)
 	{
 		if (prv_SemaphoreAndFences.render_finished_semaphores[i])	vkDestroySemaphore(prv_Devices.logical, prv_SemaphoreAndFences.render_finished_semaphores[i], nullptr);
@@ -166,10 +168,8 @@ void VulkanObj::cleanup()
 		if (prv_SemaphoreAndFences.fences[i])						vkDestroyFence(prv_Devices.logical, prv_SemaphoreAndFences.fences[i], nullptr);
 	}
 
-	CleanupSwapchain();
-
 	if (prv_Buffers.descriptor_set_layout)	vkDestroyDescriptorSetLayout(prv_Devices.logical, prv_Buffers.descriptor_set_layout, nullptr);
-	if (prv_Texture.sampler)			vkDestroySampler(prv_Devices.logical, prv_Texture.sampler, nullptr);
+	if (prv_Texture.sampler)				vkDestroySampler(prv_Devices.logical, prv_Texture.sampler, nullptr);
 	if (prv_Texture.texture_image_view)		vkDestroyImageView(prv_Devices.logical, prv_Texture.texture_image_view, nullptr);
 
 	if (prv_Texture.texture_image)			vkDestroyImage(prv_Devices.logical, prv_Texture.texture_image, nullptr);
@@ -181,9 +181,9 @@ void VulkanObj::cleanup()
 	if (prv_Buffers.vertex)					vkDestroyBuffer(prv_Devices.logical, prv_Buffers.vertex, nullptr);
 	if (prv_Buffers.vertex_memory)			vkFreeMemory(prv_Devices.logical, prv_Buffers.vertex_memory, nullptr);
 
-	if (prv_Command.command_pool)	vkDestroyCommandPool(prv_Devices.logical, prv_Command.command_pool, nullptr);
-	if (prv_Devices.logical)		vkDestroyDevice(prv_Devices.logical, nullptr);
-	if (prv_Window.surface)				vkDestroySurfaceKHR(prv_Window.instance, prv_Window.surface, nullptr);
+	if (prv_Command.command_pool)			vkDestroyCommandPool(prv_Devices.logical, prv_Command.command_pool, nullptr);
+	if (prv_Devices.logical)				vkDestroyDevice(prv_Devices.logical, nullptr);
+	if (prv_Window.surface)					vkDestroySurfaceKHR(prv_Window.instance, prv_Window.surface, nullptr);
 	if (VkObj_ValidationLayer::validation_layers_enabled)	
 											vk_destroy_debug_utils_messenger_ext(prv_Window.instance, prv_ValidationLayer.console, nullptr);
 	if (prv_Window.instance)				vkDestroyInstance(prv_Window.instance, nullptr);
