@@ -117,11 +117,7 @@ bool vk_create_descriptor_set_layout(const VkDevice &device, VkDescriptorSetLayo
 	create_info.bindingCount = (uint32_t)bindings.size();
 	create_info.pBindings = bindings.data();
 
-	VkResult r = vkCreateDescriptorSetLayout(device, &create_info, nullptr, &descriptor_set_layout);
-	if (r) {
-		LOG("Failed to create Descriptor Set Layout! Error Code: " << r);
-		return false;
-	}
+	CHECK_VKRESULT(a, vkCreateDescriptorSetLayout(device, &create_info, nullptr, &descriptor_set_layout), "Failed to create Descriptor Set Layout!");
 
 	return true;
 }
@@ -140,11 +136,7 @@ bool vk_create_descriptor_pool(const VkDevice &device, const std::vector<VkImage
 	create_info.pPoolSizes = descriptor_pool_size.data();
 	create_info.maxSets = (uint32_t)swapchain_images.size();
 
-	VkResult r = vkCreateDescriptorPool(device, &create_info, nullptr, &descriptor_pool);
-	if (r) {
-		LOG("Failed to create a Desriptor Pool! Error Code: " << r);
-		return false;
-	}
+	CHECK_VKRESULT(r, vkCreateDescriptorPool(device, &create_info, nullptr, &descriptor_pool), "Failed to create a Desriptor Pool! Error Code: ");
 
 	return true;
 }
@@ -162,11 +154,7 @@ bool vk_create_descriptor_sets(const VkDevice &device, const std::vector<VkImage
 	descriptor_set_allocate_info.pSetLayouts = descriptor_set_layout_vector.data();
 
 	descriptor_sets.resize(swapchain_images.size());
-	VkResult r = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info, descriptor_sets.data());
-	if (r) {
-		LOG("Failed to Allocate Descriptor Set! Error Code: " << r);
-		return false;
-	}
+	CHECK_VKRESULT(r, vkAllocateDescriptorSets(device, &descriptor_set_allocate_info, descriptor_sets.data()), "Failed to Allocate Descriptor Set!");
 
 	for (uint32_t i = 0; i < swapchain_images.size(); ++i)
 	{

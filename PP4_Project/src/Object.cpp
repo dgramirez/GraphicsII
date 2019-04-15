@@ -269,7 +269,7 @@ void Object3D::GetTextureFilename(FbxNode* child_node, const char* return_value)
  			// This only gets the material of type sDiffuse, you probably need to traverse all Standard Material Property by its name to get all possible textures.
  			FbxProperty prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
  
- 			// Check if it's layeredtextures
+ 			// Check if it's layered textures
  			int layeredTextureCount = prop.GetSrcObjectCount<FbxLayeredTexture>();
  
  			if (layeredTextureCount > 0)

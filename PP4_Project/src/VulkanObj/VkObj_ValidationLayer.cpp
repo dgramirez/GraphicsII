@@ -8,7 +8,7 @@ bool vk_create_validation_layer(const VkInstance& instance, VkDebugUtilsMessenge
 {
 	//Check to see if Validation Layer is enabled
 	if (!VkObj_ValidationLayer::validation_layers_enabled)
-		return true;
+		return true; //Return true to continue down the initialization, not break it.
 
 	//Create info for Debugger
 	VkDebugUtilsMessengerCreateInfoEXT create_info = {};
@@ -25,12 +25,8 @@ bool vk_create_validation_layer(const VkInstance& instance, VkDebugUtilsMessenge
 	create_info.pUserData = nullptr;
 
 
-	//Create the Validation Layer (With Results) [VK_SUCCESS = 0]
-	VkResult r = vk_create_debug_utils_messenger_ext(instance, &create_info, nullptr, &debugger);
-	if (r) {
-		LOG("Failed to create Validation Layer")
-		return false;
-	}
+	//Create the Validation Layer (With Results)
+	CHECK_VKRESULT(r, vk_create_debug_utils_messenger_ext(instance, &create_info, nullptr, &debugger), "Failed to create Validation Layer");
 
 	//Validation Layer has been created successfully
 	return true;

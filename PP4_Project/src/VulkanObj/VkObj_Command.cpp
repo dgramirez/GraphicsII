@@ -12,11 +12,7 @@ bool vk_create_command_pool(const VkPhysicalDevice &physical_device, const VkSur
 
 
 	//Create the Command Pool (With Results) [VK_SUCCESS = 0]
-	VkResult r = vkCreateCommandPool(device, &pool_create_info, nullptr, &command_pool);
-	if (r) {
-		LOG("Failed to create Command Pool. Error Code: " << r);
-		return false;
-	}
+	CHECK_VKRESULT(r, vkCreateCommandPool(device, &pool_create_info, nullptr, &command_pool), "Failed to create Command Pool!");
 
 	//Command Pool has been created successfully
 	return true;
@@ -38,12 +34,8 @@ bool vk_create_command_buffer(const VkDevice &device, const VkCommandPool &comma
 	command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	command_buffer_allocate_info.commandBufferCount = (uint32_t)command_buffers.size();
 
-	//Attempt to Allocate Command Buffer (With Results) [VK_SUCCESS = 0]
-	VkResult r = vkAllocateCommandBuffers(device, &command_buffer_allocate_info, command_buffers.data());
-	if (r) {
-		LOG("Failed to Allocate Command Buffer! Error Code: " << r)
-		return false;
-	}
+	//Allocate Command Buffer
+	CHECK_VKRESULT(r, vkAllocateCommandBuffers(device, &command_buffer_allocate_info, command_buffers.data()), "Failed to Allocate Command Buffer!");
 
 	//Loop through all the allocated command buffer and set up Begin Info's (Command Buffer, Render Pass)
 	for (unsigned int i = 0; i < command_buffers.size(); ++i)
@@ -54,12 +46,8 @@ bool vk_create_command_buffer(const VkDevice &device, const VkCommandPool &comma
 		command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 		command_buffer_begin_info.pInheritanceInfo = nullptr;
 
-		//Attempt to begin the command buffer's begin process  (With Results) [VK_SUCCESS = 0]
-		r = vkBeginCommandBuffer(command_buffers[i], &command_buffer_begin_info);
-		if (r) {
-			LOG("Failed to Begin Command Buffer's Begin Process at index " << i << ", Error Code: " << r)
-			return false;
-		}
+		//Begin the command buffer's begin process
+		CHECK_VKRESULT(b, vkBeginCommandBuffer(command_buffers[i], &command_buffer_begin_info), "Failed to Begin Command Buffer's Begin Process at index " << i << "!");
 
 		//Create the Render Pass Begin Info
 		VkRenderPassBeginInfo render_pass_begin_info = {};
@@ -96,12 +84,8 @@ bool vk_create_command_buffer(const VkDevice &device, const VkCommandPool &comma
 		 * Ending of the Drawing Stuff Entering Command Buffer {NOT THE ACTUAL DRAW!}
 		 */
 
-		//End the Command Buffer (With Results) [VK_SUCCESS = 0]
-		r = vkEndCommandBuffer(command_buffers[i]);
-		if (r) {
-			LOG("Failed to End Command Buffer at index " << i << ", Error Code: " << r);
-			return false;
-		}
+		//End the Command Buffer
+		CHECK_VKRESULT(e, vkEndCommandBuffer(command_buffers[i]), "Failed to End Command Buffer at index " << i << ",");
 	}
 
 	//Command Buffer has been created successfully

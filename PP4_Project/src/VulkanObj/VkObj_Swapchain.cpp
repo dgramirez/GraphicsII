@@ -25,11 +25,11 @@ bool vk_create_swapchain(const VkPhysicalDevice &physical_device, const VkDevice
 	create_info.imageColorSpace = surface_format.colorSpace;
 	create_info.imageExtent = extent;
 	create_info.imageArrayLayers = 1;
-	create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 	create_info.preTransform = support.capabilities.currentTransform;
 	create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 	create_info.presentMode = present_mode;
-	create_info.clipped = true;
+	create_info.clipped = VK_TRUE;
 	create_info.oldSwapchain = VK_NULL_HANDLE;
 
 	//Create Info for Swapchain KHR [Part 2: Queue Families]
@@ -45,16 +45,12 @@ bool vk_create_swapchain(const VkPhysicalDevice &physical_device, const VkDevice
 		create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 	//Create the Swapchain [Part 3: Putting it Together] {VK_SUCCESS = 0}
-	VkResult r = vkCreateSwapchainKHR(device, &create_info, nullptr, &swapchain);
-	if (r) {
-		LOG("Failed To Create Swap Chain! Error Code: " << r)
-		return false;
-	}
+	CHECK_VKRESULT(r, vkCreateSwapchainKHR(device, &create_info, nullptr, &swapchain), "Failed To Create Swap Chain!");
 
 	//Swapchain Image Setup
-	vkGetSwapchainImagesKHR(device, swapchain, &image_count, nullptr);
+	CHECK_VKRESULT(r2, vkGetSwapchainImagesKHR(device, swapchain, &image_count, nullptr), "Failed to get Swapchain Images Count");
 	swapchain_images.resize(image_count);
-	vkGetSwapchainImagesKHR(device, swapchain, &image_count, swapchain_images.data());
+	CHECK_VKRESULT(r3, vkGetSwapchainImagesKHR(device, swapchain, &image_count, swapchain_images.data()), "Failed to get Swapchain Images");
 
 	swapchain_format = surface_format.format;
 	swapchain_extent = extent;
@@ -81,7 +77,7 @@ bool vk_create_swapchain_frame_buffer(const VkDevice &device, const VkRenderPass
 
 	//Loop through the Swapchain Frame Buffers and set their create info
 	for (unsigned int i = 0; i < swapchain_frame_buffer.size(); ++i) {
-		// Create an array of image attachments for create info (swapchain image views and depth buffer view)
+		// Create an array of image attachments for create info (NOTE: There is only 1 Color Image View and Depth Buffer!)
 		std::array<VkImageView, 3> image_attachments = {
 			color_image_view,
 			depth_buffer_view,
@@ -100,12 +96,7 @@ bool vk_create_swapchain_frame_buffer(const VkDevice &device, const VkRenderPass
 
 
 		//Create the Surface (With Results) [VK_SUCCESS = 0]
-		VkResult r = vkCreateFramebuffer(device, &frame_buffer_create_info, nullptr, &swapchain_frame_buffer[i]);
-		if (r) {
-			LOG("Failed to create Frame buffer at index" << i);
-			return false;
-		}
-
+		CHECK_VKRESULT(r, vkCreateFramebuffer(device, &frame_buffer_create_info, nullptr, &swapchain_frame_buffer[i]), "Failed to create Frame buffer at index" << i);
 	}
 
 	//Swapchain's Frame Buffers has been created successfully
@@ -148,7 +139,7 @@ VkPresentModeKHR vk_select_swapchain_present_mode(const std::vector<VkPresentMod
 VkExtent2D select_swapchain_extent(const VkSurfaceCapabilitiesKHR &capability, const uint32_t &window_width, const uint32_t &window_height)
 {
 	//Find or Determine Best Surface Swap Extent
-	if (capability.currentExtent.width != std::numeric_limits<uint32_t>::max())
+	if (capability.currentExtent.width != MAX_UINT32)
 		return capability.currentExtent;
 	else
 		return { window_width, window_height };

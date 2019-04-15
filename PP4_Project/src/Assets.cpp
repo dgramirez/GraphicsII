@@ -20,7 +20,7 @@ Texture::Texture(const char* filename)
 	prv_Width = new int32_t;
 	prv_Height = new int32_t;
 	prv_Data = stbi_load(filename, prv_Width, prv_Height, nullptr, 4);
-	prv_MipLevels = log2(std::min(*prv_Width, *prv_Height)) + 1;
+	prv_MipLevels = (int32_t)log2(std::min(*prv_Width, *prv_Height)) + 1;
 }
 
 Texture::~Texture()

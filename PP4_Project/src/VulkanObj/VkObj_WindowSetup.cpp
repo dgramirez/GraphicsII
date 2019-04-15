@@ -4,7 +4,7 @@ const std::vector<const char*> validation_layers = {
 "VK_LAYER_LUNARG_standard_validation"
 };
 
-bool vk_create_instance(const char* title, VkInstance& instance)
+bool vk_create_instance(const char *title, VkInstance &instance)
 {
 	//Check for Validation Layer Support
 	#ifdef _DEBUG
@@ -17,7 +17,7 @@ bool vk_create_instance(const char* title, VkInstance& instance)
 	app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	app_info.pApplicationName = title;
 	app_info.applicationVersion = 1;
-	app_info.pEngineName = "";
+	app_info.pEngineName = "N/A";
 	app_info.engineVersion = 0;
 	app_info.apiVersion = VK_API_VERSION_1_0;
 
@@ -40,24 +40,16 @@ bool vk_create_instance(const char* title, VkInstance& instance)
 		create_info.enabledLayerCount = 0;
 
 	//Create the Instance (With Results) [VK_SUCCESS = 0]
-	VkResult r = vkCreateInstance(&create_info, nullptr, &instance);
-	if (r) {
-		LOG("Failed to Create Instance!")
-		return false;
-	}
+	CHECK_VKRESULT(r, vkCreateInstance(&create_info, nullptr, &instance), "Failed to Create Instance!");
 
 	//Instance has been created successfully
 	return true;
 }
 
-bool vk_create_surface(const VkInstance& instance, GLFWwindow* window, VkSurfaceKHR& surface)
+bool vk_create_surface(const VkInstance &instance, GLFWwindow *window, VkSurfaceKHR &surface)
 {
 	//Create the Surface (With Results) [VK_SUCCESS = 0]
-	VkResult r = glfwCreateWindowSurface(instance, window, nullptr, &surface);
-	if (r) {
-		LOG("Failed to create Surface")
-		return false;
-	}
+	CHECK_VKRESULT(r, glfwCreateWindowSurface(instance, window, nullptr, &surface), "Failed to create Surface");
 
 	//Surface has been created successfully
 	return true;

@@ -68,16 +68,13 @@ bool vk_create_logical_device(const VkPhysicalDevice& physical_device, const VkS
 	create_info.ppEnabledExtensionNames = device_extensions.data();
 
 	//Create the Surface (With Results) [VK_SUCCESS = 0]
-	VkResult r = vkCreateDevice(physical_device, &create_info, nullptr, &device);
-	if (r) {
-		LOG("Failed to create Device");
-		return false;
-	}
+	CHECK_VKRESULT(R, vkCreateDevice(physical_device, &create_info, nullptr, &device), "Failed to create Device!");
 
 	//If Device has been created, Setup the Device Queue for graphics and present family
 	vkGetDeviceQueue(device, indices.graphics.value(), 0, &graphics_queue);
 	vkGetDeviceQueue(device, indices.present.value(), 0, &present_queue);
 
+	//Device has been created successfully!
 	return true;
 }
 

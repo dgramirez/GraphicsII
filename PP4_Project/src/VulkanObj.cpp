@@ -6,68 +6,59 @@ VulkanObj::~VulkanObj() { cleanup(); }
 bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_width, unsigned short win_height)
 {
 	prv_Window.glfw_window = window;
-	if (!vk_create_instance(title, prv_Window.instance)) 
-		{ LOG("Create Instance Has Failed!")			return false; }
-	if (!vk_create_validation_layer(prv_Window.instance, prv_ValidationLayer.console)) 
-		{ LOG("Create Validation Debugger Has Failed!")	return false; }
-	if (!vk_create_surface(prv_Window.instance, window, prv_Window.surface)) 
-		{ LOG("Create Surface Has Failed!")				return false; }
-	if (!vk_set_physical_device(prv_Window.instance, prv_Window.surface, prv_Devices.physical, prv_Texture.msaa_sample)) 
-		{ LOG("Set Physical Device Has Failed!")		return false; }
-	if (!vk_create_logical_device(prv_Devices.physical, prv_Window.surface, prv_Devices.logical, prv_Devices.q_graphics, prv_Devices.q_present)) 
-		{ LOG("Create Logical Device Has Failed!")		return false; }
-	if (!vk_create_swapchain(prv_Devices.physical, prv_Devices.logical, prv_Window.surface, win_width, win_height,
-		prv_Swapchain.swapchain, prv_Swapchain.images, prv_Swapchain.format, prv_Swapchain.extent2D)) 
-		{ LOG("Create Swap Chain Has Failed!")			return false; }
- 	if (!vk_create_swapchain_image_view(prv_Devices.logical, prv_Swapchain.images, prv_Swapchain.format, prv_Swapchain.views))
-		{ LOG("Create Image View Has Failed!")			return false; }
- 	if (!vk_create_render_pass(prv_Devices.physical, prv_Devices.logical, prv_Swapchain.format, prv_Texture.msaa_sample, prv_RenderGraphicsPipeline.render_pass))
-		{ LOG("Create Render Pass Has Failed!")			return false; }
- 	if (!vk_create_descriptor_set_layout(prv_Devices.logical, prv_Buffers.descriptor_set_layout)) 
-		{ LOG("Create Descriptor Set Layout Failed!")	return false; }
- 	if (!vk_create_graphics_pipeline(prv_Devices.logical, prv_Swapchain.extent2D, prv_Buffers.descriptor_set_layout, prv_Texture.msaa_sample,
-		prv_RenderGraphicsPipeline.render_pass, prv_RenderGraphicsPipeline.graphics_pipeline_layout, prv_RenderGraphicsPipeline.graphics_pipeline)) 
-		{ LOG("Create Graphics Pipeline Has Failed!")	return false; }
- 	if (!vk_create_command_pool(prv_Devices.physical, prv_Window.surface, prv_Devices.logical, prv_Command.command_pool))
-		{ LOG("Create Command Pool Has Failed!")		return false; }
 	prv_Swapchain.depth = 1;
- 	if (!vk_create_color_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, prv_Devices.q_graphics, 1, prv_Texture.msaa_sample,
-		prv_Swapchain.extent3D, prv_Swapchain.format, prv_Texture.color_image, prv_Texture.color_image_memory, prv_Texture.color_image_view))
-		{ LOG("Create Color Buffer Has Failed!")		return false; }
-	if (!vk_create_depth_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, prv_Devices.q_graphics,
-		prv_Swapchain.extent3D, prv_Texture.msaa_sample, prv_Texture.depth_buffer, prv_Texture.depth_buffer_memory, prv_Texture.depth_buffer_view)) 
-		{ LOG("Create Depth Resources Has Failed!")		return false; }
- 	if (!vk_create_swapchain_frame_buffer(prv_Devices.logical, prv_RenderGraphicsPipeline.render_pass, prv_Swapchain.views,
-		prv_Swapchain.extent2D, prv_Texture.color_image_view, prv_Texture.depth_buffer_view, prv_Swapchain.frame_buffers))
-		{ LOG("Create Frame Buffers Has Failed")		return false; }
- 	if (!vk_create_texture_image(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, prv_Devices.q_graphics,
-		prv_ObjectList, { prv_ObjectList[0].texture->width,prv_ObjectList[0].texture->height, 1 }, prv_Texture.msaa_sample, prv_Texture.texture_image, prv_Texture.texture_image_memory))
-		{ LOG("Create Texture Image Has Failed!")		return false; }
- 	if (!vk_create_texture_image_view(prv_Devices.logical, prv_Texture.texture_image, VK_IMAGE_ASPECT_COLOR_BIT, prv_ObjectList[0].texture->mip_levels, prv_Texture.texture_image_view))
-		{ LOG("Create Texture Image View Has Failed!")	return false; }
- 	if (!vk_create_texture_sampler(prv_Devices.logical, prv_Texture.sampler))
-		{ LOG("Create Texture Image View Has Failed!")	return false; }
- 	if (!vk_create_vertex_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, prv_Devices.q_graphics,
-		prv_ObjectList, prv_Buffers.vertex, prv_Buffers.vertex_memory))
-		{ LOG("Creating Vertex Buffer Has Failed!")		return false; }
-	if (!vk_create_index_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, prv_Devices.q_graphics,
-		prv_ObjectList, prv_Buffers.index, prv_Buffers.index_memory))
-		{ LOG("Creating Index Buffer Has Failed!")		return false; }
- 	if (!vk_create_uniform_buffer(prv_Devices.physical, prv_Devices.logical, prv_Swapchain.images, 
-		prv_Buffers.uniform, prv_Buffers.uniform_memory))
-		{ LOG("Create Uniform Buffer Has Failed!")		return false; }
- 	if (!vk_create_descriptor_pool(prv_Devices.logical, prv_Swapchain.images, prv_Buffers.descriptor_pool))
-		{ LOG("Create Descriptor Pool Has Failed!")		return false; }
- 	if (!vk_create_descriptor_sets(prv_Devices.logical, prv_Swapchain.images, prv_Buffers.descriptor_pool, prv_Buffers.uniform, 
-		prv_Texture.texture_image_view, prv_Texture.sampler, prv_Buffers.descriptor_set_layout, prv_Buffers.descriptor_sets))
-		{ LOG("Create Desriptor Sets Has Failed!")		return false; }
- 	if (!vk_create_command_buffer(prv_Devices.logical, prv_Command.command_pool, prv_RenderGraphicsPipeline.render_pass, prv_RenderGraphicsPipeline.graphics_pipeline_layout,
-		prv_RenderGraphicsPipeline.graphics_pipeline, prv_Swapchain.extent2D, prv_Swapchain.frame_buffers, prv_Buffers.descriptor_sets, prv_Buffers.vertex, 0, prv_Buffers.index,
-		prv_ObjectList, prv_Command.command_buffers)) 
-		{ LOG("Create Command Buffer Has Failed!")		return false; }
- 	if (!vk_sync_semaphore_and_fences(prv_Devices.logical, prv_SemaphoreAndFences.image_available_semaphores, prv_SemaphoreAndFences.render_finished_semaphores,
-		prv_SemaphoreAndFences.fences)) 
-	{ LOG("Create Semaphore Has Failed!")				return false; }
+
+	CHECK_RESULT(vk_create_instance(title, prv_Window.instance), "Create Instance Has Failed!");
+	CHECK_RESULT(vk_create_validation_layer(prv_Window.instance, prv_ValidationLayer.console), "Create Validation Debugger Has Failed!");
+	CHECK_RESULT(vk_create_surface(prv_Window.instance, window, prv_Window.surface), "Create Surface Has Failed!");
+	CHECK_RESULT(vk_set_physical_device(prv_Window.instance, prv_Window.surface, prv_Devices.physical, 
+		prv_Texture.msaa_sample), "Set Physical Device Has Failed!");
+	CHECK_RESULT(vk_create_logical_device(prv_Devices.physical, prv_Window.surface, prv_Devices.logical, 
+		prv_Devices.q_graphics, prv_Devices.q_present), "Create Logical Device Has Failed!");
+	CHECK_RESULT(vk_create_swapchain(prv_Devices.physical, prv_Devices.logical, prv_Window.surface, win_width, win_height,
+		prv_Swapchain.swapchain, prv_Swapchain.images, prv_Swapchain.format, prv_Swapchain.extent2D), "Create Swap Chain Has Failed!");
+	CHECK_RESULT(vk_create_swapchain_image_view(prv_Devices.logical, prv_Swapchain.images, prv_Swapchain.format,
+		prv_Swapchain.views), "Create Image View Has Failed!");
+	CHECK_RESULT(vk_create_render_pass(prv_Devices.physical, prv_Devices.logical, prv_Swapchain.format,
+		prv_Texture.msaa_sample, prv_RenderGraphicsPipeline.render_pass), "Create Render Pass Has Failed!");
+	CHECK_RESULT(vk_create_descriptor_set_layout(prv_Devices.logical, prv_Buffers.descriptor_set_layout), "Create Descriptor Set Layout Failed!");
+	CHECK_RESULT(vk_create_graphics_pipeline(prv_Devices.logical, prv_Swapchain.extent2D, prv_Buffers.descriptor_set_layout,
+		prv_Texture.msaa_sample, prv_RenderGraphicsPipeline.render_pass, prv_RenderGraphicsPipeline.graphics_pipeline_layout,
+		prv_RenderGraphicsPipeline.graphics_pipeline), "Create Graphics Pipeline Has Failed!");
+	CHECK_RESULT(vk_create_command_pool(prv_Devices.physical, prv_Window.surface, prv_Devices.logical, 
+		prv_Command.command_pool), "Create Command Pool Has Failed!");
+	CHECK_RESULT(vk_create_color_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, 
+		prv_Devices.q_graphics, 1, prv_Texture.msaa_sample, prv_Swapchain.extent3D, prv_Swapchain.format, 
+		prv_Texture.color_image, prv_Texture.color_image_memory, prv_Texture.color_image_view), "Create Color Buffer Has Failed!");
+	CHECK_RESULT(vk_create_depth_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, 
+		prv_Devices.q_graphics, prv_Swapchain.extent3D, prv_Texture.msaa_sample, prv_Texture.depth_buffer, 
+		prv_Texture.depth_buffer_memory, prv_Texture.depth_buffer_view), "Create Depth Resources Has Failed!");
+	CHECK_RESULT(vk_create_swapchain_frame_buffer(prv_Devices.logical, prv_RenderGraphicsPipeline.render_pass, 
+		prv_Swapchain.views, prv_Swapchain.extent2D, prv_Texture.color_image_view, prv_Texture.depth_buffer_view, 
+		prv_Swapchain.frame_buffers), "Create Frame Buffers Has Failed");
+	CHECK_RESULT(vk_create_texture_image(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, 
+		prv_Devices.q_graphics, prv_ObjectList, { prv_ObjectList[0].texture->width,prv_ObjectList[0].texture->height, 1 }, 
+		prv_Texture.msaa_sample, prv_Texture.texture_image, prv_Texture.texture_image_memory), "Create Texture Image Has Failed!");
+	CHECK_RESULT(vk_create_texture_image_view(prv_Devices.logical, prv_Texture.texture_image, VK_IMAGE_ASPECT_COLOR_BIT, 
+		prv_ObjectList[0].texture->mip_levels, prv_Texture.texture_image_view), "Create Texture Image View Has Failed!");
+	CHECK_RESULT(vk_create_texture_sampler(prv_Devices.logical, prv_Texture.sampler), "Create Texture Image View Has Failed!");
+	CHECK_RESULT(vk_create_vertex_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool,
+		prv_Devices.q_graphics, prv_ObjectList, prv_Buffers.vertex, prv_Buffers.vertex_memory), "Creating Vertex Buffer Has Failed!");
+	CHECK_RESULT(vk_create_index_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, 
+		prv_Devices.q_graphics, prv_ObjectList, prv_Buffers.index, prv_Buffers.index_memory), "Creating Index Buffer Has Failed!");
+	CHECK_RESULT(vk_create_uniform_buffer(prv_Devices.physical, prv_Devices.logical, prv_Swapchain.images,
+		prv_Buffers.uniform, prv_Buffers.uniform_memory), "Create Uniform Buffer Has Failed!");
+	CHECK_RESULT(vk_create_descriptor_pool(prv_Devices.logical, prv_Swapchain.images, prv_Buffers.descriptor_pool), "Create Descriptor Pool Has Failed!");
+	CHECK_RESULT(vk_create_descriptor_sets(prv_Devices.logical, prv_Swapchain.images, prv_Buffers.descriptor_pool, 
+		prv_Buffers.uniform, prv_Texture.texture_image_view, prv_Texture.sampler, prv_Buffers.descriptor_set_layout,
+		prv_Buffers.descriptor_sets), "Create Desriptor Sets Has Failed!");
+	CHECK_RESULT(vk_create_command_buffer(prv_Devices.logical, prv_Command.command_pool, prv_RenderGraphicsPipeline.render_pass,
+		prv_RenderGraphicsPipeline.graphics_pipeline_layout, prv_RenderGraphicsPipeline.graphics_pipeline,
+		prv_Swapchain.extent2D, prv_Swapchain.frame_buffers, prv_Buffers.descriptor_sets, prv_Buffers.vertex, 0, 
+		prv_Buffers.index, prv_ObjectList, prv_Command.command_buffers), "Create Command Buffer Has Failed!");
+	CHECK_RESULT(vk_sync_semaphore_and_fences(prv_Devices.logical, prv_SemaphoreAndFences.image_available_semaphores,
+		prv_SemaphoreAndFences.render_finished_semaphores, prv_SemaphoreAndFences.fences), "Create Semaphore Has Failed!");
+
 	return true;
 }
 
@@ -82,37 +73,38 @@ void VulkanObj::reset_swapchain(unsigned short win_width, unsigned short win_hei
 
 	CleanupSwapchain();
 
-	if (!vk_create_swapchain(prv_Devices.physical, prv_Devices.logical, prv_Window.surface, win_width, win_height,
-		prv_Swapchain.swapchain, prv_Swapchain.images, prv_Swapchain.format, prv_Swapchain.extent2D))
-		{ LOG("Create Swap Chain Has Failed!") }
- 	if (!vk_create_swapchain_image_view(prv_Devices.logical, prv_Swapchain.images, prv_Swapchain.format, prv_Swapchain.views))
-		{ LOG("Create Image View Has Failed!") }
- 	if (!vk_create_render_pass(prv_Devices.physical, prv_Devices.logical, prv_Swapchain.format, prv_Texture.msaa_sample, prv_RenderGraphicsPipeline.render_pass))
-		{ LOG("Create Render Pass Has Failed!") }
- 	if (!vk_create_graphics_pipeline(prv_Devices.logical, prv_Swapchain.extent2D, prv_Buffers.descriptor_set_layout, prv_Texture.msaa_sample,
-		prv_RenderGraphicsPipeline.render_pass, prv_RenderGraphicsPipeline.graphics_pipeline_layout, prv_RenderGraphicsPipeline.graphics_pipeline)) 
-		{ LOG("Create Graphics Pipeline Has Failed!") }
- 	if (!vk_create_color_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, prv_Devices.q_graphics, 1, prv_Texture.msaa_sample,
-		prv_Swapchain.extent3D, prv_Swapchain.format, prv_Texture.color_image, prv_Texture.color_image_memory, prv_Texture.color_image_view))
-	{ LOG("Create Color Buffer Has Failed!") }
-	if (!vk_create_depth_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, prv_Devices.q_graphics,
-		prv_Swapchain.extent3D,prv_Texture.msaa_sample, prv_Texture.depth_buffer, prv_Texture.depth_buffer_memory, prv_Texture.depth_buffer_view)) 
-		{ LOG("Create Depth Resources Has Failed!") }
- 	if (!vk_create_swapchain_frame_buffer(prv_Devices.logical, prv_RenderGraphicsPipeline.render_pass, prv_Swapchain.views,
-		prv_Swapchain.extent2D, prv_Texture.color_image_view, prv_Texture.depth_buffer_view, prv_Swapchain.frame_buffers))
-		{ LOG("Create Frame Buffers Has Failed") }
- 	if (!vk_create_uniform_buffer(prv_Devices.physical, prv_Devices.logical, prv_Swapchain.images, 
-		prv_Buffers.uniform, prv_Buffers.uniform_memory))
-		{ LOG("Create Uniform Buffer Has Failed!") }
- 	if (!vk_create_descriptor_pool(prv_Devices.logical, prv_Swapchain.images, prv_Buffers.descriptor_pool))
-		{ LOG("Create Descriptor Pool Has Failed!") }
- 	if (!vk_create_descriptor_sets(prv_Devices.logical, prv_Swapchain.images, prv_Buffers.descriptor_pool, prv_Buffers.uniform, 
-		prv_Texture.texture_image_view, prv_Texture.sampler, prv_Buffers.descriptor_set_layout, prv_Buffers.descriptor_sets))
-		{ LOG("Create Desriptor Sets Has Failed!") }
- 	if (!vk_create_command_buffer(prv_Devices.logical, prv_Command.command_pool, prv_RenderGraphicsPipeline.render_pass, prv_RenderGraphicsPipeline.graphics_pipeline_layout,
-		prv_RenderGraphicsPipeline.graphics_pipeline, prv_Swapchain.extent2D, prv_Swapchain.frame_buffers, prv_Buffers.descriptor_sets, prv_Buffers.vertex, 0, prv_Buffers.index,
-		prv_ObjectList, prv_Command.command_buffers)) 
-		{ LOG("Create Command Buffer Has Failed!") }
+	CHECK_RESULT_NO_RETURN(vk_create_swapchain(prv_Devices.physical, prv_Devices.logical, prv_Window.surface, win_width, win_height,
+		prv_Swapchain.swapchain, prv_Swapchain.images, prv_Swapchain.format, prv_Swapchain.extent2D), "Create Swap Chain Has Failed!");
+	CHECK_RESULT_NO_RETURN(vk_create_swapchain_image_view(prv_Devices.logical, prv_Swapchain.images, prv_Swapchain.format,
+		prv_Swapchain.views), "Create Image View Has Failed!");
+	CHECK_RESULT_NO_RETURN(vk_create_render_pass(prv_Devices.physical, prv_Devices.logical, prv_Swapchain.format,
+		prv_Texture.msaa_sample, prv_RenderGraphicsPipeline.render_pass), "Create Render Pass Has Failed!");
+
+	CHECK_RESULT_NO_RETURN(vk_create_graphics_pipeline(prv_Devices.logical, prv_Swapchain.extent2D, prv_Buffers.descriptor_set_layout,
+		prv_Texture.msaa_sample, prv_RenderGraphicsPipeline.render_pass, prv_RenderGraphicsPipeline.graphics_pipeline_layout,
+		prv_RenderGraphicsPipeline.graphics_pipeline), "Create Graphics Pipeline Has Failed!");
+
+	CHECK_RESULT_NO_RETURN(vk_create_color_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool,
+		prv_Devices.q_graphics, 1, prv_Texture.msaa_sample, prv_Swapchain.extent3D, prv_Swapchain.format,
+		prv_Texture.color_image, prv_Texture.color_image_memory, prv_Texture.color_image_view), "Create Color Buffer Has Failed!");
+	CHECK_RESULT_NO_RETURN(vk_create_depth_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool,
+		prv_Devices.q_graphics, prv_Swapchain.extent3D, prv_Texture.msaa_sample, prv_Texture.depth_buffer,
+		prv_Texture.depth_buffer_memory, prv_Texture.depth_buffer_view), "Create Depth Resources Has Failed!");
+	CHECK_RESULT_NO_RETURN(vk_create_swapchain_frame_buffer(prv_Devices.logical, prv_RenderGraphicsPipeline.render_pass,
+		prv_Swapchain.views, prv_Swapchain.extent2D, prv_Texture.color_image_view, prv_Texture.depth_buffer_view,
+		prv_Swapchain.frame_buffers), "Create Frame Buffers Has Failed");
+
+	CHECK_RESULT_NO_RETURN(vk_create_uniform_buffer(prv_Devices.physical, prv_Devices.logical, prv_Swapchain.images,
+		prv_Buffers.uniform, prv_Buffers.uniform_memory), "Create Uniform Buffer Has Failed!");
+	CHECK_RESULT_NO_RETURN(vk_create_descriptor_pool(prv_Devices.logical, prv_Swapchain.images, prv_Buffers.descriptor_pool), "Create Descriptor Pool Has Failed!");
+	CHECK_RESULT_NO_RETURN(vk_create_descriptor_sets(prv_Devices.logical, prv_Swapchain.images, prv_Buffers.descriptor_pool,
+		prv_Buffers.uniform, prv_Texture.texture_image_view, prv_Texture.sampler, prv_Buffers.descriptor_set_layout,
+		prv_Buffers.descriptor_sets), "Create Desriptor Sets Has Failed!");
+	CHECK_RESULT_NO_RETURN(vk_create_command_buffer(prv_Devices.logical, prv_Command.command_pool, prv_RenderGraphicsPipeline.render_pass,
+		prv_RenderGraphicsPipeline.graphics_pipeline_layout, prv_RenderGraphicsPipeline.graphics_pipeline,
+		prv_Swapchain.extent2D, prv_Swapchain.frame_buffers, prv_Buffers.descriptor_sets, prv_Buffers.vertex, 0,
+		prv_Buffers.index, prv_ObjectList, prv_Command.command_buffers), "Create Command Buffer Has Failed!");
+
 }
 
 void VulkanObj::setup_object_list(uint32_t size)
@@ -191,10 +183,10 @@ void VulkanObj::cleanup()
 
 void VulkanObj::draw_frames()
 {
-	vkWaitForFences(prv_Devices.logical, 1, &prv_SemaphoreAndFences.fences[prv_Frame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+	vkWaitForFences(prv_Devices.logical, 1, &prv_SemaphoreAndFences.fences[prv_Frame], VK_TRUE, MAX_UINT64);
 
 	uint32_t image_index;
-	VkResult frame_result = vkAcquireNextImageKHR(prv_Devices.logical, prv_Swapchain.swapchain, std::numeric_limits<uint64_t>::max(),
+	VkResult frame_result = vkAcquireNextImageKHR(prv_Devices.logical, prv_Swapchain.swapchain, MAX_UINT64,
 		prv_SemaphoreAndFences.image_available_semaphores[prv_Frame], VK_NULL_HANDLE, &image_index);
 	if (frame_result == VK_ERROR_OUT_OF_DATE_KHR)
 		return;

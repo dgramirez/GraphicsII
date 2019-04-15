@@ -71,11 +71,7 @@ bool vk_create_render_pass(const VkPhysicalDevice &physical_device, const VkDevi
 	render_pass_create_info.dependencyCount = 1;
 	render_pass_create_info.pDependencies = &subpass_dependency;
 
-	VkResult r = vkCreateRenderPass(device, &render_pass_create_info, nullptr, &render_pass);
-	if (r) {
-		LOG("Failed to create Render Pass! Error Code: " << r);
-		return false;
-	}
+	CHECK_VKRESULT(r, vkCreateRenderPass(device, &render_pass_create_info, nullptr, &render_pass), "Failed to create Render Pass!");
 
 	return true;
 }
@@ -213,7 +209,7 @@ bool vk_create_graphics_pipeline(const VkDevice &device, const VkExtent2D &swapc
 		VK_COLOR_COMPONENT_A_BIT;
 	color_blend_attachment_state.blendEnable = VK_TRUE;
 	color_blend_attachment_state.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_COLOR;
-	color_blend_attachment_state.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+	color_blend_attachment_state.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 	color_blend_attachment_state.colorBlendOp = VK_BLEND_OP_ADD;
 	color_blend_attachment_state.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
 	color_blend_attachment_state.dstAlphaBlendFactor = VK_BLEND_FACTOR_DST_ALPHA;
@@ -255,11 +251,7 @@ bool vk_create_graphics_pipeline(const VkDevice &device, const VkExtent2D &swapc
 	pipeline_layout_create_info.pushConstantRangeCount = 0;
 	pipeline_layout_create_info.pPushConstantRanges = nullptr;
 
-	if (vkCreatePipelineLayout(device, &pipeline_layout_create_info, nullptr, &graphics_pipeline_layout))
-	{
-		LOG("Failed to create Pipeline Layout!");
-		return false;
-	}
+	CHECK_VKRESULT(pl, vkCreatePipelineLayout(device, &pipeline_layout_create_info, nullptr, &graphics_pipeline_layout), "Failed to create Pipeline Layout!");
 
 #pragma endregion
 
@@ -285,11 +277,7 @@ bool vk_create_graphics_pipeline(const VkDevice &device, const VkExtent2D &swapc
 	pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
 	pipeline_create_info.basePipelineIndex = -1;
 
-	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipeline_create_info, nullptr, &graphics_pipeline))
-	{
-		LOG("Pipeline Creation Has Failed!");
-		return false;
-	}
+	CHECK_VKRESULT(gp, vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipeline_create_info, nullptr, &graphics_pipeline), "Pipeline Creation Has Failed!");
 
 #pragma endregion
 

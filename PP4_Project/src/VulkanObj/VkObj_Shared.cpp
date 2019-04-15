@@ -80,11 +80,7 @@ VkImageView vk_create_image_view(const VkDevice &device, const VkImage &image, c
 	
 	//Create the Surface (With Results) [VK_SUCCESS = 0]
 	VkImageView image_view;
-	VkResult r = vkCreateImageView(device, &create_info, nullptr, &image_view);
-	if (r) {
-		LOG("Failed to Create Image View");
-		return false;
-	}
+	CHECK_VKRESULT(r, vkCreateImageView(device, &create_info, nullptr, &image_view), "Failed to Create Image View");
 
 	//Image View has been created successfully, return it
 	return image_view;
@@ -92,9 +88,11 @@ VkImageView vk_create_image_view(const VkDevice &device, const VkImage &image, c
 
 uint32_t vk_find_memory_type(const VkPhysicalDevice &physical_device, const uint32_t &filter, const VkMemoryPropertyFlags &property_flags)
 {
+	//Get the Memory Properties from the Physical Device
 	VkPhysicalDeviceMemoryProperties memory_properties;
 	vkGetPhysicalDeviceMemoryProperties(physical_device, &memory_properties);
 
+	//Loop through the memory type count and see if there is a match with both the filter and property flags
 	for (uint32_t i = 0; i < memory_properties.memoryTypeCount; ++i)
 	{
 		if ((filter & (1 << i)) &&
@@ -109,63 +107,58 @@ uint32_t vk_find_memory_type(const VkPhysicalDevice &physical_device, const uint
 
 VkCommandBuffer vk_start_single_command(const VkDevice &device, const VkCommandPool &command_pool)
 {
+	//Command Buffer Allocate Info
 	VkCommandBufferAllocateInfo command_buffer_allocate_info = {};
 	command_buffer_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	command_buffer_allocate_info.commandPool = command_pool;
 	command_buffer_allocate_info.commandBufferCount = 1;
 
+	//Create the command buffer and allocate the command buffer with create info
 	VkCommandBuffer command_buffer;
-	VkResult r = vkAllocateCommandBuffers(device, &command_buffer_allocate_info, &command_buffer);
-	if (r) {
-		LOG("Failed to Allocate Command Buffer! Error Code: " << r);
-	}
+	CHECK_VKRESULT_NO_RETURN(r, vkAllocateCommandBuffers(device, &command_buffer_allocate_info, &command_buffer), "Failed to Allocate Command Buffer!");
 
+	//Start the command buffer's create info
 	VkCommandBufferBeginInfo command_buffer_begin_info = {};
 	command_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-	r = vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info);
-	if (r) {
-		LOG("Failed to Begin Command Buffer! Error Code: " << r)
-	}
+	//Begin the Command Buffer's recording process
+	CHECK_VKRESULT_NO_RETURN(r2, vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info), "Failed to Begin Command Buffer!");
 
+	//Command Buffer has been successfully started!
 	return command_buffer;
 }
 
 bool vk_end_single_command(const VkDevice &device, const VkQueue &graphics_queue, const VkCommandPool &command_pool, VkCommandBuffer &command_buffer)
 {
-	VkResult r = vkEndCommandBuffer(command_buffer);
-	if (r){
-		LOG("Failed to End Command Buffer! Error Code: " << r)
-		return false;
-	}
+	//End the Command Buffer's recording Process
+	CHECK_VKRESULT(r, vkEndCommandBuffer(command_buffer), "Failed to End Command Buffer!");
 
+	//Create the submit info
 	VkSubmitInfo submit_info = {};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submit_info.commandBufferCount = 1;
 	submit_info.pCommandBuffers = &command_buffer;
 
-	r = vkQueueSubmit(graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
-	if (r) {
-		LOG("Failed to Submit to Graphics Queue While Ending Command Buffer! Error Code: " << r)
-			return false;
-	}
-	r = vkQueueWaitIdle(graphics_queue);
-	if (r) {
-		LOG("Failed to Idle Queue While Ending Command Buffer! Error Code: " << r)
-			return false;
-	}
+	//Submit The Commands Recorded into the Queue. Then wait for the Graphics Queue to be idle
+	CHECK_VKRESULT(s, vkQueueSubmit(graphics_queue, 1, &submit_info, VK_NULL_HANDLE), "Failed to Submit to Graphics Queue While Ending Command Buffer!");
+	CHECK_VKRESULT(g, vkQueueWaitIdle(graphics_queue), "Failed to Idle Queue While Ending Command Buffer!");
 
+	//Free the command buffer from memory
 	vkFreeCommandBuffers(device, command_pool, 1, &command_buffer);
+
+	//The Command Buffer has ended successfully!
 	return true;
 }
 
 void vk_transition_image_layout(const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue, const uint32_t &mip_level,
 	const VkImage &image, const VkFormat &format, const VkImageLayout &previous_layout, const VkImageLayout &current_layout)
 {
+	//Start the command buffer
 	VkCommandBuffer command_buffer = vk_start_single_command(device, command_pool);
 
+	//Create the image memory barrier
 	VkImageMemoryBarrier image_memory_barrier = {};
 	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	image_memory_barrier.image = image;
@@ -179,6 +172,7 @@ void vk_transition_image_layout(const VkDevice &device, const VkCommandPool &com
 	image_memory_barrier.subresourceRange.layerCount = 1;
 	image_memory_barrier.subresourceRange.baseArrayLayer = 0;
 
+	//Setup the source and destination stage flags. Will be set based on the Old and New Layout set from outside
 	VkPipelineStageFlags source_stage;
 	VkPipelineStageFlags destrination_stage;
 
@@ -235,23 +229,22 @@ void vk_transition_image_layout(const VkDevice &device, const VkCommandPool &com
 }
 
 bool vk_contains_stencil_format(VkFormat format) {
-	return format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D32_SFLOAT_S8_UINT;
+	return format == VK_FORMAT_D24_UNORM_S8_UINT || format == VK_FORMAT_D32_SFLOAT_S8_UINT; //Stencil Format
 }
 
 bool vk_create_buffer(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkDeviceSize &size, const VkBufferUsageFlags &usage_flags, const VkMemoryPropertyFlags &property_flags, VkBuffer &buffer, VkDeviceMemory &buffer_memory)
 {
+	//Create Buffer Create Info
 	VkBufferCreateInfo buffer_create_info = {};
 	buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	buffer_create_info.size = size;
 	buffer_create_info.usage = usage_flags;
 	buffer_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	VkResult r = vkCreateBuffer(device, &buffer_create_info, nullptr, &buffer);
-	if (r) {
-		LOG("Failed to create the vertex buffer! Error Code: " << r)
-		return false;
-	}
+	//Create the buffer
+	CHECK_VKRESULT(r, vkCreateBuffer(device, &buffer_create_info, nullptr, &buffer), "Failed to create the vertex buffer!");
 
+	//Get the memory required to allocate the buffer
 	VkMemoryRequirements memory_requirement;
 	vkGetBufferMemoryRequirements(device, buffer, &memory_requirement);
 
@@ -260,38 +253,36 @@ bool vk_create_buffer(const VkPhysicalDevice &physical_device, const VkDevice &d
 	memory_allocate_info.allocationSize = memory_requirement.size;
 	memory_allocate_info.memoryTypeIndex = vk_find_memory_type(physical_device, memory_requirement.memoryTypeBits, property_flags);
 
-	r = vkAllocateMemory(device, &memory_allocate_info, nullptr, &buffer_memory);
-	if (r) {
-		LOG("FAILED TO ALLOCATE TO MEMORY! Error Code: " << r)
-		return false;
-	}
+	//Allocate and Bind the buffer
+	CHECK_VKRESULT(a, vkAllocateMemory(device, &memory_allocate_info, nullptr, &buffer_memory), "FAILED TO ALLOCATE TO MEMORY!");
+	CHECK_VKRESULT(b, vkBindBufferMemory(device, buffer, buffer_memory, 0), "Failed to Bind Buffer Memory!");
 
-	r = vkBindBufferMemory(device, buffer, buffer_memory, 0);
-	if (r) {
-		LOG("Failed to Bind Buffer Memory! Error Code: " << r)
-		return false;
-	}
-
+	//The buffer has been successfully created!
 	return true;
 }
 
 void vk_copy_buffer(const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue, const VkBuffer &source_buffer, const VkBuffer &destination_buffer, const VkDeviceSize &device_size)
 {
+	//Start the command buffer
 	VkCommandBuffer command_buffer = vk_start_single_command(device, command_pool);
 
+	//Copy the buffer sent through
 	VkBufferCopy copy_buffer = {};
 	copy_buffer.srcOffset = 0;
 	copy_buffer.dstOffset = 0;
 	copy_buffer.size = device_size;
 	vkCmdCopyBuffer(command_buffer, source_buffer, destination_buffer, 1, &copy_buffer);
 
+	//End the command buffer
 	vk_end_single_command(device, graphics_queue, command_pool, command_buffer);
 }
 
 void vk_copy_buffer_to_image(const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue, const VkBuffer &buffer, const VkImage &image, const VkExtent3D &extent)
 {
+	//Start Command Buffer
 	VkCommandBuffer command_buffer = vk_start_single_command(device, command_pool);
 
+	//Setup The Buffer Image Copy
 	VkBufferImageCopy buffer_image_copy = {};
 	buffer_image_copy.bufferOffset = 0;
 	buffer_image_copy.bufferRowLength = 0;
@@ -303,22 +294,27 @@ void vk_copy_buffer_to_image(const VkDevice &device, const VkCommandPool &comman
 	buffer_image_copy.imageOffset = { 0,0,0 };
 	buffer_image_copy.imageExtent = extent;
 
+	//Send Command to Copy Buffer to Image
 	vkCmdCopyBufferToImage(command_buffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &buffer_image_copy);
 
+	//End the Command buffer
 	vk_end_single_command(device, graphics_queue, command_pool, command_buffer);
 }
 
 VkFormat vk_get_depth_format(const VkPhysicalDevice &physical_device)
 {
+	//Set the Depth View Formats for Depth View Support
 	std::vector<VkFormat> formats{
 	VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT
 	};
 
+	//Return if the format found was supported
 	return vk_find_supported_formats(physical_device, formats, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 
 VkFormat vk_find_supported_formats(const VkPhysicalDevice &physical_device, const std::vector<VkFormat> &formats, const VkImageTiling &tiling, const VkFormatFeatureFlags &format_features_flags)
 {
+	//Loop through all the device formats and find the proper format requested
 	for (uint32_t i = 0; i < formats.size(); ++i)
 	{
 		VkFormatProperties format_properties;
@@ -334,11 +330,9 @@ VkFormat vk_find_supported_formats(const VkPhysicalDevice &physical_device, cons
 		{
 			return formats[i];
 		}
-		else
-		{
-			LOG("Failed to find a supported format! Sending back VK_FORMAT_UNDEFINED");
-		}
 	}
 
+	//Failed to find a format! Send Undefined
+	LOG("Failed to find a supported format! Sending back VK_FORMAT_UNDEFINED");
 	return VK_FORMAT_UNDEFINED;
 }
