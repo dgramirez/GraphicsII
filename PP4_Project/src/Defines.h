@@ -50,6 +50,7 @@
 
 #define MAX_UINT32	0xFFFFFFFF
 #define MAX_UINT64	0xFFFFFFFFFFFFFFFF
+#define CAST(type,variable) static_cast<type>(variable)
 
 #define RAND_NORMAL glm::vec3(rand()/float(RAND_MAX),rand()/float(RAND_MAX),rand()/float(RAND_MAX))
 
@@ -61,6 +62,7 @@
 #define V_COLOR_CYAN	{0.0f, 1.0f, 1.0f, 1.0f}
 #define V_COLOR_YELLOW	{1.0f, 1.0f, 0.0f, 1.0f}
 #define V_COLOR_WHITE	{1.0f, 1.0f, 1.0f, 1.0f}
+
 
 
 #endif // #ifndef DEFINES_H

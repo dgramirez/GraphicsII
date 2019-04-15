@@ -28,12 +28,12 @@ bool vk_create_instance(const char *title, VkInstance &instance)
 
 	//Application's Create Info [Part 2: Extensions]
 	std::vector<const char*> extensions = vk_get_required_extensions();
-	create_info.enabledExtensionCount = (uint32_t)extensions.size();
+	create_info.enabledExtensionCount = CAST(uint32_t,extensions.size());
 	create_info.ppEnabledExtensionNames = extensions.data();
 
 	//Application's Create Info [Part 3: Validation Layer Check]
 	if (VkObj_ValidationLayer::validation_layers_enabled) {
-		create_info.enabledLayerCount = (uint32_t)validation_layers.size();
+		create_info.enabledLayerCount = CAST(uint32_t,validation_layers.size());
 		create_info.ppEnabledLayerNames = validation_layers.data();
 	}
 	else

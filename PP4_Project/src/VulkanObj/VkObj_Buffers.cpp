@@ -12,7 +12,7 @@ bool vk_create_vertex_buffer(const VkPhysicalDevice &physical_device, const VkDe
 
 	void* data;
 	vkMapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data);
-	memcpy(data, object_list[0].vertices.data(), (uint32_t)buffer_size);
+	memcpy(data, object_list[0].vertices.data(), CAST(uint32_t, buffer_size));
 	vkUnmapMemory(device, staging_buffer_memory);
 
 	vk_create_buffer(physical_device, device, buffer_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -38,7 +38,7 @@ bool vk_create_index_buffer(const VkPhysicalDevice &physical_device, const VkDev
 
 	void* data;
 	vkMapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data);
-	memcpy(data, object_list[0].indices.data(), (uint32_t)buffer_size);
+	memcpy(data, object_list[0].indices.data(), CAST(uint32_t, buffer_size));
 	vkUnmapMemory(device, staging_buffer_memory);
 
 	vk_create_buffer(physical_device, device, buffer_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -114,7 +114,7 @@ bool vk_create_descriptor_set_layout(const VkDevice &device, VkDescriptorSetLayo
 	std::array<VkDescriptorSetLayoutBinding, 2> bindings = { mvp_layout_binding, sampler_layout_binding };
 	VkDescriptorSetLayoutCreateInfo create_info = {};
 	create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	create_info.bindingCount = (uint32_t)bindings.size();
+	create_info.bindingCount = CAST(uint32_t, bindings.size());
 	create_info.pBindings = bindings.data();
 
 	CHECK_VKRESULT(a, vkCreateDescriptorSetLayout(device, &create_info, nullptr, &descriptor_set_layout), "Failed to create Descriptor Set Layout!");
@@ -126,15 +126,15 @@ bool vk_create_descriptor_pool(const VkDevice &device, const std::vector<VkImage
 {
 	std::array<VkDescriptorPoolSize, 2> descriptor_pool_size = {};
 	descriptor_pool_size[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	descriptor_pool_size[0].descriptorCount = (uint32_t)swapchain_images.size();
+	descriptor_pool_size[0].descriptorCount = CAST(uint32_t, swapchain_images.size());
 	descriptor_pool_size[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptor_pool_size[1].descriptorCount = (uint32_t)swapchain_images.size();
+	descriptor_pool_size[1].descriptorCount = CAST(uint32_t, swapchain_images.size());
 
 	VkDescriptorPoolCreateInfo create_info = {};
 	create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	create_info.poolSizeCount = (uint32_t)descriptor_pool_size.size();
+	create_info.poolSizeCount = CAST(uint32_t, descriptor_pool_size.size());
 	create_info.pPoolSizes = descriptor_pool_size.data();
-	create_info.maxSets = (uint32_t)swapchain_images.size();
+	create_info.maxSets = CAST(uint32_t, swapchain_images.size());
 
 	CHECK_VKRESULT(r, vkCreateDescriptorPool(device, &create_info, nullptr, &descriptor_pool), "Failed to create a Desriptor Pool! Error Code: ");
 
@@ -149,7 +149,7 @@ bool vk_create_descriptor_sets(const VkDevice &device, const std::vector<VkImage
 
 	VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {};
 	descriptor_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	descriptor_set_allocate_info.descriptorSetCount = (uint32_t)swapchain_images.size();
+	descriptor_set_allocate_info.descriptorSetCount = CAST(uint32_t, swapchain_images.size());
 	descriptor_set_allocate_info.descriptorPool = descriptor_pool;
 	descriptor_set_allocate_info.pSetLayouts = descriptor_set_layout_vector.data();
 
@@ -190,7 +190,7 @@ bool vk_create_descriptor_sets(const VkDevice &device, const std::vector<VkImage
 		write_descriptor_set[1].pImageInfo = &descriptor_image_info;
 		write_descriptor_set[1].pTexelBufferView = nullptr;
 
-		vkUpdateDescriptorSets(device, (uint32_t)write_descriptor_set.size(), write_descriptor_set.data(), 0, nullptr);
+		vkUpdateDescriptorSets(device, CAST(uint32_t, write_descriptor_set.size()), write_descriptor_set.data(), 0, nullptr);
 	}
 
 	return true;

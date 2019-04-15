@@ -64,7 +64,7 @@ bool vk_create_render_pass(const VkPhysicalDevice &physical_device, const VkDevi
 	std::array<VkAttachmentDescription, 3> attachments = { color_attachment_description, depth_attachment_description, color_attachment_resolve };
 	VkRenderPassCreateInfo render_pass_create_info = {};
 	render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	render_pass_create_info.attachmentCount = (uint32_t)attachments.size();
+	render_pass_create_info.attachmentCount = CAST(uint32_t, attachments.size());
 	render_pass_create_info.pAttachments = attachments.data();
 	render_pass_create_info.subpassCount = 1;
 	render_pass_create_info.pSubpasses = &subpass_description;
@@ -127,7 +127,7 @@ bool vk_create_graphics_pipeline(const VkDevice &device, const VkExtent2D &swapc
 	input_vertex_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 	input_vertex_info.vertexBindingDescriptionCount = 1;
 	input_vertex_info.pVertexBindingDescriptions = &vertex_binding_description;
-	input_vertex_info.vertexAttributeDescriptionCount = (uint32_t)vertex_attribute_description.size();
+	input_vertex_info.vertexAttributeDescriptionCount = CAST(uint32_t, vertex_attribute_description.size());
 	input_vertex_info.pVertexAttributeDescriptions = vertex_attribute_description.data();
 
 #pragma endregion

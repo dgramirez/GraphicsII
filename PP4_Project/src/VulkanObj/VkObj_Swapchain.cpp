@@ -62,7 +62,7 @@ bool vk_create_swapchain_image_view(const VkDevice &device, const std::vector<Vk
 {
 	//Create Info for Image View
 	swapchain_image_view.resize(swapchain_image.size());
-	for (uint32_t i = 0; i < (uint32_t)swapchain_image.size(); ++i)
+	for (size_t i = 0; i < swapchain_image.size(); ++i)
 		swapchain_image_view[i] = vk_create_image_view(device, swapchain_image[i], format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 
 	//Swapchain Image View has been created successfully
@@ -88,7 +88,7 @@ bool vk_create_swapchain_frame_buffer(const VkDevice &device, const VkRenderPass
 		VkFramebufferCreateInfo frame_buffer_create_info = {};
 		frame_buffer_create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		frame_buffer_create_info.renderPass = render_pass;
-		frame_buffer_create_info.attachmentCount = (uint32_t)image_attachments.size();
+		frame_buffer_create_info.attachmentCount = CAST(uint32_t, image_attachments.size());
 		frame_buffer_create_info.pAttachments = image_attachments.data();
 		frame_buffer_create_info.width = swapchain_extent.width;
 		frame_buffer_create_info.height = swapchain_extent.height;

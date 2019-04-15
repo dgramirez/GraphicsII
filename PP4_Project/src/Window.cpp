@@ -23,7 +23,7 @@ void Window::run()
 
 void Window::setup_object_list(const std::vector<Object3D>& initial_objects)
 {
-	for (uint32_t i = 0; i < (uint32_t)initial_objects.size(); ++i)
+	for (uint32_t i = 0; i < CAST(uint32_t, initial_objects.size()); ++i)
 		Vobj->add_to_object_list(initial_objects[i]);
 }
 

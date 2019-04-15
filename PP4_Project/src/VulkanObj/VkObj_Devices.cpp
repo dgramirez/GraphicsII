@@ -61,10 +61,10 @@ bool vk_create_logical_device(const VkPhysicalDevice& physical_device, const VkS
 	VkDeviceCreateInfo create_info = {};
 	create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	create_info.pQueueCreateInfos = queue_create_info_array.data();
-	create_info.queueCreateInfoCount = (uint32_t)queue_create_info_array.size();
+	create_info.queueCreateInfoCount = CAST(uint32_t, queue_create_info_array.size());
 	create_info.pEnabledFeatures = &device_features;
 
-	create_info.enabledExtensionCount = (uint32_t)device_extensions.size();
+	create_info.enabledExtensionCount = CAST(uint32_t, device_extensions.size());
 	create_info.ppEnabledExtensionNames = device_extensions.data();
 
 	//Create the Surface (With Results) [VK_SUCCESS = 0]

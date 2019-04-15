@@ -130,7 +130,7 @@ void VulkanObj::CleanupSwapchain()
 		vkDestroyFramebuffer(prv_Devices.logical, prv_Swapchain.frame_buffers[i], nullptr);
 
 
-	vkFreeCommandBuffers(prv_Devices.logical, prv_Command.command_pool, (uint32_t)prv_Command.command_buffers.size(), prv_Command.command_buffers.data());
+	vkFreeCommandBuffers(prv_Devices.logical, prv_Command.command_pool, CAST(uint32_t, prv_Command.command_buffers.size()), prv_Command.command_buffers.data());
 
 	if (prv_Buffers.descriptor_pool)							vkDestroyDescriptorPool(prv_Devices.logical, prv_Buffers.descriptor_pool, nullptr);
 	if (prv_RenderGraphicsPipeline.graphics_pipeline)			vkDestroyPipeline(prv_Devices.logical, prv_RenderGraphicsPipeline.graphics_pipeline, nullptr);

@@ -66,7 +66,7 @@ VkObj_MemoryPool::VkObj_MemoryPool(const uint32_t &id, const uint32_t &memory_ty
 	
 	//Needs to be looked at, will fail! Needs to "Find Suitable Memory Type Index" for the pool
 	//Note: VkObj_Buffers is a good reference point.
-	prv_MemoryTypeIndex = 0;
+	prv_MemoryTypeIndex = 0; //vk_find_memory_type
 }
 
 bool VkObj_MemoryPool::init()
@@ -79,5 +79,6 @@ bool VkObj_MemoryPool::init()
 	allocate_info.allocationSize = prv_Size;
 	allocate_info.memoryTypeIndex = prv_MemoryTypeIndex;
 
+	CHECK_VKRESULT( vkAllocateMemory(device, prv_Allocated, nullptr, ))
 
 }

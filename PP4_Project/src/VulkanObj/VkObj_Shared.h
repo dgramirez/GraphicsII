@@ -28,8 +28,6 @@ struct VkObj_ValidationLayer
 	VkDebugUtilsMessengerEXT console;
 };
 
-void vk_set_object_list(std::vector<Object3D> &object_list);
-
 QueueFamilyIndices vk_find_queue_family(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface);
 SwapChainSupportDetails vk_query_swapchain_support(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface);
 VkImageView vk_create_image_view(const VkDevice &device, const VkImage &image, const VkFormat &format, const VkImageAspectFlags &image_aspect_flags, const uint32_t &mip_level);

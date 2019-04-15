@@ -32,7 +32,7 @@ bool vk_create_command_buffer(const VkDevice &device, const VkCommandPool &comma
 	command_buffer_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	command_buffer_allocate_info.commandPool = command_pool;
 	command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	command_buffer_allocate_info.commandBufferCount = (uint32_t)command_buffers.size();
+	command_buffer_allocate_info.commandBufferCount = CAST(uint32_t, command_buffers.size());
 
 	//Allocate Command Buffer
 	CHECK_VKRESULT(r, vkAllocateCommandBuffers(device, &command_buffer_allocate_info, command_buffers.data()), "Failed to Allocate Command Buffer!");
@@ -62,7 +62,7 @@ bool vk_create_command_buffer(const VkDevice &device, const VkCommandPool &comma
 		clear_color[0] = { 0.0f,0.0f,0.0f,1.0f };
 		clear_color[1] = { 1.0f, 0.0f };
 
-		render_pass_begin_info.clearValueCount = (uint32_t)clear_color.size();
+		render_pass_begin_info.clearValueCount = CAST(uint32_t, clear_color.size());
 		render_pass_begin_info.pClearValues = clear_color.data();
 
 		/*
@@ -78,7 +78,7 @@ bool vk_create_command_buffer(const VkDevice &device, const VkCommandPool &comma
 
 		vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &descriptor_sets[i], 0, nullptr);
 
-		vkCmdDrawIndexed(command_buffers[i], (uint32_t)object_list[0].indices.size(), 1, 0, 0, 0);
+		vkCmdDrawIndexed(command_buffers[i], CAST(uint32_t, object_list[0].indices.size()), 1, 0, 0, 0);
 		vkCmdEndRenderPass(command_buffers[i]);
 		/*
 		 * Ending of the Drawing Stuff Entering Command Buffer {NOT THE ACTUAL DRAW!}

@@ -124,7 +124,7 @@ void Object3D::Compactify(const std::vector<Vertex>& vertex2)
 {
 	/*Compactify*/
 	const float epsilon = 0.0001f;
-	int indices_count = (uint32_t)prv_Indices.size();
+	size_t indices_count = prv_Indices.size();
 	
 	prv_Indices.clear();
 	prv_Vertices.clear();
@@ -135,7 +135,7 @@ void Object3D::Compactify(const std::vector<Vertex>& vertex2)
 		{
 			if (j == prv_Vertices.size())
 			{
-				prv_Indices.push_back((uint32_t)prv_Vertices.size());
+				prv_Indices.push_back(CAST(uint32_t, prv_Vertices.size()));
 				prv_Vertices.push_back(Vertex(vertex2[i]));
 				break;
 			}
@@ -317,7 +317,7 @@ void Object3D::GetTextureFilename(FbxNode* child_node, const char* return_value)
  					 */
  
  					FbxString str = texture->GetRelativeFileName();
- 					uint32_t length = (uint32_t)str.GetLen();
+ 					uint32_t length = CAST(uint32_t, str.GetLen());
  					wchar_t* filename = new wchar_t[length + 1];
  					memset(filename,0, (length + 1) * sizeof(wchar_t));
  
@@ -332,8 +332,8 @@ void Object3D::GetTextureFilename(FbxNode* child_node, const char* return_value)
 //  					filename[2] = 'd';
 //  					filename[3] = 'd';
  
- 					const uint32_t inverse = (uint32_t)(str.GetLen() - length - 1);
- 					const uint32_t invdiv2 = (uint32_t)ceil(inverse * 0.5f);
+ 					const uint32_t inverse = CAST(uint32_t, (str.GetLen() - length - 1));
+ 					const uint32_t invdiv2 = CAST(uint32_t, ceil(inverse * 0.5f));
  
  					for (uint32_t i = 0; i < invdiv2; ++i)
  					{
