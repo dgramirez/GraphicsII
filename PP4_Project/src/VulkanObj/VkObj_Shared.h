@@ -5,7 +5,7 @@
 #include "../Object.h"
 
 struct QueueFamilyIndices {
-	std::optional<uint32_t> graphics;	//Graphics Queue
+	std::optional<uint32_t> graphics;		//Graphics Queue
 	std::optional<uint32_t> present;		//Present Queue
 
 	bool IsComplete() { return graphics.has_value() && present.has_value(); }
@@ -15,17 +15,6 @@ struct SwapChainSupportDetails {
 	VkSurfaceCapabilitiesKHR capabilities;
 	std::vector<VkSurfaceFormatKHR> formats;
 	std::vector<VkPresentModeKHR> presentModes;
-};
-
-struct VkObj_ValidationLayer
-{
-#ifdef NDEBUG
-	static const bool validation_layers_enabled = false;
-#else
-	static const bool validation_layers_enabled = true;
-#endif
-	
-	VkDebugUtilsMessengerEXT console;
 };
 
 QueueFamilyIndices vk_find_queue_family(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface);
@@ -46,5 +35,11 @@ void vk_copy_buffer_to_image(const VkDevice &device, const VkCommandPool &comman
 
 VkFormat vk_get_depth_format(const VkPhysicalDevice &physical_device);
 VkFormat vk_find_supported_formats(const VkPhysicalDevice &physical_device, const std::vector<VkFormat> &formats, const VkImageTiling &tiling, const VkFormatFeatureFlags &format_features_flags);
+VkMemoryPropertyFlags vk_find_memory_type_index(const VkPhysicalDevice &physical_device, const uint32_t &memory_type_bits, const uint32_t &usage);
+
+bool vk_check_page(const VkDeviceSize &a_memory_offset, const VkDeviceSize &b_memory_offset, const VkDeviceSize &a_size, const VkDeviceSize &buffer_image_granularity, const uint32_t &operation);
+bool vk_granularity_conflict(const uint32_t &type_1, const uint32_t &type_2);
+
+VkSampleCountFlagBits get_highest_msaa_sample_count(const VkPhysicalDevice &physical_device);
 
 #endif

@@ -10,6 +10,8 @@
 #include "VulkanObj/VkObj_Buffers.h"
 #include "VulkanObj/VkObj_Command.h"
 #include "VulkanObj/VkObj_SemaphoresAndFences.h"
+#include "VulkanObj/VkObj_Allocator.h"
+#include "VulkanObj/VkObj_StagingBuffer.h"
 
 class VulkanObj
 {
@@ -26,15 +28,16 @@ public:
 	void add_to_object_list(const Object3D& object);
 
 private:
-	VkObj_WindowSetup prv_Window;
-	VkObj_ValidationLayer prv_ValidationLayer;
-	VkObj_Devices prv_Devices;
+	VkObj_WindowProperties prv_Window;
+	VkObj_DeviceProperties prv_Devices = VkObj_DeviceProperties(prv_Window.instance, prv_Window.surface);
 	VkObj_Swapchain prv_Swapchain;
 	VkObj_RenderGraphicsPipeline prv_RenderGraphicsPipeline;
 	VkObj_Texture prv_Texture;
 	VkObj_Buffers prv_Buffers;
 	VkObj_Commands prv_Command;
 	VkObj_SemaphoresAndFences prv_SemaphoreAndFences;
+	VkObj_Allocator prv_Allocator = VkObj_Allocator(prv_Devices.physical,prv_Devices.logical);
+	VkObj_StagingManager prv_StagingManager = VkObj_StagingManager(prv_Window.surface, prv_Devices.physical, prv_Devices.logical, prv_Devices.q_graphics);
 
 	uint32_t prv_Frame = 0;
 	std::vector<Object3D> prv_ObjectList;

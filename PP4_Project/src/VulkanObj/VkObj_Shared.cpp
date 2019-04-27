@@ -336,3 +336,116 @@ VkFormat vk_find_supported_formats(const VkPhysicalDevice &physical_device, cons
 	LOG("Failed to find a supported format! Sending back VK_FORMAT_UNDEFINED");
 	return VK_FORMAT_UNDEFINED;
 }
+
+VkMemoryPropertyFlags vk_find_memory_type_index(const VkPhysicalDevice &physical_device, const uint32_t &memory_type_bits, const uint32_t &usage)
+{
+	VkPhysicalDeviceMemoryProperties pdevice_memory_properties;
+	vkGetPhysicalDeviceMemoryProperties(physical_device, &pdevice_memory_properties);
+
+	//Set the Required and Preferred flags
+	VkMemoryPropertyFlags preferred = 0;
+	VkMemoryPropertyFlags required = 0;
+
+	if (usage == VKDEFINE_MEMORY_USAGE_GPU_ONLY)
+		preferred = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	else if (usage == VKDEFINE_MEMORY_USAGE_GPU_TO_CPU)
+	{
+		required = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+		preferred = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+	}
+	else if (usage == VKDEFINE_MEMORY_USAGE_CPU_ONLY)
+		required = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+	else if (usage == VKDEFINE_MEMORY_USAGE_CPU_TO_GPU)
+	{
+		required = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+		preferred = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT| VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+	}
+
+	//Search for both required and preferred
+	for (uint32_t i = 0; i < pdevice_memory_properties.memoryTypeCount; ++i)
+	{
+		if (((memory_type_bits >> i) & 1) == 0)
+			continue;
+
+		VkMemoryPropertyFlags memory_property_flags = pdevice_memory_properties.memoryTypes[i].propertyFlags;
+		if ((memory_property_flags & required) != required ||
+			(memory_property_flags & preferred) != preferred)
+			continue;
+
+		return i;
+	}
+
+	//Search only for required
+	for (uint32_t i = 0; i < pdevice_memory_properties.memoryTypeCount; ++i)
+	{
+		if (((memory_type_bits >> i) & 1) == 0)
+			continue;
+
+		VkMemoryPropertyFlags memory_property_flags = pdevice_memory_properties.memoryTypes[i].propertyFlags;
+		if ((memory_property_flags & required) != required)
+			continue;
+
+		return i;
+	}
+
+	return MAX_UINT32;
+}
+
+bool vk_check_page(const VkDeviceSize &a_memory_offset, const VkDeviceSize &b_memory_offset, const VkDeviceSize &a_size, const VkDeviceSize &buffer_image_granularity, const uint32_t &operation)
+{
+	//In Vulkan 1.0.107 Specification, Underneath the "vkBindImageMemory" contains information about Buffer-Image Granularity.
+	//This is based on the function provided
+	if ((a_memory_offset + a_size <= b_memory_offset) && a_size > 0 && buffer_image_granularity > 0) {
+		LOG("Check Resource Page: There is a good possibilty that A overlaps B, and thats not good.");
+	}
+
+	VkDeviceSize big_negate = ~(buffer_image_granularity - 1);
+	VkDeviceSize a_end = a_memory_offset + a_size - 1;
+	VkDeviceSize a_end_page = a_end & big_negate;
+	VkDeviceSize b_start = b_memory_offset;
+	VkDeviceSize b_start_page = b_start & big_negate;
+
+	if (operation  == VKDEFINE_OPERATION_TYPE_LESS)
+		return a_end_page < b_start_page;
+	else if (operation == VKDEFINE_OPERATION_TYPE_EQUAL)
+		return a_end_page == b_start_page;
+	else if (operation == VKDEFINE_OPERATION_TYPE_GREATER)
+		return a_end_page > b_start_page;
+}
+
+bool vk_granularity_conflict(const uint32_t &type_1, const uint32_t &type_2)
+{
+	uint32_t t1 = std::max(type_1, type_2);
+	uint32_t t2 = std::min(type_1, type_2);
+
+	if (t1 == VKDEFINE_ALLOCATION_TYPE_FREE)
+		return false;
+	if (t1 == VKDEFINE_ALLOCATION_TYPE_BUFFER)
+		return t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL;
+	if (t1 == VKDEFINE_ALLOCATION_TYPE_IMAGE)
+		return t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_LINEAR || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL;
+	if (t1 == VKDEFINE_ALLOCATION_TYPE_IMAGE_LINEAR)
+		return t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL;
+	if (t1 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL)
+		return false;
+
+	return true;
+}
+
+VkSampleCountFlagBits get_highest_msaa_sample_count(const VkPhysicalDevice &physical_device)
+{
+	VkPhysicalDeviceProperties physical_device_properties;
+	vkGetPhysicalDeviceProperties(physical_device, &physical_device_properties);
+
+	VkSampleCountFlags flags = std::min(physical_device_properties.limits.framebufferColorSampleCounts,
+		physical_device_properties.limits.framebufferDepthSampleCounts);
+
+	if (flags & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
+	if (flags & VK_SAMPLE_COUNT_32_BIT) { return VK_SAMPLE_COUNT_32_BIT; }
+	if (flags & VK_SAMPLE_COUNT_16_BIT) { return VK_SAMPLE_COUNT_16_BIT; }
+	if (flags & VK_SAMPLE_COUNT_8_BIT) { return VK_SAMPLE_COUNT_8_BIT; }
+	if (flags & VK_SAMPLE_COUNT_4_BIT) { return VK_SAMPLE_COUNT_4_BIT; }
+	if (flags & VK_SAMPLE_COUNT_2_BIT) { return VK_SAMPLE_COUNT_2_BIT; }
+
+	return VK_SAMPLE_COUNT_1_BIT;
+}

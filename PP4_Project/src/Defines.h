@@ -31,7 +31,7 @@
 
 #pragma endregion This contains defines and includes with GLFW and Vulkan
 
-#define MAX_FRAMES_FLIGHT 2
+#define MAX_FRAMES 2
 
 #include <optional>
 #include <set>
@@ -63,6 +63,37 @@
 #define V_COLOR_YELLOW	{1.0f, 1.0f, 0.0f, 1.0f}
 #define V_COLOR_WHITE	{1.0f, 1.0f, 1.0f, 1.0f}
 
+#define VKDEFINE_HOST_VISIBLE_MEMORY 64
+#define VKDEFINE_DEVICE_LOCAL_MEMORY 128
+#define VKDEFINE_GPU_UPLOAD_BUFFER_SIZE 64
 
+#define VKDEFINE_MEMORY_USAGE_GPU_ONLY 0
+#define VKDEFINE_MEMORY_USAGE_GPU_TO_CPU 1
+#define VKDEFINE_MEMORY_USAGE_CPU_ONLY 2
+#define VKDEFINE_MEMORY_USAGE_CPU_TO_GPU 3
+
+#define VKDEFINE_ALLOCATION_TYPE_FREE 0
+#define VKDEFINE_ALLOCATION_TYPE_BUFFER 1
+#define VKDEFINE_ALLOCATION_TYPE_IMAGE 2
+#define VKDEFINE_ALLOCATION_TYPE_IMAGE_LINEAR 3
+#define VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL 4
+
+#define VKDEFINE_OPERATION_TYPE_LESS -1
+#define VKDEFINE_OPERATION_TYPE_EQUAL 0
+#define VKDEFINE_OPERATION_TYPE_GREATER 1
+
+#define VKDEFINE_RENDERCOMMAND_NOP 0
+#define VKDEFINE_RENDERCOMMAND_DRAW_VIEW_3D 1
+#define VKDEFINE_RENDERCOMMAND_DRAW_VIEW_GUI 2
+#define VKDEFINE_RENDERCOMMAND_COPY_RENDER 3
+#define VKDEFINE_RENDERCOMMAND_POST_PROCESS 4
+
+//This is sourced in the Linux-Kernel for byte alignment.
+#define __ALIGN_MASK(x,mask)    (((x)+(mask))&~(mask))
+//Modified to work with 32-bit unsigned integers, as "Typeof(x)" doesn't work [and 64-bit unsigned integers]
+#define ALIGN_UINT32(x,a)       __ALIGN_MASK(x,(unsigned int)(a)-1)
+#define ALIGN_UINT64(x,a)		__ALIGN_MASK(x, (unsigned long long)(a)-1)
+
+#define MB_TO_BYTE(x) x * 1048576
 
 #endif // #ifndef DEFINES_H

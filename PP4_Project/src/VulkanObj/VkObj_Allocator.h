@@ -3,39 +3,36 @@
 
 #include "VkObj_Shared.h"
 
-struct VkObj_Allocation {
-	uint32_t		pool_id;
-	uint32_t		block_id;
-	VkDeviceMemory	device_memory;
-	VkDeviceSize	offset;
-	VkDeviceSize	size;
-	unsigned char*	data;
-};
+struct VkObj_MemoryBlock;
 
 class VkObj_MemoryPool {
 	friend class VkObj_Allocator;
 public:
-	VkObj_MemoryPool(const uint32_t &id, const uint32_t &memory_type_bits, const VkDeviceSize &size, 
-		const bool &host_visible);
+	VkObj_MemoryPool(VkPhysicalDevice &physical_device, VkDevice &device, const uint32_t &memory_type_index, const VkDeviceSize &size, const uint32_t &vkdefine_allocation_type);
 	~VkObj_MemoryPool();
 
 	bool init();
 	void shutdown();
 
-	bool allocate(const uint32_t &size, const uint32_t &align, VkObj_Allocation &allocation);
-	void free(const VkObj_Allocation &allocation);
+	bool allocate(const uint32_t &size, const uint32_t &align, const VkDeviceSize &granularity, const uint32_t &allocation_type, VkObj_MemoryBlock &allocation);
+	void free(const VkObj_MemoryBlock &allocation);
 
 private:
 	struct mem_block {
 		uint32_t		 id;
 		VkDeviceSize	 size,  offset;
 		mem_block		*next, *prev;
-		bool			 is_free;
+		uint32_t		 type;
+
+		mem_block(const uint32_t &_id, const VkDeviceSize &_size)
+			: id(_id), size(_size), offset(0), prev(nullptr), next(nullptr), type(VKDEFINE_ALLOCATION_TYPE_FREE) {}
 	};
 
+	VkPhysicalDevice *prv_PhysicalDevice;
+	VkDevice		*prv_Device;
 	mem_block		*prv_Head;
-	uint32_t		 prv_Id, prv_NextId, prv_MemoryTypeIndex;
-	bool			 prv_HostVisible;
+	uint32_t		 prv_NextId, prv_MemoryTypeIndex;
+	uint32_t		 prv_Usage;
 	VkDeviceMemory	 prv_DeviceMemory;
 	VkDeviceSize	 prv_Size, prv_Allocated;
 	unsigned char*	 prv_Data;
@@ -43,26 +40,34 @@ private:
 
 class VkObj_Allocator {
 public:
-	VkObj_Allocator(const VkPhysicalDevice &physical_device);
+	VkObj_Allocator(VkPhysicalDevice &physical_device, VkDevice &device);
 
 	void init();
+	void shutdown();
 	void empty_garbage();
 
-	VkObj_Allocation allocate(const uint32_t &size, const uint32_t &align, const uint32_t &memory_type_bits,
-		const bool &host_visible);
-	void free(const VkObj_Allocation &allocation);
+	VkObj_MemoryBlock allocate(const uint32_t &size, const uint32_t &align, const uint32_t &memory_type_bits, const uint32_t &vkdefine_memory_usage,
+		const uint32_t &vkdefine_allocation_type);
+	void free(const VkObj_MemoryBlock &allocation);
 
 private:
-	VkPhysicalDevice *physical_device;
-	int32_t prv_NextId;
+	VkPhysicalDevice *prv_PhysicalDevice;
+	VkDevice *prv_Device;
+	VkDeviceSize prv_BufferImageGranularity;
 	int32_t prv_GarbageIndex;
 	int32_t prv_DeviceLocalMemory; //In MB
 	int32_t prv_HostVisibleMemory; //In MB
-	std::vector<VkObj_MemoryPool*> prv_MemoryPools;
-	std::vector<VkObj_Allocation> prv_Garbage[MAX_FRAMES_FLIGHT];
+	std::array<std::vector<VkObj_MemoryPool*>, VK_MAX_MEMORY_TYPES> prv_MemoryPools;
+	std::vector<VkObj_MemoryBlock> prv_Garbage[MAX_FRAMES];
+};
 
-	bool Allocate(const uint32_t &size, const uint32_t &align, const uint32_t &memory_type_bits,
-		const bool &need_host_visible, VkObj_Allocation &allocation);
+struct VkObj_MemoryBlock {
+	VkObj_MemoryPool   *pool;
+	uint32_t			id;
+	VkDeviceMemory		device_memory;
+	VkDeviceSize		offset;
+	VkDeviceSize		size;
+	unsigned char*		data;
 };
 
 #endif

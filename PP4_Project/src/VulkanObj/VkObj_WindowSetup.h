@@ -3,17 +3,46 @@
 
 #include "VkObj_Shared.h"
 
-struct VkObj_WindowSetup {
+class VkObj_WindowProperties {
+public:
+	VkObj_WindowProperties();
+	bool init(const char *title);
+	void shutdown();
+
 	VkInstance instance;
 	VkSurfaceKHR surface;
-	GLFWwindow* glfw_window;
+	GLFWwindow* window;
+
+private:
+
+	//Window Related
+	bool CreateInstance(const char* title);
+	bool CreateValidationLayer();
+	bool CreateSurface();
+	std::vector<const char*> GetRequiredExtensions();
+	
+	//Validation Layer Related
+	VkDebugUtilsMessengerEXT validation_layer;
+	bool CheckValidationLayerSupport();
+	static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugCallback(
+		VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
+		VkDebugUtilsMessageTypeFlagsEXT message_type,
+		const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
+		void* user_data
+	);
+
+	VkResult vkCreateDebugUtilsMessengerExt(
+		VkInstance instance,
+		const VkDebugUtilsMessengerCreateInfoEXT* create_info,
+		const VkAllocationCallbacks* allocator,
+		VkDebugUtilsMessengerEXT* debug_messenger
+	);
+
+	void vkDestroyDebugUtilsMessengerExt(
+		VkInstance instance,
+		VkDebugUtilsMessengerEXT debug_messenger,
+		const VkAllocationCallbacks* allocator
+	);
 };
-
-bool vk_create_instance(const char* title, VkInstance& instance);
-
-bool vk_create_surface(const VkInstance& instance, GLFWwindow* window, VkSurfaceKHR& surface);
-
-bool vk_check_validation_layer_support();
-std::vector<const char*> vk_get_required_extensions();
 
 #endif

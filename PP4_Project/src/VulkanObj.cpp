@@ -5,40 +5,59 @@ VulkanObj::~VulkanObj() { cleanup(); }
 
 bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_width, unsigned short win_height)
 {
-	prv_Window.glfw_window = window;
+	prv_Window.window = window;
 	prv_Swapchain.depth = 1;
 
-	CHECK_RESULT(vk_create_instance(title, prv_Window.instance), "Create Instance Has Failed!");
-	CHECK_RESULT(vk_create_validation_layer(prv_Window.instance, prv_ValidationLayer.console), "Create Validation Debugger Has Failed!");
-	CHECK_RESULT(vk_create_surface(prv_Window.instance, window, prv_Window.surface), "Create Surface Has Failed!");
-	CHECK_RESULT(vk_set_physical_device(prv_Window.instance, prv_Window.surface, prv_Devices.physical, 
-		prv_Texture.msaa_sample), "Set Physical Device Has Failed!");
-	CHECK_RESULT(vk_create_logical_device(prv_Devices.physical, prv_Window.surface, prv_Devices.logical, 
-		prv_Devices.q_graphics, prv_Devices.q_present), "Create Logical Device Has Failed!");
+	//Create Instance, Validation Layer, and Surface
+	prv_Window.init(title);
+
+	//Create Physical and Logical Device
+	prv_Devices.init();
+
+	//Create Semaphores
+	CHECK_RESULT(vk_sync_semaphore_and_fences(prv_Devices.logical, prv_SemaphoreAndFences.image_available_semaphores,
+		prv_SemaphoreAndFences.render_finished_semaphores, prv_SemaphoreAndFences.fences), "Create Semaphore Has Failed!");
+
+	//	TODO: LOOK INTO QUERY POOL
+	CHECK_RESULT(vk_create_command_pool(prv_Devices.physical, prv_Window.surface, prv_Devices.logical,
+		prv_Command.command_pool), "Create Command Pool Has Failed!");
+	//	TODO: INVESTIGATE COMMAND BUFFERS MORE
+
+
+//	TODO: START ALLOCATOR AND STAGING MANAGER
+	prv_Allocator.init();
+	prv_StagingManager.init();
+
 	CHECK_RESULT(vk_create_swapchain(prv_Devices.physical, prv_Devices.logical, prv_Window.surface, win_width, win_height,
 		prv_Swapchain.swapchain, prv_Swapchain.images, prv_Swapchain.format, prv_Swapchain.extent2D), "Create Swap Chain Has Failed!");
 	CHECK_RESULT(vk_create_swapchain_image_view(prv_Devices.logical, prv_Swapchain.images, prv_Swapchain.format,
 		prv_Swapchain.views), "Create Image View Has Failed!");
+
+
 	CHECK_RESULT(vk_create_render_pass(prv_Devices.physical, prv_Devices.logical, prv_Swapchain.format,
-		prv_Texture.msaa_sample, prv_RenderGraphicsPipeline.render_pass), "Create Render Pass Has Failed!");
+		prv_Devices.msaa_support, prv_RenderGraphicsPipeline.render_pass), "Create Render Pass Has Failed!");
+	CHECK_RESULT(vk_create_color_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool,
+		prv_Devices.q_graphics, 1, prv_Devices.msaa_support, prv_Swapchain.extent3D, prv_Swapchain.format,
+		prv_Texture.color_image, prv_Texture.color_image_memory, prv_Texture.color_image_view), "Create Color Buffer Has Failed!");
+	CHECK_RESULT(vk_create_depth_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool,
+		prv_Devices.q_graphics, prv_Swapchain.extent3D, prv_Devices.msaa_support, prv_Texture.depth_buffer,
+		prv_Texture.depth_buffer_memory, prv_Texture.depth_buffer_view), "Create Depth Resources Has Failed!");
+
+
+	CHECK_RESULT(vk_create_swapchain_frame_buffer(prv_Devices.logical, prv_RenderGraphicsPipeline.render_pass,
+		prv_Swapchain.views, prv_Swapchain.extent2D, prv_Texture.color_image_view, prv_Texture.depth_buffer_view,
+		prv_Swapchain.frame_buffers), "Create Frame Buffers Has Failed");
+
+
+	//TODO: Continue Tutorial for RenderProgManager
+	//TODO: Continue Tutorial for Vertex Cache
 	CHECK_RESULT(vk_create_descriptor_set_layout(prv_Devices.logical, prv_Buffers.descriptor_set_layout), "Create Descriptor Set Layout Failed!");
 	CHECK_RESULT(vk_create_graphics_pipeline(prv_Devices.logical, prv_Swapchain.extent2D, prv_Buffers.descriptor_set_layout,
-		prv_Texture.msaa_sample, prv_RenderGraphicsPipeline.render_pass, prv_RenderGraphicsPipeline.graphics_pipeline_layout,
+		prv_Devices.msaa_support, prv_RenderGraphicsPipeline.render_pass, prv_RenderGraphicsPipeline.graphics_pipeline_layout,
 		prv_RenderGraphicsPipeline.graphics_pipeline), "Create Graphics Pipeline Has Failed!");
-	CHECK_RESULT(vk_create_command_pool(prv_Devices.physical, prv_Window.surface, prv_Devices.logical, 
-		prv_Command.command_pool), "Create Command Pool Has Failed!");
-	CHECK_RESULT(vk_create_color_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, 
-		prv_Devices.q_graphics, 1, prv_Texture.msaa_sample, prv_Swapchain.extent3D, prv_Swapchain.format, 
-		prv_Texture.color_image, prv_Texture.color_image_memory, prv_Texture.color_image_view), "Create Color Buffer Has Failed!");
-	CHECK_RESULT(vk_create_depth_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, 
-		prv_Devices.q_graphics, prv_Swapchain.extent3D, prv_Texture.msaa_sample, prv_Texture.depth_buffer, 
-		prv_Texture.depth_buffer_memory, prv_Texture.depth_buffer_view), "Create Depth Resources Has Failed!");
-	CHECK_RESULT(vk_create_swapchain_frame_buffer(prv_Devices.logical, prv_RenderGraphicsPipeline.render_pass, 
-		prv_Swapchain.views, prv_Swapchain.extent2D, prv_Texture.color_image_view, prv_Texture.depth_buffer_view, 
-		prv_Swapchain.frame_buffers), "Create Frame Buffers Has Failed");
 	CHECK_RESULT(vk_create_texture_image(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool, 
 		prv_Devices.q_graphics, prv_ObjectList, { prv_ObjectList[0].texture->width,prv_ObjectList[0].texture->height, 1 }, 
-		prv_Texture.msaa_sample, prv_Texture.texture_image, prv_Texture.texture_image_memory), "Create Texture Image Has Failed!");
+		prv_Devices.msaa_support, prv_Texture.texture_image, prv_Texture.texture_image_memory), "Create Texture Image Has Failed!");
 	CHECK_RESULT(vk_create_texture_image_view(prv_Devices.logical, prv_Texture.texture_image, VK_IMAGE_ASPECT_COLOR_BIT, 
 		prv_ObjectList[0].texture->mip_levels, prv_Texture.texture_image_view), "Create Texture Image View Has Failed!");
 	CHECK_RESULT(vk_create_texture_sampler(prv_Devices.logical, prv_Texture.sampler), "Create Texture Image View Has Failed!");
@@ -56,8 +75,6 @@ bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_w
 		prv_RenderGraphicsPipeline.graphics_pipeline_layout, prv_RenderGraphicsPipeline.graphics_pipeline,
 		prv_Swapchain.extent2D, prv_Swapchain.frame_buffers, prv_Buffers.descriptor_sets, prv_Buffers.vertex, 0, 
 		prv_Buffers.index, prv_ObjectList, prv_Command.command_buffers), "Create Command Buffer Has Failed!");
-	CHECK_RESULT(vk_sync_semaphore_and_fences(prv_Devices.logical, prv_SemaphoreAndFences.image_available_semaphores,
-		prv_SemaphoreAndFences.render_finished_semaphores, prv_SemaphoreAndFences.fences), "Create Semaphore Has Failed!");
 
 	return true;
 }
@@ -78,17 +95,17 @@ void VulkanObj::reset_swapchain(unsigned short win_width, unsigned short win_hei
 	CHECK_RESULT_NO_RETURN(vk_create_swapchain_image_view(prv_Devices.logical, prv_Swapchain.images, prv_Swapchain.format,
 		prv_Swapchain.views), "Create Image View Has Failed!");
 	CHECK_RESULT_NO_RETURN(vk_create_render_pass(prv_Devices.physical, prv_Devices.logical, prv_Swapchain.format,
-		prv_Texture.msaa_sample, prv_RenderGraphicsPipeline.render_pass), "Create Render Pass Has Failed!");
+		prv_Devices.msaa_support, prv_RenderGraphicsPipeline.render_pass), "Create Render Pass Has Failed!");
 
 	CHECK_RESULT_NO_RETURN(vk_create_graphics_pipeline(prv_Devices.logical, prv_Swapchain.extent2D, prv_Buffers.descriptor_set_layout,
-		prv_Texture.msaa_sample, prv_RenderGraphicsPipeline.render_pass, prv_RenderGraphicsPipeline.graphics_pipeline_layout,
+		prv_Devices.msaa_support, prv_RenderGraphicsPipeline.render_pass, prv_RenderGraphicsPipeline.graphics_pipeline_layout,
 		prv_RenderGraphicsPipeline.graphics_pipeline), "Create Graphics Pipeline Has Failed!");
 
 	CHECK_RESULT_NO_RETURN(vk_create_color_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool,
-		prv_Devices.q_graphics, 1, prv_Texture.msaa_sample, prv_Swapchain.extent3D, prv_Swapchain.format,
+		prv_Devices.q_graphics, 1, prv_Devices.msaa_support, prv_Swapchain.extent3D, prv_Swapchain.format,
 		prv_Texture.color_image, prv_Texture.color_image_memory, prv_Texture.color_image_view), "Create Color Buffer Has Failed!");
 	CHECK_RESULT_NO_RETURN(vk_create_depth_buffer(prv_Devices.physical, prv_Devices.logical, prv_Command.command_pool,
-		prv_Devices.q_graphics, prv_Swapchain.extent3D, prv_Texture.msaa_sample, prv_Texture.depth_buffer,
+		prv_Devices.q_graphics, prv_Swapchain.extent3D, prv_Devices.msaa_support, prv_Texture.depth_buffer,
 		prv_Texture.depth_buffer_memory, prv_Texture.depth_buffer_view), "Create Depth Resources Has Failed!");
 	CHECK_RESULT_NO_RETURN(vk_create_swapchain_frame_buffer(prv_Devices.logical, prv_RenderGraphicsPipeline.render_pass,
 		prv_Swapchain.views, prv_Swapchain.extent2D, prv_Texture.color_image_view, prv_Texture.depth_buffer_view,
@@ -104,7 +121,6 @@ void VulkanObj::reset_swapchain(unsigned short win_width, unsigned short win_hei
 		prv_RenderGraphicsPipeline.graphics_pipeline_layout, prv_RenderGraphicsPipeline.graphics_pipeline,
 		prv_Swapchain.extent2D, prv_Swapchain.frame_buffers, prv_Buffers.descriptor_sets, prv_Buffers.vertex, 0,
 		prv_Buffers.index, prv_ObjectList, prv_Command.command_buffers), "Create Command Buffer Has Failed!");
-
 }
 
 void VulkanObj::setup_object_list(uint32_t size)
@@ -153,7 +169,10 @@ void VulkanObj::cleanup()
 {
 	CleanupSwapchain();
 
-	for (unsigned int i = 0; i < MAX_FRAMES_FLIGHT; ++i)
+	prv_Allocator.shutdown();
+	prv_StagingManager.shutdown();
+
+	for (unsigned int i = 0; i < MAX_FRAMES; ++i)
 	{
 		if (prv_SemaphoreAndFences.render_finished_semaphores[i])	vkDestroySemaphore(prv_Devices.logical, prv_SemaphoreAndFences.render_finished_semaphores[i], nullptr);
 		if (prv_SemaphoreAndFences.image_available_semaphores[i])	vkDestroySemaphore(prv_Devices.logical, prv_SemaphoreAndFences.image_available_semaphores[i], nullptr);
@@ -174,11 +193,8 @@ void VulkanObj::cleanup()
 	if (prv_Buffers.vertex_memory)			vkFreeMemory(prv_Devices.logical, prv_Buffers.vertex_memory, nullptr);
 
 	if (prv_Command.command_pool)			vkDestroyCommandPool(prv_Devices.logical, prv_Command.command_pool, nullptr);
-	if (prv_Devices.logical)				vkDestroyDevice(prv_Devices.logical, nullptr);
-	if (prv_Window.surface)					vkDestroySurfaceKHR(prv_Window.instance, prv_Window.surface, nullptr);
-	if (VkObj_ValidationLayer::validation_layers_enabled)	
-											vk_destroy_debug_utils_messenger_ext(prv_Window.instance, prv_ValidationLayer.console, nullptr);
-	if (prv_Window.instance)				vkDestroyInstance(prv_Window.instance, nullptr);
+	prv_Devices.shutdown();
+	prv_Window.shutdown();
 }
 
 void VulkanObj::draw_frames()
@@ -242,5 +258,5 @@ void VulkanObj::draw_frames()
 		LOG("Present Queue is Suboptimal!")
 	}
 
-	prv_Frame = (prv_Frame + 1) % MAX_FRAMES_FLIGHT;
+	prv_Frame = (prv_Frame + 1) % MAX_FRAMES;
 }

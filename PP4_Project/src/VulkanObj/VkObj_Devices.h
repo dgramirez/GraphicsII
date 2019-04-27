@@ -3,23 +3,50 @@
 
 #include "VkObj_Shared.h"
 
-struct VkObj_Devices
+class VkObj_DeviceProperties
 {
+public:
+	VkObj_DeviceProperties(VkInstance &instance, VkSurfaceKHR &surface);
+	bool init();
+	void shutdown();
+
+	const uint32_t get_device_count() { return prv_DeviceCount; }
+	__declspec(property(get = get_device_count)) uint32_t device_count;
+	const uint32_t get_device_index() { return prv_DeviceIndex; }
+	__declspec(property(get = get_device_index)) uint32_t device_index;
+
 	//Queue Variables
 	VkQueue q_graphics;
 	VkQueue q_present;
+	QueueFamilyIndices q_family;
 
-	//Device Variables
+	//Physical Device Stuff
 	VkPhysicalDevice physical;
 	VkDevice logical;
+
+	//Supports
+	VkSampleCountFlagBits msaa_support;
+
+private:
+	//PreRequisites
+	VkInstance *pInstance;
+	VkSurfaceKHR *pSurface;
+
+	//Information
+	uint32_t prv_DeviceCount;
+	uint32_t prv_DeviceIndex;
+	std::vector<VkPhysicalDevice> prv_PhysicalDeviceList;
+	std::vector<VkPhysicalDeviceProperties> prv_DeviceProperties;
+	std::vector<VkPhysicalDeviceFeatures> prv_DeviceFeatures;
+	std::vector<VkFormatProperties> prv_DeviceFormatProperties;
+	std::vector<QueueFamilyIndices> prv_DeviceQFamilies;
+	std::vector<std::vector<VkExtensionProperties>> prv_DeviceExtensions;
+
+	bool SetPhysicalDevice();
+	bool CreateLogicalDevice();
+	bool DeviceIsCompatible(const uint32_t &index);
+	bool DeviceExtensionSupported(const uint32_t &index);
+	void GetDeviceInformation(const uint32_t &index);
 };
-
-bool vk_set_physical_device(const VkInstance& instance, const VkSurfaceKHR& surface, VkPhysicalDevice& physical_device, VkSampleCountFlagBits &msaa);
-bool vk_create_logical_device(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface, VkDevice& device, VkQueue& graphics_queue, VkQueue& present_queue);
-
-bool vk_device_is_compatible(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface);
-bool vk_device_extension_supported(const VkPhysicalDevice& physical_device);
-
-VkSampleCountFlagBits get_highest_msaa_sample_count(const VkPhysicalDevice &physical_device);
 
 #endif

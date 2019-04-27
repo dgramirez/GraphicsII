@@ -8,6 +8,7 @@ bool vk_create_command_pool(const VkPhysicalDevice &physical_device, const VkSur
 	//command pool's create info
 	VkCommandPoolCreateInfo pool_create_info = {};
 	pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	pool_create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	pool_create_info.queueFamilyIndex = queue_family_indices.graphics.value();
 
 
@@ -59,7 +60,7 @@ bool vk_create_command_buffer(const VkDevice &device, const VkCommandPool &comma
 
 		//Clear Value for both Screen and Depth Buffer
 		std::array<VkClearValue, 2> clear_color = {};
-		clear_color[0] = { 0.0f,0.0f,0.0f,1.0f };
+		clear_color[0] = { 0.0f, 0.0f, 0.0f, 1.0f };
 		clear_color[1] = { 1.0f, 0.0f };
 
 		render_pass_begin_info.clearValueCount = CAST(uint32_t, clear_color.size());

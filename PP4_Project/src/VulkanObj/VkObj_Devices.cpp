@@ -2,41 +2,65 @@
 #include "VkObj_Swapchain.h"
 
 //Device Extensions Exclusively for the Device Setup
-const std::vector<const char*> device_extensions = {
+const std::vector<const char*> req_extensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
+VkObj_DeviceProperties::VkObj_DeviceProperties(VkInstance &instance, VkSurfaceKHR &surface)
+	: pInstance(&instance), pSurface(&surface) {}
 
-//Setup or Creations of Devices
-bool vk_set_physical_device(const VkInstance& instance, const VkSurfaceKHR& surface, VkPhysicalDevice& physical_device, VkSampleCountFlagBits &msaa)
+//Public Methods
+bool VkObj_DeviceProperties::init()
+{
+	SetPhysicalDevice();
+	CreateLogicalDevice();
+	return true;
+}
+
+void VkObj_DeviceProperties::shutdown()
+{
+	vkDestroyDevice(logical, nullptr);
+}
+
+//Important Methods
+bool VkObj_DeviceProperties::SetPhysicalDevice()
 {
 	//Check for GPUs
-	uint32_t device_count = 0;
-	vkEnumeratePhysicalDevices(instance, &device_count, nullptr);
-	if (!device_count) {
+	vkEnumeratePhysicalDevices(*pInstance, &prv_DeviceCount, nullptr);
+	if (!prv_DeviceCount) {
 		LOG("No GPU Available for Vulkan!");
 		return false;
 	}
 
 	//Check if GPU found is compatible [Will convert to "Find" Best GPU]
-	std::vector<VkPhysicalDevice> physical_device_list(device_count);
-	vkEnumeratePhysicalDevices(instance, &device_count, physical_device_list.data());
-	for (size_t i = 0; i < physical_device_list.size(); ++i)
-		if (vk_device_is_compatible(physical_device_list[i], surface)) {
-			physical_device = physical_device_list[i];
-			msaa = get_highest_msaa_sample_count(physical_device);
+	prv_PhysicalDeviceList.resize(prv_DeviceCount);
+	vkEnumeratePhysicalDevices(*pInstance, &prv_DeviceCount, prv_PhysicalDeviceList.data());
+
+	//Gather Physical Hardware Information
+	for (uint32_t i = 0; i < prv_PhysicalDeviceList.size(); ++i)
+		GetDeviceInformation(i);
+
+	//Choose Physical Hardware
+	for (uint32_t i = 0; i < prv_PhysicalDeviceList.size(); ++i)
+	{
+		if (DeviceIsCompatible(i)) {
+			prv_DeviceIndex = i;
+			q_family = prv_DeviceQFamilies[i];
+			physical = prv_PhysicalDeviceList[i];
+			msaa_support = get_highest_msaa_sample_count(physical);
 			return true;
 		}
+	}
 
 	//No GPU was compatible, failed.
 	LOG("No devices were compatible with vulkan");
 	return false;
 }
 
-bool vk_create_logical_device(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface, VkDevice& device, VkQueue& graphics_queue, VkQueue& present_queue)
+bool VkObj_DeviceProperties::CreateLogicalDevice()
 {
 	//Setup Queue Families for Create Info
-	QueueFamilyIndices indices = vk_find_queue_family(physical_device, surface);
+	QueueFamilyIndices indices = vk_find_queue_family(physical, *pSurface);
 	std::set<uint32_t> unique_queue_families = { indices.graphics.value(), indices.present.value() };
 	std::vector<VkDeviceQueueCreateInfo> queue_create_info_array(unique_queue_families.size());
 
@@ -64,70 +88,27 @@ bool vk_create_logical_device(const VkPhysicalDevice& physical_device, const VkS
 	create_info.queueCreateInfoCount = CAST(uint32_t, queue_create_info_array.size());
 	create_info.pEnabledFeatures = &device_features;
 
-	create_info.enabledExtensionCount = CAST(uint32_t, device_extensions.size());
-	create_info.ppEnabledExtensionNames = device_extensions.data();
+	create_info.enabledExtensionCount = CAST(uint32_t, prv_DeviceExtensions.size());
+	create_info.ppEnabledExtensionNames = req_extensions.data();
 
 	//Create the Surface (With Results) [VK_SUCCESS = 0]
-	CHECK_VKRESULT(R, vkCreateDevice(physical_device, &create_info, nullptr, &device), "Failed to create Device!");
+	CHECK_VKRESULT(R, vkCreateDevice(physical, &create_info, nullptr, &logical), "Failed to create Device!");
 
 	//If Device has been created, Setup the Device Queue for graphics and present family
-	vkGetDeviceQueue(device, indices.graphics.value(), 0, &graphics_queue);
-	vkGetDeviceQueue(device, indices.present.value(), 0, &present_queue);
+	vkGetDeviceQueue(logical, indices.graphics.value(), 0, &q_graphics);
+	vkGetDeviceQueue(logical, indices.present.value(), 0, &q_present);
 
 	//Device has been created successfully!
 	return true;
 }
 
-
-//Helper Functions for Setup/Creation of Devices
-bool vk_device_is_compatible(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface)
+//Helper Methods
+bool VkObj_DeviceProperties::DeviceExtensionSupported(const uint32_t &index)
 {
-	//Check for Device Properties and Features
-	VkPhysicalDeviceProperties device_property;
-	vkGetPhysicalDeviceProperties(physical_device, &device_property);
-
-	VkPhysicalDeviceFeatures device_features;
-	vkGetPhysicalDeviceFeatures(physical_device, &device_features);
-
-	VkFormatProperties format_properties;
-	vkGetPhysicalDeviceFormatProperties(physical_device, VK_FORMAT_R8G8B8A8_UNORM, &format_properties);
-
-	//Look for Family Queues
-	QueueFamilyIndices indices = vk_find_queue_family(physical_device, surface);
-	bool extension_support = vk_device_extension_supported(physical_device);
-
-	//Swapchain Support Details for Compatibilities
-	bool good_swapchain = false;
-	if (extension_support)
-	{
-		SwapChainSupportDetails support = vk_query_swapchain_support(physical_device, surface);
-		good_swapchain = !support.formats.empty() && !support.presentModes.empty();
-	}
-
-	//Return true if all of these match
-	return device_property.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
-		&& device_features.geometryShader
-		&& device_features.samplerAnisotropy
-		&& indices.IsComplete()
-		&& extension_support
-		&& good_swapchain
-		&& format_properties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT
-		;
-}
-
-bool vk_device_extension_supported(const VkPhysicalDevice& physical_device)
-{
-	//Get the list of Available Extensions
-	uint32_t extension_count;
-	vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, nullptr);
-
-	std::vector<VkExtensionProperties> available_extension(extension_count);
-	vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, available_extension.data());
-
 	//Find all Required Extensions and find them in the available extensions.
-	std::set<std::string> required_extension(device_extensions.begin(), device_extensions.end());
+	std::set<std::string> required_extension(req_extensions.begin(), req_extensions.end());
 
-	for (const auto& ext : available_extension) {
+	for (const auto& ext : prv_DeviceExtensions[index]) {
 		required_extension.erase(ext.extensionName);
 	}
 
@@ -135,20 +116,56 @@ bool vk_device_extension_supported(const VkPhysicalDevice& physical_device)
 	return required_extension.empty();
 }
 
-VkSampleCountFlagBits get_highest_msaa_sample_count(const VkPhysicalDevice &physical_device)
+bool VkObj_DeviceProperties::DeviceIsCompatible(const uint32_t &index)
 {
-	VkPhysicalDeviceProperties physical_device_properties;
-	vkGetPhysicalDeviceProperties(physical_device, &physical_device_properties);
+	//Look for Extension Support
+	bool extension_support = DeviceExtensionSupported(index);
 
-	VkSampleCountFlags flags = std::min(physical_device_properties.limits.framebufferColorSampleCounts,
-		physical_device_properties.limits.framebufferDepthSampleCounts);
+	//Swapchain Support Details for Compatibilities
+	bool good_swapchain = false;
+	if (extension_support)
+	{
+		SwapChainSupportDetails support = vk_query_swapchain_support(prv_PhysicalDeviceList[index], *pSurface);
+		good_swapchain = !support.formats.empty() && !support.presentModes.empty();
+	}
 
-	if (flags & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
-	if (flags & VK_SAMPLE_COUNT_32_BIT) { return VK_SAMPLE_COUNT_32_BIT; }
-	if (flags & VK_SAMPLE_COUNT_16_BIT) { return VK_SAMPLE_COUNT_16_BIT; }
-	if (flags & VK_SAMPLE_COUNT_8_BIT) { return VK_SAMPLE_COUNT_8_BIT; }
-	if (flags & VK_SAMPLE_COUNT_4_BIT) { return VK_SAMPLE_COUNT_4_BIT; }
-	if (flags & VK_SAMPLE_COUNT_2_BIT) { return VK_SAMPLE_COUNT_2_BIT; }
-
-	return VK_SAMPLE_COUNT_1_BIT;
+	//Return true if all of these match
+	return prv_DeviceProperties[index].deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU
+		&& prv_DeviceFeatures[index].geometryShader
+		&& prv_DeviceFeatures[index].samplerAnisotropy
+		&& prv_DeviceQFamilies[index].IsComplete()
+		&& extension_support
+		&& good_swapchain
+		&& prv_DeviceFormatProperties[index].optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT
+		;
 }
+
+void VkObj_DeviceProperties::GetDeviceInformation(const uint32_t &index)
+{
+	//Get the Device Properties
+	VkPhysicalDeviceProperties device_property;
+	vkGetPhysicalDeviceProperties(prv_PhysicalDeviceList[index], &device_property);
+	prv_DeviceProperties.push_back(device_property);
+
+	//Get the Device Features
+	VkPhysicalDeviceFeatures device_feature;
+	vkGetPhysicalDeviceFeatures(prv_PhysicalDeviceList[index], &device_feature);
+	prv_DeviceFeatures.push_back(device_feature);
+
+	//Get the Format Properties
+	VkFormatProperties format_properties;
+	vkGetPhysicalDeviceFormatProperties(prv_PhysicalDeviceList[index], VK_FORMAT_R8G8B8A8_UNORM, &format_properties);
+	prv_DeviceFormatProperties.push_back(format_properties);
+
+	//Look for Family Queues
+	prv_DeviceQFamilies.push_back(vk_find_queue_family(prv_PhysicalDeviceList[index], *pSurface));
+
+	//Get the list of Available Extensions
+	uint32_t extension_count;
+	vkEnumerateDeviceExtensionProperties(prv_PhysicalDeviceList[index], nullptr, &extension_count, nullptr);
+	std::vector<VkExtensionProperties> available_extension(extension_count);
+	vkEnumerateDeviceExtensionProperties(prv_PhysicalDeviceList[index], nullptr, &extension_count, available_extension.data());
+	prv_DeviceExtensions.push_back(available_extension);
+}
+
+
