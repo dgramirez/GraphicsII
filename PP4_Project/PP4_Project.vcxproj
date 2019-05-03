@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -166,6 +166,8 @@
     <ClCompile Include="src\VulkanObj\VkObj_Buffers.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_Command.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_Devices.cpp" />
+    <ClCompile Include="src\VulkanObj\VkObj_Image.cpp" />
+    <ClCompile Include="src\VulkanObj\VkObj_Pools.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_RenderBackend.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_RenderGraphicsPipeline.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_SemaphoresAndFences.cpp" />
@@ -173,7 +175,6 @@
     <ClCompile Include="src\VulkanObj\VkObj_StagingBuffer.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_Swapchain.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_Texture.cpp" />
-    <ClCompile Include="src\VulkanObj\VkObj_ValidationLayer.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_WindowSetup.cpp" />
     <ClCompile Include="src\VulkanObj.cpp" />
     <ClCompile Include="src\Window.cpp" />
@@ -188,6 +189,8 @@
     <ClInclude Include="src\VulkanObj\VkObj_Allocator.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Buffers.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Command.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_Image.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_Pools.h" />
     <ClInclude Include="src\VulkanObj\VkObj_RenderBackend.h" />
     <ClInclude Include="src\VulkanObj\VkObj_RenderGraphicsPipeline.h" />
     <ClInclude Include="src\VulkanObj\VkObj_SemaphoresAndFences.h" />
@@ -197,7 +200,6 @@
     <ClInclude Include="src\VulkanObj\VkObj_Devices.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Shared.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Swapchain.h" />
-    <ClInclude Include="src\VulkanObj\VkObj_ValidationLayer.h" />
     <ClInclude Include="src\VulkanObj.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>

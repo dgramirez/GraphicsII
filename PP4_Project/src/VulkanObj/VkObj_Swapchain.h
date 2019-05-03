@@ -2,8 +2,10 @@
 #define VKOBJ_SWAPCHAIN_H
 
 #include "VkObj_Shared.h"
+#include "VkObj_WindowSetup.h"
+#include "VkObj_Devices.h"
 
-struct VkObj_Swapchain
+struct VkObj_Swapchains
 {
 	VkSwapchainKHR swapchain;
 	std::vector<VkImage> images;
@@ -15,6 +17,29 @@ struct VkObj_Swapchain
 		VkExtent3D extent3D;
 		struct { VkExtent2D extent2D; uint32_t depth; };
 	};
+};
+
+class VkObj_Swapchain
+{
+public:
+	VkObj_Swapchain(VkObj_WindowProperties &window_properties, VkObj_DeviceProperties &device_properties);
+	bool init();
+
+	VkSwapchainKHR me;
+	std::vector<VkImage> images;
+	std::vector<VkImageView> image_views;
+	std::vector<VkFramebuffer> frame_buffers;
+	VkFormat format;
+	union
+	{
+		VkExtent3D extent3D;
+		struct { VkExtent2D extent2D; uint32_t depth; };
+	};
+private:
+	bool CreateSwapchain();
+	bool CreateSwapchainViews();
+	VkObj_WindowProperties *pWindowProperties;
+	VkObj_DeviceProperties *pDeviceProperties;
 };
 
 bool vk_create_swapchain(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkSurfaceKHR &surface, const uint32_t &window_width, const uint32_t &window_height, 

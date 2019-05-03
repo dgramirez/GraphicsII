@@ -1,9 +1,9 @@
 #include "VkObj_Shared.h"
 
-SwapChainSupportDetails vk_query_swapchain_support(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface)
+VkStruct_SwapchainSupportDetails vk_query_swapchain_support(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface)
 {
 	//Set the Surface Capabilities for Swapchain
-	SwapChainSupportDetails details;
+	VkStruct_SwapchainSupportDetails details;
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &details.capabilities);
 
 	//Set the format(s) and Present Mode(s) for Swapchain
@@ -29,10 +29,10 @@ SwapChainSupportDetails vk_query_swapchain_support(const VkPhysicalDevice& physi
 	return details;
 }
 
-QueueFamilyIndices vk_find_queue_family(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface)
+VkStruct_QueueFamilyIndices vk_find_queue_family(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface)
 {
 	//Initialize Return Value
-	QueueFamilyIndices indices;
+	VkStruct_QueueFamilyIndices indices;
 
 	//Gather Queue Family Count
 	uint32_t queue_family_count = 0;
@@ -337,7 +337,7 @@ VkFormat vk_find_supported_formats(const VkPhysicalDevice &physical_device, cons
 	return VK_FORMAT_UNDEFINED;
 }
 
-VkMemoryPropertyFlags vk_find_memory_type_index(const VkPhysicalDevice &physical_device, const uint32_t &memory_type_bits, const uint32_t &usage)
+VkMemoryPropertyFlags vk_find_memory_type_index(const VkPhysicalDevice &physical_device, const uint64_t &memory_type_bits, const uint64_t &usage)
 {
 	VkPhysicalDeviceMemoryProperties pdevice_memory_properties;
 	vkGetPhysicalDeviceMemoryProperties(physical_device, &pdevice_memory_properties);
@@ -391,7 +391,7 @@ VkMemoryPropertyFlags vk_find_memory_type_index(const VkPhysicalDevice &physical
 	return MAX_UINT32;
 }
 
-bool vk_check_page(const VkDeviceSize &a_memory_offset, const VkDeviceSize &b_memory_offset, const VkDeviceSize &a_size, const VkDeviceSize &buffer_image_granularity, const uint32_t &operation)
+bool vk_check_page(const VkDeviceSize &a_memory_offset, const VkDeviceSize &b_memory_offset, const VkDeviceSize &a_size, const VkDeviceSize &buffer_image_granularity, const uint64_t &operation)
 {
 	//In Vulkan 1.0.107 Specification, Underneath the "vkBindImageMemory" contains information about Buffer-Image Granularity.
 	//This is based on the function provided
@@ -411,9 +411,10 @@ bool vk_check_page(const VkDeviceSize &a_memory_offset, const VkDeviceSize &b_me
 		return a_end_page == b_start_page;
 	else if (operation == VKDEFINE_OPERATION_TYPE_GREATER)
 		return a_end_page > b_start_page;
+	else return false;
 }
 
-bool vk_granularity_conflict(const uint32_t &type_1, const uint32_t &type_2)
+bool vk_granularity_conflict(const uint64_t &type_1, const uint64_t &type_2)
 {
 	uint32_t t1 = std::max(type_1, type_2);
 	uint32_t t2 = std::min(type_1, type_2);
@@ -421,11 +422,11 @@ bool vk_granularity_conflict(const uint32_t &type_1, const uint32_t &type_2)
 	if (t1 == VKDEFINE_ALLOCATION_TYPE_FREE)
 		return false;
 	if (t1 == VKDEFINE_ALLOCATION_TYPE_BUFFER)
-		return t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL;
+		return (t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL);
 	if (t1 == VKDEFINE_ALLOCATION_TYPE_IMAGE)
-		return t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_LINEAR || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL;
+		return t2 == (VKDEFINE_ALLOCATION_TYPE_IMAGE || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_LINEAR || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL);
 	if (t1 == VKDEFINE_ALLOCATION_TYPE_IMAGE_LINEAR)
-		return t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL;
+		return (t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL);
 	if (t1 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL)
 		return false;
 

@@ -1,14 +1,15 @@
 #include "VkObj_StagingBuffer.h"
 
-VkObj_StagingManager::VkObj_StagingManager(VkSurfaceKHR &surface, VkPhysicalDevice &physical_device, VkDevice &device, VkQueue &graphics_queue)
-	: prv_Surface(&surface), prv_PhysicalDevice(&physical_device), prv_Device(&device), prv_GraphicsQueue(&graphics_queue),
-	prv_MaxBufferSize(0), prv_CurrentBuffer(0), prv_MappedData(nullptr), prv_Memory(0), prv_CommandPool(0) { }
+VkObj_StagingManager StageManager;
+
+VkObj_StagingManager::VkObj_StagingManager()
+	:  prv_MaxBufferSize(0), prv_CurrentBuffer(0), prv_MappedData(nullptr), prv_Memory(0), prv_CommandPool(0) { }
 
 VkObj_StagingManager::~VkObj_StagingManager() = default;
 
-void VkObj_StagingManager::align(const uint64_t &value, const uint32_t & alignment, uint64_t &changeme)
+void VkObj_StagingManager::align(const uint64_t &value, const uint64_t & alignment, uint64_t &changeme)
 {
-	uint32_t align_mod = value % alignment;
+	uint64_t align_mod = value % alignment;
 	changeme = !align_mod ? value : (value + alignment - align_mod);
 }
 
@@ -45,7 +46,7 @@ bool VkObj_StagingManager::init()
 
 	CHECK_VKRESULT(d, vkMapMemory(*prv_Device, prv_Memory, 0, alignment_size * MAX_FRAMES, 0, (void**)&prv_MappedData), "");
 
-	QueueFamilyIndices queue_family_indices = vk_find_queue_family(*prv_PhysicalDevice, *prv_Surface);
+	VkStruct_QueueFamilyIndices queue_family_indices = vk_find_queue_family(*prv_PhysicalDevice, *prv_Surface);
 
 	VkCommandPoolCreateInfo command_pool_create_info = {};
 	command_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -72,6 +73,17 @@ bool VkObj_StagingManager::init()
 
 		prv_Buffers[i].data = (char*)prv_MappedData + (i + alignment_size);
 	}
+
+	return true;
+}
+
+bool VkObj_StagingManager::init(VkSurfaceKHR &surface, VkPhysicalDevice &physical_device, VkDevice &device, VkQueue &graphics_queue)
+{
+	prv_Surface = &surface;
+	prv_PhysicalDevice = &physical_device;
+	prv_Device = &device;
+	prv_GraphicsQueue = &graphics_queue;
+	return init();
 }
 
 void VkObj_StagingManager::shutdown()
@@ -97,7 +109,7 @@ void VkObj_StagingManager::shutdown()
 	prv_CurrentBuffer = 0;
 }
 
-char* VkObj_StagingManager::stage(const uint32_t &size, const uint32_t &alignment, VkCommandBuffer &command_buffer, VkBuffer &buffer, uint32_t &buffer_offset)
+char* VkObj_StagingManager::stage(const uint32_t &size, const uint32_t &alignment, VkCommandBuffer &command_buffer, VkBuffer &buffer, uint64_t &buffer_offset)
 {
 	CHECK_RESULT_NO_RETURN((size > prv_MaxBufferSize), "ERROR: VkObj_StagingManager stage function has a size that is greater than Max Buffer Size");
 

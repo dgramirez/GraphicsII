@@ -50,6 +50,11 @@
 
 #define MAX_UINT32	0xFFFFFFFF
 #define MAX_UINT64	0xFFFFFFFFFFFFFFFF
+
+#define MASK_BIT_1 0x1;
+#define MASK_BIT_2 0x2;
+#define MASK_BIT_3 0x4;
+
 #define CAST(type,variable) static_cast<type>(variable)
 
 #define RAND_NORMAL glm::vec3(rand()/float(RAND_MAX),rand()/float(RAND_MAX),rand()/float(RAND_MAX))
@@ -95,5 +100,7 @@
 #define ALIGN_UINT64(x,a)		__ALIGN_MASK(x, (unsigned long long)(a)-1)
 
 #define MB_TO_BYTE(x) x * 1048576
+
+#define TUTORIAL_TRANSITION 0
 
 #endif // #ifndef DEFINES_H

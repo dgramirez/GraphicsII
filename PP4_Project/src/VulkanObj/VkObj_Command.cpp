@@ -3,7 +3,7 @@
 bool vk_create_command_pool(const VkPhysicalDevice &physical_device, const VkSurfaceKHR& surface, const VkDevice &device, VkCommandPool &command_pool)
 {
 	//Gather the queue family's graphic value
-	QueueFamilyIndices queue_family_indices = vk_find_queue_family(physical_device, surface);
+	VkStruct_QueueFamilyIndices queue_family_indices = vk_find_queue_family(physical_device, surface);
 
 	//command pool's create info
 	VkCommandPoolCreateInfo pool_create_info = {};

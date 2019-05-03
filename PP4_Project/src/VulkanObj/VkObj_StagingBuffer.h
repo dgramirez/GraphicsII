@@ -19,16 +19,17 @@ struct VkStruct_StagingBuffer
 class VkObj_StagingManager
 {
 public:
-	VkObj_StagingManager(VkSurfaceKHR &surface, VkPhysicalDevice &physical_device, VkDevice &device, VkQueue &graphics_queue);
+	VkObj_StagingManager();
 	~VkObj_StagingManager();
 
-	bool init();
+	bool init(VkSurfaceKHR &surface, VkPhysicalDevice &physical_device, VkDevice &device, VkQueue &graphics_queue);
 	void shutdown();
 
-	char* stage(const uint32_t &size, const uint32_t &alignment, VkCommandBuffer &command_buffer, VkBuffer &buffer, uint32_t &buffer_offset);
+	char* stage(const uint32_t &size, const uint32_t &alignment, VkCommandBuffer &command_buffer, VkBuffer &buffer, uint64_t &buffer_offset);
 	void flush();
 
 private:
+	bool init();
 	VkSurfaceKHR *prv_Surface;
 	VkPhysicalDevice *prv_PhysicalDevice;
 	VkDevice *prv_Device;
@@ -41,7 +42,9 @@ private:
 	VkStruct_StagingBuffer prv_Buffers[MAX_FRAMES];
 
 	void wait(VkStruct_StagingBuffer &staging_buffer);
-	void align(const uint64_t &value, const uint32_t & alignment, uint64_t &changeme);
+	void align(const uint64_t &value, const uint64_t & alignment, uint64_t &changeme);
 };
+
+extern VkObj_StagingManager StageManager;
 
 #endif

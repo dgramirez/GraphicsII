@@ -19,7 +19,7 @@ bool VkObj_DeviceProperties::init()
 
 void VkObj_DeviceProperties::shutdown()
 {
-	vkDestroyDevice(logical, nullptr);
+	if (logical) vkDestroyDevice(logical, nullptr);
 }
 
 //Important Methods
@@ -60,7 +60,7 @@ bool VkObj_DeviceProperties::SetPhysicalDevice()
 bool VkObj_DeviceProperties::CreateLogicalDevice()
 {
 	//Setup Queue Families for Create Info
-	QueueFamilyIndices indices = vk_find_queue_family(physical, *pSurface);
+	VkStruct_QueueFamilyIndices indices = vk_find_queue_family(physical, *pSurface);
 	std::set<uint32_t> unique_queue_families = { indices.graphics.value(), indices.present.value() };
 	std::vector<VkDeviceQueueCreateInfo> queue_create_info_array(unique_queue_families.size());
 
@@ -125,7 +125,7 @@ bool VkObj_DeviceProperties::DeviceIsCompatible(const uint32_t &index)
 	bool good_swapchain = false;
 	if (extension_support)
 	{
-		SwapChainSupportDetails support = vk_query_swapchain_support(prv_PhysicalDeviceList[index], *pSurface);
+		VkStruct_SwapchainSupportDetails support = vk_query_swapchain_support(prv_PhysicalDeviceList[index], *pSurface);
 		good_swapchain = !support.formats.empty() && !support.presentModes.empty();
 	}
 

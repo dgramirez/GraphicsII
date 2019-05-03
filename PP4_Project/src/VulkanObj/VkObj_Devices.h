@@ -18,7 +18,7 @@ public:
 	//Queue Variables
 	VkQueue q_graphics;
 	VkQueue q_present;
-	QueueFamilyIndices q_family;
+	VkStruct_QueueFamilyIndices q_family;
 
 	//Physical Device Stuff
 	VkPhysicalDevice physical;
@@ -39,7 +39,7 @@ private:
 	std::vector<VkPhysicalDeviceProperties> prv_DeviceProperties;
 	std::vector<VkPhysicalDeviceFeatures> prv_DeviceFeatures;
 	std::vector<VkFormatProperties> prv_DeviceFormatProperties;
-	std::vector<QueueFamilyIndices> prv_DeviceQFamilies;
+	std::vector<VkStruct_QueueFamilyIndices> prv_DeviceQFamilies;
 	std::vector<std::vector<VkExtensionProperties>> prv_DeviceExtensions;
 
 	bool SetPhysicalDevice();

@@ -195,3 +195,64 @@ bool vk_create_descriptor_sets(const VkDevice &device, const std::vector<VkImage
 
 	return true;
 }
+
+VkObj_Buffers::VkObj_Buffers(VkObj_WindowProperties &window_properties, VkObj_DeviceProperties &device_properties, VkObj_Swapchain &swapchain, VkObj_Pools &pools)
+	: pWindowProperties(&window_properties), pDeviceProperties(&device_properties), pSwapchain(&swapchain), pPools(&pools) {}
+
+bool VkObj_Buffers::CreateCommandBuffer()
+{
+	VkCommandBufferAllocateInfo command_buffer_allocate_info = {};
+	command_buffer_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	command_buffer_allocate_info.commandPool = pPools->command;
+	command_buffer_allocate_info.commandBufferCount = MAX_FRAMES;
+
+	vkAllocateCommandBuffers(pDeviceProperties->logical, &command_buffer_allocate_info, &command.me);
+
+	VkFenceCreateInfo fence_create_info = {};
+	fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+	command.fence.resize(MAX_FRAMES);
+	for (uint32_t i = 0; i < MAX_FRAMES; ++i)
+		vkCreateFence(pDeviceProperties->logical, &fence_create_info, nullptr, &command.fence[i]);
+
+	return true;
+}
+
+bool VkObj_Buffers::CreateDepthAndMSAA()
+{
+	return true;
+}
+
+bool VkObj_Buffers::CreateSwapchainFrameBuffers(const VkImageView &color_image_view, const VkImageView &depth_buffer_view, const VkRenderPass &render_pass)
+{
+	//Resize the Swapchain Frame Buffer Vector
+	pSwapchain->frame_buffers.resize(pSwapchain->image_views.size());
+
+	//Loop through the Swapchain Frame Buffers and set their create info
+	for (unsigned int i = 0; i < pSwapchain->frame_buffers.size(); ++i) {
+		// Create an array of image attachments for create info (NOTE: There is only 1 Color Image View and Depth Buffer!)
+		std::array<VkImageView, 3> image_attachments = {
+			color_image_view,
+			depth_buffer_view,
+			pSwapchain->image_views[i]
+		};
+
+		//Frame Buffer's Create Info
+		VkFramebufferCreateInfo frame_buffer_create_info = {};
+		frame_buffer_create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		frame_buffer_create_info.renderPass = render_pass;
+		frame_buffer_create_info.attachmentCount = CAST(uint32_t, image_attachments.size());
+		frame_buffer_create_info.pAttachments = image_attachments.data();
+		frame_buffer_create_info.width = pSwapchain->extent2D.width;
+		frame_buffer_create_info.height = pSwapchain->extent2D.height;
+		frame_buffer_create_info.layers = 1;
+
+
+		//Create the Surface (With Results) [VK_SUCCESS = 0]
+		CHECK_VKRESULT(r, vkCreateFramebuffer(pDeviceProperties->logical, &frame_buffer_create_info, nullptr, &pSwapchain->frame_buffers[i]), "Failed to create Frame buffer at index" << i);
+	}
+
+	//Swapchain's Frame Buffers has been created successfully
+	return true;
+}

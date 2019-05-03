@@ -1,8 +1,9 @@
 #include "VkObj_Allocator.h"
 
-VkObj_Allocator::VkObj_Allocator(VkPhysicalDevice &physical_device, VkDevice &device)
-	: prv_GarbageIndex(0), prv_DeviceLocalMemory(0), prv_HostVisibleMemory(0), 
-	prv_BufferImageGranularity(0), prv_PhysicalDevice(&physical_device), prv_Device(&device) { }
+VkObj_Allocator Allocator;
+
+VkObj_Allocator::VkObj_Allocator()
+	: prv_DeviceLocalMemory(0), prv_HostVisibleMemory(0), prv_BufferImageGranularity(0) {}
 
 void VkObj_Allocator::init()
 {
@@ -13,6 +14,13 @@ void VkObj_Allocator::init()
 	vkGetPhysicalDeviceProperties(*prv_PhysicalDevice, &properties);
 	
 	prv_BufferImageGranularity = properties.limits.bufferImageGranularity;
+}
+
+void VkObj_Allocator::init(VkPhysicalDevice &physical_device, VkDevice &device)
+{
+	prv_PhysicalDevice = &physical_device;
+	prv_Device = &device;
+	init();
 }
 
 void VkObj_Allocator::shutdown()
@@ -49,12 +57,12 @@ void VkObj_Allocator::empty_garbage()
 	garbage.clear();
 }
 
-VkObj_MemoryBlock VkObj_Allocator::allocate(const uint32_t &size, const uint32_t &align, const uint32_t &memory_type_bits, const uint32_t &vkdefine_memory_usage,
-	const uint32_t &vkdefine_allocation_type)
+VkObj_MemoryBlock VkObj_Allocator::allocate(const uint64_t &size, const uint64_t &align, const uint64_t &memory_type_bits, const uint64_t &vkdefine_memory_usage,
+	const uint64_t &vkdefine_allocation_type)
 {
 	//Setup Allocation
 	VkObj_MemoryBlock allocation;
-	uint32_t memory_type_index = vk_find_memory_type_index(*prv_PhysicalDevice, memory_type_bits, vkdefine_memory_usage);
+	uint64_t memory_type_index = vk_find_memory_type_index(*prv_PhysicalDevice, memory_type_bits, vkdefine_memory_usage);
 	if (memory_type_index == MAX_UINT32)
 	{
 		LOG("Failed to find Memory Type Index, in Allocator.");
@@ -73,7 +81,7 @@ VkObj_MemoryBlock VkObj_Allocator::allocate(const uint32_t &size, const uint32_t
 
 	//Create a new memory pool
 	VkDeviceSize new_size = (vkdefine_memory_usage == VKDEFINE_MEMORY_USAGE_GPU_ONLY) ? prv_HostVisibleMemory : prv_DeviceLocalMemory;
-	VkObj_MemoryPool *new_pool = new VkObj_MemoryPool(*prv_PhysicalDevice, *prv_Device, memory_type_index, (uint64_t)size, vkdefine_allocation_type);
+	VkObj_MemoryPool *new_pool = new VkObj_MemoryPool(*prv_PhysicalDevice, *prv_Device, memory_type_index, size, vkdefine_allocation_type);
 
 	if (new_pool->init())
 		memory_pool->push_back(new_pool);
@@ -90,7 +98,7 @@ void VkObj_Allocator::free(const VkObj_MemoryBlock & allocation)
 	prv_Garbage[prv_GarbageIndex].push_back(allocation);
 }
 
-VkObj_MemoryPool::VkObj_MemoryPool(VkPhysicalDevice &physical_device, VkDevice &device, const uint32_t &memory_type_index, const VkDeviceSize &size, const uint32_t &vkdefine_allocation_type)
+VkObj_MemoryPool::VkObj_MemoryPool(VkPhysicalDevice &physical_device, VkDevice &device, const uint64_t &memory_type_index, const VkDeviceSize &size, const uint64_t &vkdefine_allocation_type)
 	: prv_PhysicalDevice(&physical_device), prv_Device(&device), prv_MemoryTypeIndex(memory_type_index), prv_Size(size), prv_Usage(vkdefine_allocation_type),
 	prv_NextId(0), prv_Allocated(0), prv_DeviceMemory(VK_NULL_HANDLE) {}
 
@@ -106,7 +114,7 @@ bool VkObj_MemoryPool::init()
 	VkMemoryAllocateInfo allocate_info = {};
 	allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocate_info.allocationSize = prv_Size;
-	allocate_info.memoryTypeIndex = prv_MemoryTypeIndex;
+	allocate_info.memoryTypeIndex = (uint32_t)prv_MemoryTypeIndex;
 
 	CHECK_VKRESULT(r, vkAllocateMemory(*prv_Device, &allocate_info, nullptr, &prv_DeviceMemory), "Failed to Allocate Memory in Memory Pool");
 
@@ -147,7 +155,7 @@ void VkObj_MemoryPool::shutdown()
 	prv_Head = nullptr;
 }
 
-bool VkObj_MemoryPool::allocate(const uint32_t & size, const uint32_t & align, const VkDeviceSize & granularity, const uint32_t & allocation_type, VkObj_MemoryBlock & allocation)
+bool VkObj_MemoryPool::allocate(const uint64_t &size, const uint64_t &align, const VkDeviceSize & granularity, const uint64_t &allocation_type, VkObj_MemoryBlock &allocation)
 {
 	if ((prv_Size - prv_Allocated) < size)
 		return false;

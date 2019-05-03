@@ -2,8 +2,8 @@
 #define VULKAN_OBJ2_H
 
 #include "VulkanObj/VkObj_WindowSetup.h"
-#include "VulkanObj/VkObj_ValidationLayer.h"
 #include "VulkanObj/VkObj_Devices.h"
+#include "VulkanObj/VkObj_Pools.h"
 #include "VulkanObj/VkObj_Swapchain.h"
 #include "VulkanObj/VkObj_RenderGraphicsPipeline.h"
 #include "VulkanObj/VkObj_Texture.h"
@@ -30,14 +30,17 @@ public:
 private:
 	VkObj_WindowProperties prv_Window;
 	VkObj_DeviceProperties prv_Devices = VkObj_DeviceProperties(prv_Window.instance, prv_Window.surface);
-	VkObj_Swapchain prv_Swapchain;
+	VkObj_Pools prv_Pools = VkObj_Pools(prv_Devices.logical, prv_Devices.q_family);
+	VkObj_Swapchains prv_Swapchain_old;
+	VkObj_Swapchain prv_Swapchain = VkObj_Swapchain(prv_Window, prv_Devices);
 	VkObj_RenderGraphicsPipeline prv_RenderGraphicsPipeline;
 	VkObj_Texture prv_Texture;
-	VkObj_Buffers prv_Buffers;
+	VkObj_Buffer prv_Buffers_old;
+	VkObj_Buffers prv_Buffers = VkObj_Buffers(prv_Window, prv_Devices, prv_Swapchain, prv_Pools);
 	VkObj_Commands prv_Command;
 	VkObj_SemaphoresAndFences prv_SemaphoreAndFences;
-	VkObj_Allocator prv_Allocator = VkObj_Allocator(prv_Devices.physical,prv_Devices.logical);
-	VkObj_StagingManager prv_StagingManager = VkObj_StagingManager(prv_Window.surface, prv_Devices.physical, prv_Devices.logical, prv_Devices.q_graphics);
+	VkObj_Allocator prv_Allocator;
+	VkObj_StagingManager prv_StagingManager;
 
 	uint32_t prv_Frame = 0;
 	std::vector<Object3D> prv_ObjectList;

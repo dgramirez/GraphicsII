@@ -34,8 +34,9 @@ bool VkObj_WindowProperties::init(const char *title)
 
 void VkObj_WindowProperties::shutdown()
 {
-	vkDestroySurfaceKHR(instance, surface, nullptr);
-	vkDestroyInstance(instance, nullptr);
+	if (surface)			vkDestroySurfaceKHR(instance, surface, nullptr);
+	if (validation_layer)	vkDestroyDebugUtilsMessengerExt(instance, validation_layer, nullptr);
+	if (instance)			vkDestroyInstance(instance, nullptr);
 }
 
 bool VkObj_WindowProperties::CreateInstance(const char* title)

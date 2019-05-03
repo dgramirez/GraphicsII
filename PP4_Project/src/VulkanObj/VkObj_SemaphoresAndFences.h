@@ -10,5 +10,5 @@ struct VkObj_SemaphoresAndFences {
 };
 
 bool vk_sync_semaphore_and_fences(const VkDevice &device, std::vector<VkSemaphore> &image_available_semaphore, std::vector<VkSemaphore> &render_finished_semaphore, std::vector<VkFence> &fences);
-
+bool vk_create_semaphore(const VkDevice &device, std::vector<VkSemaphore> &image_available_semaphore, std::vector<VkSemaphore> &render_finished_semaphore);
 #endif

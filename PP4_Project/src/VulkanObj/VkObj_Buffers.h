@@ -2,8 +2,12 @@
 #define VKOBJ_BUFFERS_H
 
 #include "VkObj_Shared.h"
+#include "VkObj_WindowSetup.h"
+#include "VkObj_Devices.h"
+#include "VkObj_Swapchain.h"
+#include "VkObj_Pools.h"
 
-struct VkObj_Buffers
+struct VkObj_Buffer
 {
 	VkBuffer vertex;
 	VkDeviceMemory vertex_memory;
@@ -17,6 +21,37 @@ struct VkObj_Buffers
 	VkDescriptorSetLayout descriptor_set_layout;
 	VkDescriptorPool descriptor_pool;
 	std::vector<VkDescriptorSet> descriptor_sets;
+};
+
+struct VkObj_CommandBuffer
+{
+	VkCommandBuffer me;
+	std::vector<VkFence> fence;
+};
+
+class VkObj_Buffers
+{
+public:
+	VkObj_Buffers(VkObj_WindowProperties &window_properties, VkObj_DeviceProperties &device_properties, VkObj_Swapchain &swapchain, VkObj_Pools &pools);
+
+	bool CreateCommandBuffer();
+	bool CreateDepthAndMSAA();
+	bool CreateSwapchainFrameBuffers(const VkImageView &color_image_view, const VkImageView &depth_buffer_view, const VkRenderPass &render_pass);
+
+	VkObj_WindowProperties *pWindowProperties;
+	VkObj_DeviceProperties *pDeviceProperties;
+	VkObj_Swapchain *pSwapchain;
+	VkObj_Pools *pPools;
+	VkObj_CommandBuffer command;
+private:
+
+};
+
+class VkObj_UniformBuffer
+{
+	VkObj_UniformBuffer();
+
+
 };
 
 bool vk_create_vertex_buffer(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue,

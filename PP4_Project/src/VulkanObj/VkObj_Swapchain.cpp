@@ -5,7 +5,7 @@ bool vk_create_swapchain(const VkPhysicalDevice &physical_device, const VkDevice
 	VkSwapchainKHR &swapchain, std::vector<VkImage> &swapchain_images, VkFormat &swapchain_format, VkExtent2D& swapchain_extent)
 {
 	//Getting Swapchain Information for Create Info
-	SwapChainSupportDetails support = vk_query_swapchain_support(physical_device, surface);
+	VkStruct_SwapchainSupportDetails support = vk_query_swapchain_support(physical_device, surface);
 
 	VkSurfaceFormatKHR surface_format = vk_select_swapchain_surface_format(support.formats);
 	VkPresentModeKHR present_mode = vk_select_swapchain_present_mode(support.presentModes);
@@ -33,7 +33,7 @@ bool vk_create_swapchain(const VkPhysicalDevice &physical_device, const VkDevice
 	create_info.oldSwapchain = VK_NULL_HANDLE;
 
 	//Create Info for Swapchain KHR [Part 2: Queue Families]
-	QueueFamilyIndices QFamilyIndices = vk_find_queue_family(physical_device, surface);
+	VkStruct_QueueFamilyIndices QFamilyIndices = vk_find_queue_family(physical_device, surface);
 	uint32_t queue_family_indices[] = { QFamilyIndices.graphics.value(), QFamilyIndices.present.value() };
 	if (QFamilyIndices.graphics != QFamilyIndices.present)
 	{
@@ -143,5 +143,85 @@ VkExtent2D select_swapchain_extent(const VkSurfaceCapabilitiesKHR &capability, c
 		return capability.currentExtent;
 	else
 		return { window_width, window_height };
+}
+
+VkObj_Swapchain::VkObj_Swapchain(VkObj_WindowProperties &window_properties, VkObj_DeviceProperties &device_properties)
+	: pWindowProperties(&window_properties), pDeviceProperties(&device_properties) {}
+
+bool VkObj_Swapchain::init()
+{
+	depth = 1;
+	CreateSwapchain();
+	CreateSwapchainViews();
+	return true;
+}
+
+bool VkObj_Swapchain::CreateSwapchain()
+{
+	//Get Extent Info
+	int32_t width, height;
+	glfwGetFramebufferSize(pWindowProperties->window, &width, &height);
+	
+	//Getting Swapchain Information for Create Info
+	VkStruct_SwapchainSupportDetails support = vk_query_swapchain_support(pDeviceProperties->physical, pWindowProperties->surface);
+
+	VkSurfaceFormatKHR surface_format = vk_select_swapchain_surface_format(support.formats);
+	VkPresentModeKHR present_mode = vk_select_swapchain_present_mode(support.presentModes);
+	VkExtent2D extent = select_swapchain_extent(support.capabilities, width, height);
+
+	uint32_t image_count = support.capabilities.minImageCount + 1;
+	if (support.capabilities.maxImageCount > 0 && image_count > support.capabilities.maxImageCount)
+		image_count = support.capabilities.maxImageCount;
+
+	//Create Info for SwapchainKHR [Part 1]
+	VkSwapchainCreateInfoKHR create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	create_info.surface = pWindowProperties->surface;
+	create_info.minImageCount = image_count;
+	create_info.imageFormat = surface_format.format;
+	create_info.imageColorSpace = surface_format.colorSpace;
+	create_info.imageExtent = extent;
+	create_info.imageArrayLayers = 1;
+	create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+	create_info.preTransform = support.capabilities.currentTransform;
+	create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	create_info.presentMode = present_mode;
+	create_info.clipped = VK_TRUE;
+	create_info.oldSwapchain = VK_NULL_HANDLE;
+
+	//Create Info for Swapchain KHR [Part 2: Queue Families]
+	uint32_t queue_family_indices[] = { pDeviceProperties->q_family.graphics.value(), pDeviceProperties->q_family.present.value() };
+	if (pDeviceProperties->q_family.graphics != pDeviceProperties->q_family.present)
+	{
+		create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+		create_info.queueFamilyIndexCount = 2;
+		create_info.pQueueFamilyIndices = queue_family_indices;
+	}
+	else
+		create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	//Create the Swapchain [Part 3: Putting it Together] {VK_SUCCESS = 0}
+	CHECK_VKRESULT(r, vkCreateSwapchainKHR(pDeviceProperties->logical, &create_info, nullptr, &me), "Failed To Create Swap Chain!");
+
+	//Swapchain Image Setup
+	CHECK_VKRESULT(r2, vkGetSwapchainImagesKHR(pDeviceProperties->logical, me, &image_count, nullptr), "Failed to get Swapchain Images Count");
+	images.resize(image_count);
+	CHECK_VKRESULT(r3, vkGetSwapchainImagesKHR(pDeviceProperties->logical, me, &image_count, images.data()), "Failed to get Swapchain Images");
+
+	format = surface_format.format;
+	extent = extent;
+
+	return true;
+}
+
+bool VkObj_Swapchain::CreateSwapchainViews()
+{
+	//Create Info for Image View
+	image_views.resize(images.size());
+	for (size_t i = 0; i < images.size(); ++i)
+		image_views[i] = vk_create_image_view(pDeviceProperties->logical, images[i], format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+
+	//Swapchain Image View has been created successfully
+	return true;
 }
 

@@ -54,9 +54,6 @@
     <ClCompile Include="src\VulkanObj\VkObj_Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\VulkanObj\VkObj_ValidationLayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\VulkanObj\VkObj_WindowSetup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -67,6 +64,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\VulkanObj\VkObj_RenderBackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanObj\VkObj_Pools.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -119,9 +119,6 @@
     <ClInclude Include="src\VulkanObj\VkObj_Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VulkanObj\VkObj_ValidationLayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\VulkanObj\VkObj_WindowSetup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -132,6 +129,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\VulkanObj\VkObj_RenderBackend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VulkanObj\VkObj_Pools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VulkanObj\VkObj_Images.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
