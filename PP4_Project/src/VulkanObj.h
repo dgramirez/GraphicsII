@@ -36,7 +36,7 @@ private:
 	VkObj_RenderGraphicsPipeline prv_RenderGraphicsPipeline;
 	VkObj_Texture prv_Texture;
 	VkObj_Buffer prv_Buffers_old;
-	VkObj_Buffers prv_Buffers = VkObj_Buffers(prv_Window, prv_Devices, prv_Swapchain, prv_Pools);
+	VkObj_Buffers prv_Buffers;
 	VkObj_Commands prv_Command;
 	VkObj_SemaphoresAndFences prv_SemaphoreAndFences;
 	VkObj_Allocator prv_Allocator;

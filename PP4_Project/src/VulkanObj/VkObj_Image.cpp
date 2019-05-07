@@ -1,11 +1,10 @@
 #include "VkObj_Image.h"
 
-int prv_GarbageIndex = 0;
 
 VkDevice *VkObj_Image::prv_Device = nullptr;
 VkFormat *VkObj_Image::prv_DepthBuffer = nullptr;
 VkSampleCountFlagBits *VkObj_Image::prv_MSAABuffer = nullptr;
-int VkObj_Image::prv_GarbageIndex = 0;
+uint32_t VkObj_Image::prv_GarbageIndex = 0;
 std::vector<VkObj_MemoryBlock> VkObj_Image::prv_MemoryGarbage[MAX_FRAMES];
 std::vector<VkImage> VkObj_Image::prv_ImageGarbage[MAX_FRAMES];
 std::vector<VkImageView> VkObj_Image::prv_ImageViewGarbage[MAX_FRAMES];

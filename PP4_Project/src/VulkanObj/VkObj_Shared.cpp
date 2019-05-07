@@ -416,15 +416,15 @@ bool vk_check_page(const VkDeviceSize &a_memory_offset, const VkDeviceSize &b_me
 
 bool vk_granularity_conflict(const uint64_t &type_1, const uint64_t &type_2)
 {
-	uint32_t t1 = std::max(type_1, type_2);
-	uint32_t t2 = std::min(type_1, type_2);
+	uint64_t t1 = std::max(type_1, type_2);
+	uint64_t t2 = std::min(type_1, type_2);
 
 	if (t1 == VKDEFINE_ALLOCATION_TYPE_FREE)
 		return false;
 	if (t1 == VKDEFINE_ALLOCATION_TYPE_BUFFER)
 		return (t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL);
 	if (t1 == VKDEFINE_ALLOCATION_TYPE_IMAGE)
-		return t2 == (VKDEFINE_ALLOCATION_TYPE_IMAGE || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_LINEAR || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL);
+		return (t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_LINEAR || t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL);
 	if (t1 == VKDEFINE_ALLOCATION_TYPE_IMAGE_LINEAR)
 		return (t2 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL);
 	if (t1 == VKDEFINE_ALLOCATION_TYPE_IMAGE_OPTIMAL)

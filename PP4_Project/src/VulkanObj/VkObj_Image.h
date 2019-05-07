@@ -35,7 +35,7 @@ private:
 	static VkDevice *prv_Device;
 	static VkFormat *prv_DepthBuffer;
 	static VkSampleCountFlagBits *prv_MSAABuffer;
-	static int prv_GarbageIndex;
+	static uint32_t prv_GarbageIndex;
 	static std::vector<VkObj_MemoryBlock> prv_MemoryGarbage[MAX_FRAMES];
 	static std::vector<VkImage> prv_ImageGarbage[MAX_FRAMES];
 	static std::vector<VkImageView> prv_ImageViewGarbage[MAX_FRAMES];

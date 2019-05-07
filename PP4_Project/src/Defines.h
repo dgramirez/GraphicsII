@@ -51,9 +51,18 @@
 #define MAX_UINT32	0xFFFFFFFF
 #define MAX_UINT64	0xFFFFFFFFFFFFFFFF
 
-#define MASK_BIT_1 0x1;
-#define MASK_BIT_2 0x2;
-#define MASK_BIT_3 0x4;
+#define MASK_BIT_1 0x1
+#define MASK_BIT_2 0x2
+#define MASK_BIT_3 0x4
+#define MASK_BIT_4 0x8
+#define MASK_BIT_5 0x10
+#define MASK_BIT_6 0x20
+#define MASK_BIT_7 0x40
+#define MASK_BIT_8 0x80
+#define MASK_BIT_32 0x80000000
+
+#define MAPPED_FLAG 
+#define OWNS_BUFFER_FLAG 0x80000000
 
 #define CAST(type,variable) static_cast<type>(variable)
 
@@ -92,6 +101,11 @@
 #define VKDEFINE_RENDERCOMMAND_DRAW_VIEW_GUI 2
 #define VKDEFINE_RENDERCOMMAND_COPY_RENDER 3
 #define VKDEFINE_RENDERCOMMAND_POST_PROCESS 4
+
+#define VKDEFINE_BUFFER_MAP_READ 1
+#define VKDEFINE_BUFFER_MAP_WRITE 2
+#define VKDEFINE_BUFFER_USAGE_STATIC 1
+#define VKDEFINE_BUFFER_USAGE_DYNAMIC 2
 
 //This is sourced in the Linux-Kernel for byte alignment.
 #define __ALIGN_MASK(x,mask)    (((x)+(mask))&~(mask))

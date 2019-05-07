@@ -1,5 +1,7 @@
 #include "VkObj_Buffers.h"
 
+
+
 bool vk_create_vertex_buffer(const VkPhysicalDevice &physical_device, const VkDevice &device,  const VkCommandPool &command_pool, const VkQueue &graphics_queue,
 	std::vector<Object3D> &object_list, VkBuffer &vertex_buffer, VkDeviceMemory &vertex_buffer_memory)
 {
@@ -196,8 +198,62 @@ bool vk_create_descriptor_sets(const VkDevice &device, const std::vector<VkImage
 	return true;
 }
 
-VkObj_Buffers::VkObj_Buffers(VkObj_WindowProperties &window_properties, VkObj_DeviceProperties &device_properties, VkObj_Swapchain &swapchain, VkObj_Pools &pools)
-	: pWindowProperties(&window_properties), pDeviceProperties(&device_properties), pSwapchain(&swapchain), pPools(&pools) {}
+VkObj_Buffers::VkObj_Buffers()
+	: prv_Size(0), prv_OffsetInOtherBuffer(0), prv_Usage(0), prv_Buffer(nullptr) {}
+
+bool VkObj_Buffers::init(VkObj_WindowProperties &window_properties, VkObj_DeviceProperties &device_properties, VkObj_Swapchain &swapchain, VkObj_Pools &pools)
+{
+	pWindowProperties = &window_properties;
+	pDeviceProperties = &device_properties;
+	pSwapchain = &swapchain;
+	pPools = &pools;
+
+	return true;
+}
+
+int64_t VkObj_Buffers::get_size()
+{
+	return (prv_Size & ~MASK_BIT_32);
+}
+
+
+int64_t VkObj_Buffers::get_allocated_size()
+{
+	return ((get_size() + 15) & ~15); //15 = 1111
+}
+
+uint64_t VkObj_Buffers::get_usage_type()
+{
+	return prv_Usage;
+}
+
+VkBuffer VkObj_Buffers::get_buffer()
+{
+	return prv_Buffer;
+}
+
+int64_t VkObj_Buffers::get_offset()
+{
+	return (prv_OffsetInOtherBuffer & ~MASK_BIT_32);
+}
+
+bool VkObj_Buffers::is_mapped()
+{
+	return (prv_Size & MASK_BIT_32);
+}
+
+void VkObj_Buffers::set_map_flag(const bool &on)
+{
+	if (on)
+		prv_Size |= MASK_BIT_32;
+	else
+		prv_Size &= ~MASK_BIT_32;
+}
+
+bool VkObj_Buffers::root_buffer()
+{
+	return (prv_OffsetInOtherBuffer & MASK_BIT_32);
+}
 
 bool VkObj_Buffers::CreateCommandBuffer()
 {
@@ -255,4 +311,464 @@ bool VkObj_Buffers::CreateSwapchainFrameBuffers(const VkImageView &color_image_v
 
 	//Swapchain's Frame Buffers has been created successfully
 	return true;
+}
+
+
+VkObj_VertexBuffer::VkObj_VertexBuffer()
+{
+	set_map_flag(false);
+}
+
+void VkObj_VertexBuffer::clear_no_free()
+{
+	prv_Size = 0;
+	prv_OffsetInOtherBuffer = OWNS_BUFFER_FLAG;
+	prv_Buffer = nullptr;
+	prv_Allocation.device_memory = nullptr;
+}
+
+bool VkObj_VertexBuffer::allocate_buffer(const void* data, const uint32_t &allocation_size, const uint32_t &usage)
+{
+	if (!prv_Buffer) {
+		LOG("Buffer is nullptr in Vertex Buffer!")
+	}
+
+// 	//Assert 16 bit aligned (data)
+	if ((uint32_t)(data) & 15) {
+		LOG("Data Buffer is Not Aligned by 16 bits")
+	}
+
+	if (allocation_size <= 0) {
+		LOG("Allocation Size is below 1!")
+	}
+
+	prv_Size = allocation_size;
+	prv_Usage = usage;
+
+	int32_t bytes = get_allocated_size();
+
+	VkBufferCreateInfo buffer_create_info = {};
+	buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	buffer_create_info.size = bytes;
+	buffer_create_info.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	buffer_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	if (prv_Usage == VKDEFINE_BUFFER_USAGE_STATIC)
+		buffer_create_info.usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+
+	CHECK_VKRESULT(r, vkCreateBuffer(pDeviceProperties->logical, &buffer_create_info, nullptr, &prv_Buffer), "Failed to create buffer in VkObj_VertexBuffer::allocate_buffer");
+
+	VkMemoryRequirements memory_requirement;
+	vkGetBufferMemoryRequirements(pDeviceProperties->logical, prv_Buffer, &memory_requirement);
+	uint32_t memory_usage = (prv_Usage == VKDEFINE_BUFFER_USAGE_STATIC) ? VKDEFINE_MEMORY_USAGE_GPU_ONLY : VKDEFINE_MEMORY_USAGE_CPU_TO_GPU;
+
+	prv_Allocation = Allocator.allocate(memory_requirement.size, memory_requirement.alignment, memory_requirement.memoryTypeBits, memory_usage, VKDEFINE_ALLOCATION_TYPE_BUFFER);
+
+	vkBindBufferMemory(pDeviceProperties->logical, prv_Buffer, prv_Allocation.device_memory, prv_Allocation.offset);
+
+	if (data)
+		update(data, allocation_size, 0);
+
+	return true;
+}
+
+void VkObj_VertexBuffer::free_buffer()
+{
+	if (is_mapped())
+		unmap_buffer();
+
+	if (!root_buffer()) {
+		clear_no_free();
+		return;
+	}
+
+	if (!prv_Buffer)
+		return;
+
+	Allocator.free(prv_Allocation);
+	vkDestroyBuffer(pDeviceProperties->logical, prv_Buffer, nullptr);
+	prv_Buffer = nullptr;
+	prv_Allocation = VkObj_MemoryBlock();
+
+	clear_no_free();
+}
+
+void VkObj_VertexBuffer::update(const void* data, const uint32_t &size, const uint32_t &offset)
+{
+	if (!prv_Buffer) {
+		LOG("Buffer is nullptr in Vertex Buffer!")
+	}
+
+	//Assert 16 bit aligned (data)
+	if ((uint32_t)(data) & 15) {
+		LOG("Data Buffer is Not Aligned by 16 bits")
+	}
+
+	if ( ((uint32_t)(offset)) & 15) {
+		LOG("Offset is Not Aligned by 16 bits")
+	}
+
+	if (size > get_size()) {
+		LOG("Size is greater than the allocated size!")
+	}
+
+	if (prv_Usage == VKDEFINE_BUFFER_USAGE_DYNAMIC)
+		memcpy(prv_Allocation.data + get_offset() + offset, data, size);
+	else
+	{
+		VkBuffer stage_buffer;
+		uint64_t stage_offset = 0;
+		VkCommandBuffer command_buffer;
+		char* stage_data = StageManager.stage(size, 1, command_buffer, stage_buffer, stage_offset);
+
+		memcpy(stage_data, data, size);
+
+		VkBufferCopy buffer_copy = {};
+		buffer_copy.srcOffset = stage_offset;
+		buffer_copy.dstOffset = get_offset() + offset;
+		buffer_copy.size = size;
+
+		vkCmdCopyBuffer(command_buffer, stage_buffer, prv_Buffer, 1, &buffer_copy);
+	}
+
+}
+
+void* VkObj_VertexBuffer::map_buffer()
+{
+	if (!prv_Buffer) {
+		LOG("Buffer is nullptr in Vertex Buffer!")
+	}
+
+	if (prv_Usage == VKDEFINE_BUFFER_USAGE_STATIC) {
+		LOG("WARNING: TRYING TO MAP BUFFER, BUT VERTEX BUFFER'S USAGE IS STATIC")
+	}
+
+	void *buffer = prv_Allocation.data + get_offset();
+
+	set_map_flag(true);
+
+	if (!buffer) {
+		LOG("WARNING: BUFFER FAILED TO MAP!")
+	}
+
+	return buffer;
+}
+
+void VkObj_VertexBuffer::unmap_buffer()
+{
+	if (!prv_Buffer) {
+		LOG("Buffer is nullptr in Vertex Buffer!")
+	}
+
+	if (prv_Usage == VKDEFINE_BUFFER_USAGE_STATIC) {
+		LOG("WARNING: TRYING TO MAP BUFFER, BUT VERTEX BUFFER'S USAGE IS STATIC")
+	}
+
+	set_map_flag(false);
+}
+
+
+VkObj_IndexBuffer::VkObj_IndexBuffer()
+{
+	set_map_flag(false);
+}
+
+void VkObj_IndexBuffer::clear_no_free()
+{
+	prv_Size = 0;
+	prv_OffsetInOtherBuffer = OWNS_BUFFER_FLAG;
+	prv_Buffer = nullptr;
+	prv_Allocation.device_memory = nullptr;
+}
+
+bool VkObj_IndexBuffer::allocate_buffer(const void* data, const uint32_t &allocation_size, const uint32_t &usage)
+{
+	if (!prv_Buffer) {
+		LOG("Buffer is nullptr in Vertex Buffer!")
+	}
+
+	// 	//Assert 16 bit aligned (data)
+	if ((uint32_t)(data) & 15) {
+		LOG("Data Buffer is Not Aligned by 16 bits")
+	}
+
+	if (allocation_size <= 0) {
+		LOG("Allocation Size is below 1!")
+	}
+
+	prv_Size = allocation_size;
+	prv_Usage = usage;
+
+	int32_t bytes = get_allocated_size();
+
+	VkBufferCreateInfo buffer_create_info = {};
+	buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	buffer_create_info.size = bytes;
+	buffer_create_info.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+	if (prv_Usage == VKDEFINE_BUFFER_USAGE_STATIC)
+		buffer_create_info.usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+
+	CHECK_VKRESULT(r, vkCreateBuffer(pDeviceProperties->logical, &buffer_create_info, nullptr, &prv_Buffer), "Failed to create buffer in VkObj_VertexBuffer::allocate_buffer");
+
+	VkMemoryRequirements memory_requirement;
+	vkGetBufferMemoryRequirements(pDeviceProperties->logical, prv_Buffer, &memory_requirement);
+	uint32_t memory_usage = (prv_Usage == VKDEFINE_BUFFER_USAGE_STATIC) ? VKDEFINE_MEMORY_USAGE_GPU_ONLY : VKDEFINE_MEMORY_USAGE_CPU_TO_GPU;
+
+	prv_Allocation = Allocator.allocate(memory_requirement.size, memory_requirement.alignment, memory_requirement.memoryTypeBits, memory_usage, VKDEFINE_ALLOCATION_TYPE_BUFFER);
+
+	vkBindBufferMemory(pDeviceProperties->logical, prv_Buffer, prv_Allocation.device_memory, prv_Allocation.offset);
+
+	if (data)
+		update(data, allocation_size, 0);
+
+	return true;
+}
+
+void VkObj_IndexBuffer::free_buffer()
+{
+	if (is_mapped())
+		unmap_buffer();
+
+	if (!root_buffer()) {
+		clear_no_free();
+		return;
+	}
+
+	if (!prv_Buffer)
+		return;
+
+	Allocator.free(prv_Allocation);
+	vkDestroyBuffer(pDeviceProperties->logical, prv_Buffer, nullptr);
+	prv_Buffer = nullptr;
+	prv_Allocation = VkObj_MemoryBlock();
+
+	clear_no_free();
+}
+
+void VkObj_IndexBuffer::update(const void* data, const uint32_t &size, const uint32_t &offset)
+{
+	if (!prv_Buffer) {
+		LOG("Buffer is nullptr in Vertex Buffer!")
+	}
+
+	//Assert 16 bit aligned (data)
+	if ((uint32_t)(data) & 15) {
+		LOG("Data Buffer is Not Aligned by 16 bits")
+	}
+
+	if (((uint32_t)(offset)) & 15) {
+		LOG("Offset is Not Aligned by 16 bits")
+	}
+
+	if (size > get_size()) {
+		LOG("Size is greater than the allocated size!")
+	}
+
+	if (prv_Usage == VKDEFINE_BUFFER_USAGE_DYNAMIC)
+		memcpy(prv_Allocation.data + get_offset() + offset, data, size);
+	else
+	{
+		VkBuffer stage_buffer;
+		uint64_t stage_offset = 0;
+		VkCommandBuffer command_buffer;
+		char* stage_data = StageManager.stage(size, 1, command_buffer, stage_buffer, stage_offset);
+
+		memcpy(stage_data, data, size);
+
+		VkBufferCopy buffer_copy = {};
+		buffer_copy.srcOffset = stage_offset;
+		buffer_copy.dstOffset = get_offset() + offset;
+		buffer_copy.size = size;
+
+		vkCmdCopyBuffer(command_buffer, stage_buffer, prv_Buffer, 1, &buffer_copy);
+	}
+}
+
+void* VkObj_IndexBuffer::map_buffer()
+{
+	if (!prv_Buffer) {
+		LOG("Buffer is nullptr in Vertex Buffer!")
+	}
+
+	if (prv_Usage == VKDEFINE_BUFFER_USAGE_STATIC) {
+		LOG("WARNING: TRYING TO MAP BUFFER, BUT VERTEX BUFFER'S USAGE IS STATIC")
+	}
+
+	void *buffer = prv_Allocation.data + get_offset();
+
+	set_map_flag(true);
+
+	if (!buffer) {
+		LOG("WARNING: BUFFER FAILED TO MAP!")
+	}
+
+	return buffer;
+}
+
+void VkObj_IndexBuffer::unmap_buffer()
+{
+	if (!prv_Buffer) {
+		LOG("Buffer is nullptr in Vertex Buffer!")
+	}
+
+	if (prv_Usage == VKDEFINE_BUFFER_USAGE_STATIC) {
+		LOG("WARNING: TRYING TO MAP BUFFER, BUT VERTEX BUFFER'S USAGE IS STATIC")
+	}
+
+	set_map_flag(false);
+}
+
+
+VkObj_UniformBuffer::VkObj_UniformBuffer()
+{
+	prv_Usage = VKDEFINE_BUFFER_USAGE_DYNAMIC;
+	set_map_flag(false);
+}
+
+void VkObj_UniformBuffer::clear_no_free()
+{
+	prv_Size = 0;
+	prv_OffsetInOtherBuffer = OWNS_BUFFER_FLAG;
+	prv_Buffer = nullptr;
+	prv_Allocation.device_memory = nullptr;
+}
+
+bool VkObj_UniformBuffer::allocate_buffer(const void* data, const uint32_t &allocation_size, const uint32_t &usage)
+{
+	if (!prv_Buffer) {
+		LOG("Buffer is nullptr in Vertex Buffer!")
+	}
+
+	// 	//Assert 16 bit aligned (data)
+	if ((uint32_t)(data) & 15) {
+		LOG("Data Buffer is Not Aligned by 16 bits")
+	}
+
+	if (allocation_size <= 0) {
+		LOG("Allocation Size is below 1!")
+	}
+
+	prv_Size = allocation_size;
+	prv_Usage = usage;
+
+	int32_t bytes = get_allocated_size();
+
+	VkBufferCreateInfo buffer_create_info = {};
+	buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	buffer_create_info.size = bytes;
+	buffer_create_info.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+	if (prv_Usage == VKDEFINE_BUFFER_USAGE_STATIC)
+		buffer_create_info.usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+
+	CHECK_VKRESULT(r, vkCreateBuffer(pDeviceProperties->logical, &buffer_create_info, nullptr, &prv_Buffer), "Failed to create buffer in VkObj_VertexBuffer::allocate_buffer");
+
+	VkMemoryRequirements memory_requirement;
+	vkGetBufferMemoryRequirements(pDeviceProperties->logical, prv_Buffer, &memory_requirement);
+	uint32_t memory_usage = (prv_Usage == VKDEFINE_BUFFER_USAGE_STATIC) ? VKDEFINE_MEMORY_USAGE_GPU_ONLY : VKDEFINE_MEMORY_USAGE_CPU_TO_GPU;
+
+	prv_Allocation = Allocator.allocate(memory_requirement.size, memory_requirement.alignment, memory_requirement.memoryTypeBits, memory_usage, VKDEFINE_ALLOCATION_TYPE_BUFFER);
+
+	vkBindBufferMemory(pDeviceProperties->logical, prv_Buffer, prv_Allocation.device_memory, prv_Allocation.offset);
+
+	if (data)
+		update(data, allocation_size, 0);
+
+	return true;
+}
+
+void VkObj_UniformBuffer::free_buffer()
+{
+	if (is_mapped())
+		unmap_buffer();
+
+	if (!root_buffer()) {
+		clear_no_free();
+		return;
+	}
+
+	if (!prv_Buffer)
+		return;
+
+	Allocator.free(prv_Allocation);
+	vkDestroyBuffer(pDeviceProperties->logical, prv_Buffer, nullptr);
+	prv_Buffer = nullptr;
+	prv_Allocation = VkObj_MemoryBlock();
+
+	clear_no_free();
+}
+
+void VkObj_UniformBuffer::update(const void* data, const uint32_t &size, const uint32_t &offset)
+{
+	if (!prv_Buffer) {
+		LOG("Buffer is nullptr in Vertex Buffer!")
+	}
+
+	//Assert 16 bit aligned (data)
+	if ((uint32_t)(data) & 15) {
+		LOG("Data Buffer is Not Aligned by 16 bits")
+	}
+
+	if (((uint32_t)(offset)) & 15) {
+		LOG("Offset is Not Aligned by 16 bits")
+	}
+
+	if (size > get_size()) {
+		LOG("Size is greater than the allocated size!")
+	}
+
+	if (prv_Usage == VKDEFINE_BUFFER_USAGE_DYNAMIC)
+		memcpy(prv_Allocation.data + get_offset() + offset, data, size);
+	else
+	{
+		VkBuffer stage_buffer;
+		uint64_t stage_offset = 0;
+		VkCommandBuffer command_buffer;
+		char* stage_data = StageManager.stage(size, 1, command_buffer, stage_buffer, stage_offset);
+
+		memcpy(stage_data, data, size);
+
+		VkBufferCopy buffer_copy = {};
+		buffer_copy.srcOffset = stage_offset;
+		buffer_copy.dstOffset = get_offset() + offset;
+		buffer_copy.size = size;
+
+		vkCmdCopyBuffer(command_buffer, stage_buffer, prv_Buffer, 1, &buffer_copy);
+	}
+}
+
+void* VkObj_UniformBuffer::map_buffer(uint32_t map_type)
+{
+	if (map_type == VKDEFINE_BUFFER_MAP_WRITE) {
+		LOG("WARNING: UNIFORM BUFFER HAS WRITE MAP TYPE!")
+	}
+
+	if (!prv_Buffer) {
+		LOG("Buffer is nullptr in Vertex Buffer!")
+	}
+
+	if (prv_Usage == VKDEFINE_BUFFER_USAGE_STATIC) {
+		LOG("WARNING: TRYING TO MAP BUFFER, BUT VERTEX BUFFER'S USAGE IS STATIC")
+	}
+
+	void *buffer = prv_Allocation.data + get_offset();
+
+	set_map_flag(true);
+
+	if (!buffer) {
+		LOG("WARNING: BUFFER FAILED TO MAP!")
+	}
+
+	return buffer;
+}
+
+void VkObj_UniformBuffer::unmap_buffer()
+{
+	if (!prv_Buffer) {
+		LOG("Buffer is nullptr in Vertex Buffer!")
+	}
+
+	if (prv_Usage == VKDEFINE_BUFFER_USAGE_STATIC) {
+		LOG("WARNING: TRYING TO MAP BUFFER, BUT VERTEX BUFFER'S USAGE IS STATIC")
+	}
+
+	set_map_flag(false);
 }
