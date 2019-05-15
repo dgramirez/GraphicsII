@@ -18,13 +18,14 @@ public:
 	std::vector<Vertex> get_vertices() { return prv_Vertices; }
 	std::vector<uint32_t> get_indices() { return prv_Indices; }
 	Texture* get_texture() const { return prv_Texture; }
-	void set_vertex(const std::vector<Vertex>& vertex) { prv_Vertices = vertex; }
-	void set_index(const std::vector<uint32_t>& index) { prv_Indices = index; }
-	void set_texture(Texture* texture2d) { if (prv_Texture->on_heap) delete prv_Texture; prv_Texture = texture2d; }
 
-	__declspec(property(get = get_vertices, put = set_vertex)) std::vector<Vertex> vertices;
-	__declspec(property(get = get_texture, put = set_texture)) Texture* texture;
-	__declspec(property(get = get_indices, put = set_index)) std::vector<uint32_t> indices;
+	VkBuffer vertex_buffer;
+	VkBuffer index_buffer;
+	VkBuffer uniform_buffer;
+
+	__declspec(property(get = get_vertices)) std::vector<Vertex> vertices;
+	__declspec(property(get = get_texture)) Texture* texture;
+	__declspec(property(get = get_indices)) std::vector<uint32_t> indices;
 
 	float scale = 10.0f;
 private:

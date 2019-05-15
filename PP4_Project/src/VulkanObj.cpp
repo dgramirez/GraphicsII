@@ -59,6 +59,8 @@ bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_w
 
 	//TODO: Continue Tutorial for RenderProgManager
 	//TODO: Continue Tutorial for Vertex Cache
+
+	//[These don't exist]
 	CHECK_RESULT(vk_create_descriptor_set_layout(prv_Devices.logical, prv_Buffers_old.descriptor_set_layout), "Create Descriptor Set Layout Failed!");
 	CHECK_RESULT(vk_create_graphics_pipeline(prv_Devices.logical, prv_Swapchain_old.extent2D, prv_Buffers_old.descriptor_set_layout,
 		prv_Devices.msaa_support, prv_RenderGraphicsPipeline.render_pass, prv_RenderGraphicsPipeline.graphics_pipeline_layout,
@@ -141,6 +143,70 @@ void VulkanObj::add_to_object_list(const Object3D & object)
 	prv_ObjectList.push_back(object);
 }
 
+void VulkanObj::start_frame()
+{
+	vkAcquireNextImageKHR(prv_Devices.logical, prv_Swapchain_old.swapchain, MAX_UINT64,
+		prv_SemaphoreAndFences.image_available_semaphores[prv_Frame], VK_NULL_HANDLE, &prv_Devices.current_frame);
+
+//	VkObj_Image::EmptyGarbage(); TODO: MAKE THIS STATIC!!!
+	Allocator.empty_garbage();
+	StageManager.flush();
+
+	//rendermanager.start_frame();
+
+	VkCommandBufferBeginInfo command_buffer_begin_info = {};
+	command_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	vkBeginCommandBuffer(prv_Command.command_buffers[prv_Devices.current_frame], &command_buffer_begin_info);
+
+	VkMemoryBarrier memory_barrier = {};
+	memory_barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+	memory_barrier.srcAccessMask = VK_ACCESS_HOST_WRITE_BIT;
+	memory_barrier.dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT | VK_ACCESS_INDEX_READ_BIT | VK_ACCESS_UNIFORM_READ_BIT | 
+		VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | 
+		VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+
+	vkCmdPipelineBarrier(prv_Command.command_buffers[prv_Devices.current_frame], VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0,
+		1, &memory_barrier,
+		0, nullptr,
+		0, nullptr);
+
+	VkClearValue clear_value[2];
+	clear_value[0].color = { { 0.0f, 0.721f, 1.0f, 1.0f } };
+	clear_value[1].depthStencil = { 1.0f, 128 };
+
+	VkRenderPassBeginInfo render_pass_begin_info = {};
+	render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	render_pass_begin_info.renderPass = prv_RenderGraphicsPipeline.render_pass;
+	render_pass_begin_info.framebuffer = prv_Swapchain.frame_buffers[prv_Devices.current_frame];
+	render_pass_begin_info.renderArea.extent = prv_Swapchain.extent2D;
+	render_pass_begin_info.clearValueCount = 2;
+	render_pass_begin_info.pClearValues = clear_value;
+
+	vkCmdBeginRenderPass(prv_Command.command_buffers[prv_Devices.current_frame], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+}
+
+void VulkanObj::end_frame()
+{
+	vkCmdEndRenderPass(prv_Command.command_buffers[prv_Devices.current_frame]);
+	vkEndCommandBuffer(prv_Command.command_buffers[prv_Devices.current_frame]);
+	//TODO: Record that the frame buffer has ended
+
+	VkSemaphore wait_semaphores[] = { prv_SemaphoreAndFences.image_available_semaphores[prv_Devices.current_frame] };
+	VkPipelineStageFlags wait_stages[] = { VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT };
+	VkSemaphore signal_semaphore[] = { prv_SemaphoreAndFences.render_finished_semaphores[prv_Devices.current_frame] };
+
+
+	VkSubmitInfo submit_info = {};
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.waitSemaphoreCount = 1;
+	submit_info.pWaitSemaphores = wait_semaphores;
+	submit_info.pWaitDstStageMask = wait_stages;
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &prv_Command.command_buffers[prv_Devices.current_frame];
+	submit_info.signalSemaphoreCount = 1;
+	submit_info.pSignalSemaphores = signal_semaphore;
+}
+
 void VulkanObj::CleanupSwapchain()
 {
 	if (prv_Texture.color_image_view)		vkDestroyImageView(prv_Devices.logical, prv_Texture.color_image_view, nullptr);
@@ -156,7 +222,7 @@ void VulkanObj::CleanupSwapchain()
 
 	vkFreeCommandBuffers(prv_Devices.logical, prv_Pools.command, CAST(uint32_t, prv_Command.command_buffers.size()), prv_Command.command_buffers.data());
 
-	if (prv_Buffers_old.descriptor_pool)							vkDestroyDescriptorPool(prv_Devices.logical, prv_Buffers_old.descriptor_pool, nullptr);
+	if (prv_Buffers_old.descriptor_pool)						vkDestroyDescriptorPool(prv_Devices.logical, prv_Buffers_old.descriptor_pool, nullptr);
 	if (prv_RenderGraphicsPipeline.graphics_pipeline)			vkDestroyPipeline(prv_Devices.logical, prv_RenderGraphicsPipeline.graphics_pipeline, nullptr);
 	if (prv_RenderGraphicsPipeline.graphics_pipeline_layout)	vkDestroyPipelineLayout(prv_Devices.logical, prv_RenderGraphicsPipeline.graphics_pipeline_layout, nullptr);
 	if (prv_RenderGraphicsPipeline.render_pass)					vkDestroyRenderPass(prv_Devices.logical, prv_RenderGraphicsPipeline.render_pass, nullptr);

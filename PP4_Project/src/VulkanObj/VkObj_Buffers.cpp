@@ -80,7 +80,9 @@ bool vk_update_uniform_buffer(const VkDevice& device, const VkExtent3D& swapchai
 	Mvp_object mvp;
 
 #if USE_PYRAMID
-	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f))
+		* glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		//* glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
 #else
 	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 #endif
@@ -345,7 +347,7 @@ bool VkObj_VertexBuffer::allocate_buffer(const void* data, const uint32_t &alloc
 	prv_Size = allocation_size;
 	prv_Usage = usage;
 
-	int32_t bytes = get_allocated_size();
+	int64_t bytes = get_allocated_size();
 
 	VkBufferCreateInfo buffer_create_info = {};
 	buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -498,7 +500,7 @@ bool VkObj_IndexBuffer::allocate_buffer(const void* data, const uint32_t &alloca
 	prv_Size = allocation_size;
 	prv_Usage = usage;
 
-	int32_t bytes = get_allocated_size();
+	int64_t bytes = get_allocated_size();
 
 	VkBufferCreateInfo buffer_create_info = {};
 	buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -650,7 +652,7 @@ bool VkObj_UniformBuffer::allocate_buffer(const void* data, const uint32_t &allo
 	prv_Size = allocation_size;
 	prv_Usage = usage;
 
-	int32_t bytes = get_allocated_size();
+	int64_t bytes = get_allocated_size();
 
 	VkBufferCreateInfo buffer_create_info = {};
 	buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;

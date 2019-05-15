@@ -14,19 +14,19 @@ std::vector<Object3D> &object_list, const VkExtent3D &texture_extent, VkSampleCo
 	vk_create_buffer(physical_device, device, image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, staging_buffer, staging_buffer_memory);
 
-//	Change the Color Format from ARGB to ABGR [Reads from Left to Right, TGA is BGRA while Vulkan is SRGB]
-// 	std::vector<unsigned int> converted_pixels(object_list[0].texture->width * object_list[0].texture->height);
-// 	for (uint32_t i = 0; i < converted_pixels.size(); ++i)
-// 	{
-// 		Color current_pixel(object_list[0].texture->data[i]);
-// 		Color new_pixel = (current_pixel.a << 24) | (current_pixel.b << 16) | (current_pixel.g << 8) | current_pixel.r;
-// 		converted_pixels[i] = new_pixel.color;
-// 	}
+// 	Change the Color Format from ARGB to ABGR [Reads from Left to Right, TGA is BGRA while Vulkan is SRGB]
+	std::vector<unsigned int> converted_pixels(object_list[0].texture->width * object_list[0].texture->height);
+	for (uint32_t i = 0; i < converted_pixels.size(); ++i)
+	{
+		Color current_pixel(object_list[0].texture->data_h[i]);
+		Color new_pixel = (current_pixel.a << 24) | (current_pixel.b << 16) | (current_pixel.g << 8) | current_pixel.r;
+		converted_pixels[i] = new_pixel.color;
+	}
 
 	//Allocate the data into the buffer
 	void* data = nullptr;
 	vkMapMemory(device, staging_buffer_memory, 0, image_size, 0, &data);
-	memcpy(data, object_list[0].texture->data, (unsigned int)image_size);
+	memcpy(data, converted_pixels.data(), (unsigned int)image_size);
 	vkUnmapMemory(device, staging_buffer_memory);
 
 	//Create the image, using appropriate information (Mip Levels, Texture data, etc.)

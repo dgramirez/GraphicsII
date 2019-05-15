@@ -12,7 +12,7 @@ public:
 	VkObj_Image(const char* _name, const Texture &_texture, VkDevice &device, VkFormat &depth_buffer, VkSampleCountFlagBits &msaa, bool purge = true);
 
 	void CreateSampler();
-	void EmptyGarbage();
+	static void EmptyGarbage();
 	void AllocateImage();
 	void PurgeImage();
 	void SubImageUpload(const uint32_t &mip_level, const int32_t &offset_x, const int32_t &offset_y, const uint32_t &offset_z, const uint32_t &width, const uint32_t &height, const void* pixels, const uint32_t &pitch);

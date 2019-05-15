@@ -42,6 +42,9 @@ private:
 	VkObj_Allocator prv_Allocator;
 	VkObj_StagingManager prv_StagingManager;
 
+	void start_frame();
+	void end_frame();
+
 	uint32_t prv_Frame = 0;
 	std::vector<Object3D> prv_ObjectList;
 

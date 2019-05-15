@@ -26,6 +26,7 @@ public:
 
 	//Supports
 	VkSampleCountFlagBits msaa_support;
+	uint32_t current_frame;
 
 private:
 	//PreRequisites
