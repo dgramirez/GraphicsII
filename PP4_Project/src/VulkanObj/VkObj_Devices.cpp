@@ -6,12 +6,12 @@ const std::vector<const char*> req_extensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-VkObj_DeviceProperties::VkObj_DeviceProperties(VkInstance &instance, VkSurfaceKHR &surface)
-	: pInstance(&instance), pSurface(&surface) {}
+VkObj_DeviceProperties::VkObj_DeviceProperties() {}
 
 //Public Methods
-bool VkObj_DeviceProperties::init()
+bool VkObj_DeviceProperties::init(VkObj_WindowProperties &windowprops)
 {
+	pWindow = &windowprops;
 	SetPhysicalDevice();
 	CreateLogicalDevice();
 	return true;
@@ -26,7 +26,7 @@ void VkObj_DeviceProperties::shutdown()
 bool VkObj_DeviceProperties::SetPhysicalDevice()
 {
 	//Check for GPUs
-	vkEnumeratePhysicalDevices(*pInstance, &prv_DeviceCount, nullptr);
+	vkEnumeratePhysicalDevices(pWindow->instance, &prv_DeviceCount, nullptr);
 	if (!prv_DeviceCount) {
 		LOG("No GPU Available for Vulkan!");
 		return false;
@@ -34,7 +34,7 @@ bool VkObj_DeviceProperties::SetPhysicalDevice()
 
 	//Check if GPU found is compatible [Will convert to "Find" Best GPU]
 	prv_PhysicalDeviceList.resize(prv_DeviceCount);
-	vkEnumeratePhysicalDevices(*pInstance, &prv_DeviceCount, prv_PhysicalDeviceList.data());
+	vkEnumeratePhysicalDevices(pWindow->instance, &prv_DeviceCount, prv_PhysicalDeviceList.data());
 
 	//Gather Physical Hardware Information
 	for (uint32_t i = 0; i < prv_PhysicalDeviceList.size(); ++i)
@@ -60,7 +60,7 @@ bool VkObj_DeviceProperties::SetPhysicalDevice()
 bool VkObj_DeviceProperties::CreateLogicalDevice()
 {
 	//Setup Queue Families for Create Info
-	VkStruct_QueueFamilyIndices indices = vk_find_queue_family(physical, *pSurface);
+	VkStruct_QueueFamilyIndices indices = vk_find_queue_family(physical, pWindow->surface);
 	std::set<uint32_t> unique_queue_families = { indices.graphics.value(), indices.present.value() };
 	std::vector<VkDeviceQueueCreateInfo> queue_create_info_array(unique_queue_families.size());
 
@@ -125,7 +125,7 @@ bool VkObj_DeviceProperties::DeviceIsCompatible(const uint32_t &index)
 	bool good_swapchain = false;
 	if (extension_support)
 	{
-		VkStruct_SwapchainSupportDetails support = vk_query_swapchain_support(prv_PhysicalDeviceList[index], *pSurface);
+		VkStruct_SwapchainSupportDetails support = vk_query_swapchain_support(prv_PhysicalDeviceList[index], pWindow->surface);
 		good_swapchain = !support.formats.empty() && !support.presentModes.empty();
 	}
 
@@ -158,7 +158,7 @@ void VkObj_DeviceProperties::GetDeviceInformation(const uint32_t &index)
 	prv_DeviceFormatProperties.push_back(format_properties);
 
 	//Look for Family Queues
-	prv_DeviceQFamilies.push_back(vk_find_queue_family(prv_PhysicalDeviceList[index], *pSurface));
+	prv_DeviceQFamilies.push_back(vk_find_queue_family(prv_PhysicalDeviceList[index], pWindow->surface));
 
 	//Get the list of Available Extensions
 	uint32_t extension_count;

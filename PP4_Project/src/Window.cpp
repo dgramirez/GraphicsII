@@ -85,7 +85,7 @@ void Window::Cleanup()
 
 void Window::DrawFrames()
 {
-	Vobj->draw_frames();
+	Vobj->draw();
 }
 
 void Window::WindowResizeCallback(GLFWwindow* window, int width, int height)

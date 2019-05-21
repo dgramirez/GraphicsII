@@ -15,6 +15,7 @@ int main()
 	Object3D axe = create_axe();
 
 	std::vector<Object3D> Object_List;
+	Object_List.push_back(axe);
 	Object_List.push_back(pyramid);
 
 	myWindow->setup_object_list(Object_List);

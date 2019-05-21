@@ -26,7 +26,7 @@ bool vk_create_command_buffer(const VkDevice &device, const VkCommandPool &comma
 	std::vector<VkCommandBuffer> &command_buffers)
 {
 	//Resize the Command Buffer to the Swapchain's buffer size
-	command_buffers.resize(swapchain_frame_buffers.size());
+	command_buffers.resize(MAX_FRAMES);
 
 	//Allocate Command buffer Information
 	VkCommandBufferAllocateInfo command_buffer_allocate_info = {};
@@ -70,16 +70,13 @@ bool vk_create_command_buffer(const VkDevice &device, const VkCommandPool &comma
 		 * Starting of the Drawing Stuff Entering Command Buffer {NOT THE ACTUAL DRAW!}
 		 */
 		vkCmdBeginRenderPass(command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
-		vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline);
-
-		std::array<VkBuffer, 1> vertex_buffer = { vertex_buffers };
-		VkDeviceSize offsets[] = { vertex_buffer_offset };
-		vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffer.data(), offsets);
-		vkCmdBindIndexBuffer(command_buffers[i], index_buffers, 0, VK_INDEX_TYPE_UINT32);
-
-		vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &descriptor_sets[i], 0, nullptr);
-
-		vkCmdDrawIndexed(command_buffers[i], CAST(uint32_t, object_list[0].indices.size()), 1, 0, 0, 0);
+			std::array<VkBuffer, 1> vertex_buffer = { vertex_buffers };
+			VkDeviceSize offsets[] = { vertex_buffer_offset };
+			vkCmdBindPipeline(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline);
+			vkCmdBindDescriptorSets(command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &descriptor_sets[i], 0, nullptr);
+			vkCmdBindVertexBuffers(command_buffers[i], 0, 1, vertex_buffer.data(), offsets);
+			vkCmdBindIndexBuffer(command_buffers[i], index_buffers, 0, VK_INDEX_TYPE_UINT32);
+			vkCmdDrawIndexed(command_buffers[i], CAST(uint32_t, object_list[0].indices.size()), 1, 0, 0, 0);
 		vkCmdEndRenderPass(command_buffers[i]);
 		/*
 		 * Ending of the Drawing Stuff Entering Command Buffer {NOT THE ACTUAL DRAW!}

@@ -2,7 +2,6 @@
 #define VKOBJ_SHARED_H
 
 #include "../Defines.h"
-#include "../Object.h"
 
 struct VkStruct_QueueFamilyIndices {
 	std::optional<uint32_t> graphics;		//Graphics Queue
@@ -52,5 +51,11 @@ bool vk_check_page(const VkDeviceSize &a_memory_offset, const VkDeviceSize &b_me
 bool vk_granularity_conflict(const uint64_t &type_1, const uint64_t &type_2);
 
 VkSampleCountFlagBits get_highest_msaa_sample_count(const VkPhysicalDevice &physical_device);
+
+bool vk_create_image(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkExtent3D &extent, const uint32_t &mip_levels, const VkSampleCountFlagBits &msaa_sample, const VkFormat &format, const VkImageTiling &tiling,
+	const VkImageUsageFlags &usage_flags, const VkMemoryPropertyFlags &memory_property_flags, VkImage &texture_image, VkDeviceMemory &texture_image_memory);
+
+bool vk_create_mipmaps(const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue,
+	const VkImage &texture_image, const uint32_t &texture_width, const uint32_t &texture_height, const uint32_t &mip_levels);
 
 #endif

@@ -24,8 +24,10 @@ const std::vector<const char*> validation_layers = {
 VkObj_WindowProperties::VkObj_WindowProperties()
 	:instance(nullptr), surface(nullptr), window(nullptr) {}
 
-bool VkObj_WindowProperties::init(const char *title)
+bool VkObj_WindowProperties::init(const char *title, GLFWwindow *win)
 {
+	if (!window)
+		window = win;
 	CreateInstance(title);
 	CreateValidationLayer();
 	CreateSurface();

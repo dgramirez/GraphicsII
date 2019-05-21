@@ -75,8 +75,8 @@ bool vk_create_texture_sampler(const VkDevice &device, VkSampler &sampler)
 	sampler_create_info.unnormalizedCoordinates = false;
 	sampler_create_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 	sampler_create_info.mipLodBias = 0.0f;
-	sampler_create_info.minLod = 0.0f;
-	sampler_create_info.maxLod = 0.0f;
+	sampler_create_info.minLod = 5.0f;
+	sampler_create_info.maxLod = 10.0f;
 
 	//Create the Sampler (Using Validation)
 	CHECK_VKRESULT(r, vkCreateSampler(device, &sampler_create_info, nullptr, &sampler), "Sampler Has Failed to be Created!");
@@ -104,8 +104,8 @@ bool vk_create_color_buffer(const VkPhysicalDevice &physical_device, const VkDev
 	return true;
 }
 
-bool vk_create_depth_buffer(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue, const VkExtent3D &swapchain_extent_3d, const VkSampleCountFlagBits &msaa_sample, 
-	VkImage &depth_buffer, VkDeviceMemory &depth_buffer_memory, VkImageView &depth_buffer_view)
+bool vk_create_depth_buffer(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue, const VkExtent3D &swapchain_extent_3d, 
+	const VkSampleCountFlagBits &msaa_sample, VkImage &depth_buffer, VkDeviceMemory &depth_buffer_memory, VkImageView &depth_buffer_view)
 {
 	//Create the format for depth buffer
 	VkFormat depth_format = vk_get_depth_format(physical_device);
@@ -121,129 +121,4 @@ bool vk_create_depth_buffer(const VkPhysicalDevice &physical_device, const VkDev
 	return true;
 }
 
-bool vk_create_image(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkExtent3D &extent, const uint32_t &mip_levels, const VkSampleCountFlagBits &msaa_sample, const VkFormat &format, const VkImageTiling &tiling, 
-	const VkImageUsageFlags &usage_flags, const VkMemoryPropertyFlags &memory_property_flags, VkImage &texture_image, VkDeviceMemory &texture_image_memory)
-{
-	//Create image info
-	VkImageCreateInfo image_create_info = {};
-	image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-	image_create_info.imageType = VK_IMAGE_TYPE_2D;
-	image_create_info.extent = extent;
-	image_create_info.mipLevels = mip_levels;
-	image_create_info.arrayLayers = 1;
-	image_create_info.format = format;
-	image_create_info.tiling = tiling;
-	image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	image_create_info.usage = usage_flags;
-	image_create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	image_create_info.samples = msaa_sample;
-	image_create_info.flags = 0;
-
-	//Create the image
-	CHECK_VKRESULT(r1, vkCreateImage(device, &image_create_info, nullptr, &texture_image), "Failed to Create Image!");
-
-	//Create the memory required for any the image passed into this function
-	VkMemoryRequirements memory_requirements;
-	vkGetImageMemoryRequirements(device, texture_image, &memory_requirements);
-
-	//Memory Allocate Info
-	VkMemoryAllocateInfo memory_allocate_info = {};
-	memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	memory_allocate_info.allocationSize = memory_requirements.size;
-	memory_allocate_info.memoryTypeIndex = vk_find_memory_type(physical_device, memory_requirements.memoryTypeBits, memory_property_flags);
-
-	//Allocate the memory created
-	CHECK_VKRESULT(r2, vkAllocateMemory(device, &memory_allocate_info, nullptr, &texture_image_memory), "Failed to Allocate Memory in Create Image!");
-
-	//Bind the memory created
-	CHECK_VKRESULT(r3, vkBindImageMemory(device, texture_image, texture_image_memory, 0), "Failed to Bind Image Memory! Error Code: ");
-
-	//Image Creation has been successful!
-	return true;
-}
-
-bool vk_create_mipmaps(const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue, 
-	const VkImage &texture_image, const uint32_t &texture_width, const uint32_t &texture_height, const uint32_t &mip_levels)
-{
-	//Start the command buffer
-	VkCommandBuffer command_buffer = vk_start_single_command(device, command_pool);
-
-	//Create the Image Memory Barrier for Mipmapping
-	VkImageMemoryBarrier image_memory_barrier = {};
-	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	image_memory_barrier.image = texture_image;
-	image_memory_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	image_memory_barrier.subresourceRange.baseArrayLayer = 0;
-	image_memory_barrier.subresourceRange.layerCount = 1;
-	image_memory_barrier.subresourceRange.levelCount = 1;
-
-	//Save the texture width and height for Mip levels
-	int32_t mip_width = texture_width;
-	int32_t mip_height = texture_height;
-
-	//Loop for every Mip levels. NOTE: (i-1) is the current mip level, while (i) is the next mip level
-	for (uint32_t i = 1; i < mip_levels; ++i) {
-		//Setup the current mip level for blitting the image
-		image_memory_barrier.subresourceRange.baseMipLevel = i - 1;
-		image_memory_barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-		image_memory_barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-		image_memory_barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-		image_memory_barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-
-		//Transfer the layout and Access Mask Information
-		vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
-			0, nullptr, 0, nullptr, 1, &image_memory_barrier);
-
-		//Create the Blit Image. Src is (i-1), or current mip level. dst is (i), or next mip level.
-		VkImageBlit image_blit = {};
-		image_blit.srcSubresource.mipLevel = i - 1;
-		image_blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		image_blit.srcSubresource.baseArrayLayer = 0;
-		image_blit.srcSubresource.layerCount = 1;
-		image_blit.srcOffsets[0] = { 0, 0, 0 };
-		image_blit.srcOffsets[1] = { mip_width, mip_height, 1 };
-
-		image_blit.dstSubresource.mipLevel = i;
-		image_blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		image_blit.dstSubresource.baseArrayLayer = 0;
-		image_blit.dstSubresource.layerCount = 1;
-		image_blit.dstOffsets[0] = image_blit.srcOffsets[0];
-		image_blit.dstOffsets[1] = { mip_width > 1 ? (mip_width >> 1) : 1 , mip_height > 1 ? (mip_height >> 1) : 1, 1 };
-
-		//Blit the texture
-		vkCmdBlitImage(command_buffer, texture_image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, texture_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			1, &image_blit, VK_FILTER_LINEAR);
-
-		//Set the layout and Access Mask (again) for the shader to read
-		image_memory_barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-		image_memory_barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		image_memory_barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-		image_memory_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-		//Transfer the layout and Access Mask Information (Again, based on above values)
-		vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			0, 0, nullptr, 0, nullptr, 1, &image_memory_barrier);
-
-		//Reduce the Mip level down by 1 level [By cutting width and height in half]
-		if (mip_width > 1) { mip_width >>= 1; }
-		if (mip_height > 1) { mip_height >>= 1; }
-	}
-
-	image_memory_barrier.subresourceRange.baseMipLevel = mip_levels - 1;
-	image_memory_barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-	image_memory_barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	image_memory_barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-	image_memory_barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-	vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		0, 0, nullptr, 0, nullptr, 1, &image_memory_barrier);
-
-	//End the command
-	CHECK_RESULT(vk_end_single_command(device, graphics_queue, command_pool, command_buffer), "Failed to End Single Command in Mipmapping Texture.");
-
-	//Mipmapping has been created successfully!
-	return true;
-}
 

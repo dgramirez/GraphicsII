@@ -22,24 +22,46 @@ struct VkObj_Swapchains
 class VkObj_Swapchain
 {
 public:
-	VkObj_Swapchain(VkObj_WindowProperties &window_properties, VkObj_DeviceProperties &device_properties);
-	bool init();
+	VkObj_Swapchain();
+	bool init(VkObj_WindowProperties &window_properties, VkObj_DeviceProperties &device_properties, VkCommandPool &pools);
 
-	VkSwapchainKHR me;
-	std::vector<VkImage> images;
-	std::vector<VkImageView> image_views;
-	std::vector<VkFramebuffer> frame_buffers;
-	VkFormat format;
-	union
-	{
+	union {
 		VkExtent3D extent3D;
 		struct { VkExtent2D extent2D; uint32_t depth; };
 	};
+	VkFormat format;
+	std::vector<VkImage> images;
+	std::vector<VkImageView> image_views;
+	std::vector<VkFramebuffer> frame_buffers;
+	VkSwapchainKHR me;
+
+	VkRenderPass render_pass;
+	VkRenderPass render_pass_no_clear;
+
+	struct VkStruct_Image{
+		VkImage image;
+		VkDeviceMemory memory;
+		VkImageView view;
+	};
+
+	VkStruct_Image msaa;
+	VkStruct_Image zbuffer;
+	uint32_t image_index;
+
+	static uint32_t swapchain_size;
+	std::vector<VkCommandBuffer> command_buffer;
+
 private:
 	bool CreateSwapchain();
-	bool CreateSwapchainViews();
+	bool CreateRenderPass();
+	bool CreateRenderPassNoClear();
+	bool CreateMSAA();
+	bool CreateDepthBuffer();
+	bool CreateFrameBuffer();
+	bool CreateCommandBuffer();
 	VkObj_WindowProperties *pWindowProperties;
 	VkObj_DeviceProperties *pDeviceProperties;
+	VkCommandPool *pCommandPool;
 };
 
 bool vk_create_swapchain(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkSurfaceKHR &surface, const uint32_t &window_width, const uint32_t &window_height, 

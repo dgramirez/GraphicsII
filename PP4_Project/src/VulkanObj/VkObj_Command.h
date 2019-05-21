@@ -2,6 +2,7 @@
 #define VKOBJ_COMMANDOBJECTS_H
 
 #include "VkObj_Shared.h"
+#include "../Object.h"
 
 struct VkObj_Commands
 {

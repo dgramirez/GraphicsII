@@ -69,6 +69,15 @@
     <ClCompile Include="src\VulkanObj\VkObj_Pools.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\VulkanObj\VkObj_Image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanObj\VkObj_Context.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanObj\VkObj_Uniform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Window.h">
@@ -131,10 +140,13 @@
     <ClInclude Include="src\VulkanObj\VkObj_RenderBackend.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VulkanObj\VkObj_Pools.h">
+    <ClInclude Include="src\VulkanObj\VkObj_Image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VulkanObj\VkObj_Images.h">
+    <ClInclude Include="src\VulkanObj\VkObj_Context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VulkanObj\VkObj_Uniform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

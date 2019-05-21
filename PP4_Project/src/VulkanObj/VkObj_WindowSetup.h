@@ -6,7 +6,7 @@
 class VkObj_WindowProperties {
 public:
 	VkObj_WindowProperties();
-	bool init(const char *title);
+	bool init(const char *title, GLFWwindow *win = nullptr);
 	void shutdown();
 
 	VkInstance instance;

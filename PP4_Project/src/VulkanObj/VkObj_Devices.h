@@ -2,12 +2,13 @@
 #define VKOBJ_DEVICES_H
 
 #include "VkObj_Shared.h"
+#include "VkObj_WindowSetup.h"
 
 class VkObj_DeviceProperties
 {
 public:
-	VkObj_DeviceProperties(VkInstance &instance, VkSurfaceKHR &surface);
-	bool init();
+	VkObj_DeviceProperties();
+	bool init(VkObj_WindowProperties &windowprops);
 	void shutdown();
 
 	const uint32_t get_device_count() { return prv_DeviceCount; }
@@ -32,6 +33,7 @@ private:
 	//PreRequisites
 	VkInstance *pInstance;
 	VkSurfaceKHR *pSurface;
+	VkObj_WindowProperties *pWindow;
 
 	//Information
 	uint32_t prv_DeviceCount;
