@@ -33,8 +33,6 @@ void Object3D::set_static_contexts(VkObj_DeviceProperties &device, VkCommandPool
 void Object3D::init(std::vector<VkBuffer> &uniform_buffers, const uint32_t &sizeof_ubuffer,
 	VkPipelineLayout &graphics_pipeline_layout, VkPipeline &graphic_pipeline, const uint32_t &swapchain_vec_size)
 {
-	world_matrix = { 0, 0, 0, 1 };
-	uniform_buffer = &uniform_buffers;
 	ubuffer_range = sizeof_ubuffer;
 	pipeline_layout = &graphics_pipeline_layout;
 	pipeline = &graphic_pipeline;
@@ -45,7 +43,28 @@ void Object3D::init(std::vector<VkBuffer> &uniform_buffers, const uint32_t &size
 	CreateVertexBuffer();
 	CreateIndexBuffer();
 	CreateDescriptorPool();
-	CreateDescriptorSet();
+}
+
+void Object3D::set_image_view(const VkComponentSwizzle &red, const VkComponentSwizzle &green, const VkComponentSwizzle &blue, const VkComponentSwizzle &alpha)
+{
+	//Image View Create Info
+	VkImageViewCreateInfo create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	create_info.image = image;
+	create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	create_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+	create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	create_info.subresourceRange.baseMipLevel = 0;
+	create_info.subresourceRange.levelCount = texture->mip_levels;
+	create_info.subresourceRange.baseArrayLayer = 0;
+	create_info.subresourceRange.layerCount = 1;
+	create_info.components.r = component_r;
+	create_info.components.g = component_g;
+	create_info.components.b = component_b;
+	create_info.components.a = component_a;
+
+	//Create the Surface (With Results) [VK_SUCCESS = 0]
+	vkCreateImageView(pDevice->logical, &create_info, nullptr, &image_view), "Failed to Create Image View";
 }
 
 void Object3D::ProcessFbxMesh(FbxNode* node)
@@ -469,7 +488,7 @@ void Object3D::CreateImage()
 	vk_create_mipmaps(pDevice->logical, *pCommandPool, pDevice->q_graphics, image, texture->width, texture->height, texture->mip_levels);
 
 	//Create Image View
-	image_view = vk_create_image_view(pDevice->logical, image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, texture->mip_levels);
+	set_image_view();
 }
 
 void Object3D::CreateSampler()
@@ -575,7 +594,7 @@ bool Object3D::CreateDescriptorSet()
 	for (uint32_t i = 0; i < swapchain_size; ++i)
 	{
 		VkDescriptorBufferInfo descriptor_buffer_info = {};
-		descriptor_buffer_info.buffer = uniform_buffer->operator[](i);
+		descriptor_buffer_info.buffer = uniform_buffer[i];
 		descriptor_buffer_info.offset = 0;
 		descriptor_buffer_info.range = ubuffer_range;
 

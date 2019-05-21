@@ -9,7 +9,6 @@ void VkObj_Uniform::init(VkObj_DeviceProperties &device, VkObj_Swapchain &swapch
 	pCommandPool = &command_pool;
 
 	CreateDescriptorSetLayout();
-	CreateUniformBuffer();
 }
 
 bool VkObj_Uniform::CreateDescriptorSetLayout()
@@ -39,7 +38,7 @@ bool VkObj_Uniform::CreateDescriptorSetLayout()
 	return true;
 }
 
-bool VkObj_Uniform::CreateUniformBuffer()
+bool VkObj_Uniform::CreateUniformBuffer(std::vector<VkBuffer> &buffer, std::vector<VkDeviceMemory> &memory)
 {
 	VkDeviceSize buffer_size = sizeof(Mvp_object);
 

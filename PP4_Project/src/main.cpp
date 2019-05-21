@@ -60,6 +60,17 @@ Object3D create_pyramid()
 	Texture* celestial = new Texture(celestial_width, celestial_height, celestial_pixels, celestial_numlevels, false);
 
 	Object3D pyramid(pyramid_vertex, pyramid_index, celestial);
+	//rgba
+	//gbar
+	
+	//bgra
+	//abgr
+	pyramid.component_r = VK_COMPONENT_SWIZZLE_G;
+	pyramid.component_g = VK_COMPONENT_SWIZZLE_B;
+	pyramid.component_b = VK_COMPONENT_SWIZZLE_A;
+	pyramid.component_a = VK_COMPONENT_SWIZZLE_R;
+
+	pyramid.world_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-4.5f, -2.0f, -3.0f));
 
 	return pyramid;
 }
@@ -93,6 +104,7 @@ Object3D create_two_squares()
 Object3D create_axe()
 {
 	Object3D axe("Axe.fbx");
+	axe.world_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f)) /* glm::rotate(glm::mat4(), 1.0f, glm::vec3(0.0f, 1.0f, 0.0f)) */;
 
 	return axe;
 }

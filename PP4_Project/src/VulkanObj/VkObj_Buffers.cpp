@@ -71,7 +71,7 @@ bool vk_create_uniform_buffer(const VkPhysicalDevice &physical_device, const VkD
 	return true;
 }
 
-bool vk_update_uniform_buffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, std::vector<VkDeviceMemory> &uniform_buffer_memory)
+bool vk_update_uniform_buffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, std::vector<VkDeviceMemory> &uniform_buffer_memory, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory)
 {
 	static auto start_time = std::chrono::high_resolution_clock::now();
 	auto current_time = std::chrono::high_resolution_clock::now();
@@ -80,9 +80,10 @@ bool vk_update_uniform_buffer(const VkDevice& device, const VkExtent3D& swapchai
 	Mvp_object mvp;
 
 #if USE_PYRAMID
-	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f))
+	//mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	mvp.model = model
+		* glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f))
 		* glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		//* glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
 #else
 	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 #endif
@@ -92,9 +93,9 @@ bool vk_update_uniform_buffer(const VkDevice& device, const VkExtent3D& swapchai
 	mvp.projection[1][1] = -mvp.projection[1][1];
 
 	void* data;
-	vkMapMemory(device, uniform_buffer_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
+	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
 	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_buffer_memory[current_image]);
+	vkUnmapMemory(device, uniform_memory[current_image]);
 
 	return true;
 }

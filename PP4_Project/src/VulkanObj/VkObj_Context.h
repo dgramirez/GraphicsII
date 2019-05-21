@@ -32,7 +32,6 @@ public:
 	bool CreateCommandBuffer(Object3D &object, uint32_t index);
 
 	bool CreatePipelines();
-	bool CreatePipelineNoClear();
 //	bool CreatePipelines(const char* vertex_shader, const char* pixel_shader);
 
 	VkCommandPool command_pool;

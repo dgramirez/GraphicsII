@@ -16,6 +16,9 @@ bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_w
 			context.pipeline_layout[0], context.pipelines[0], VkObj_Swapchain::swapchain_size);
 
 		context.CreateCommandBuffer(prv_ObjectList[i], i);
+		context.uniform.CreateUniformBuffer(prv_ObjectList[i].uniform_buffer, prv_ObjectList[i].uniform_memory);
+
+		prv_ObjectList[i].CreateDescriptorSet();
 	}
 
 	//Create Semaphores
@@ -181,15 +184,13 @@ void VulkanObj::end_frame()
 	VkPipelineStageFlags wait_stages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 	VkSemaphore signal_semaphore[] = { prv_SemaphoreAndFences.render_finished_semaphores[prv_Frame] };
 
-	vk_update_uniform_buffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, context.uniform.memory);
-
 	std::array<VkCommandBuffer, 1 > pCommandBuffer = { context.swapchain.command_buffer[context.swapchain.image_index] };
 	VkSubmitInfo submit_info = {};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submit_info.waitSemaphoreCount = 1;
 	submit_info.pWaitSemaphores = wait_semaphores;
 	submit_info.pWaitDstStageMask = wait_stages;
-	submit_info.commandBufferCount = pCommandBuffer.size();
+	submit_info.commandBufferCount = CAST(uint32_t,pCommandBuffer.size());
 	submit_info.pCommandBuffers = pCommandBuffer.data();
 	submit_info.signalSemaphoreCount = 1;
 	submit_info.pSignalSemaphores = signal_semaphore;
@@ -314,7 +315,7 @@ void VulkanObj::draw_frames()
 // 	for (uint32_t i = 0; i < buffersize; ++i)
 // 		pCommandBuffer.push_back(prv_ObjectList[i].command_buffer[image_index]);
 
-	vk_update_uniform_buffer(context.device.logical, context.swapchain.extent3D, image_index, context.uniform.memory);
+//	vk_update_uniform_buffer(context.device.logical, context.swapchain.extent3D, image_index, context.uniform.memory);
 
 	VkSubmitInfo submit_info = {};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -362,21 +363,18 @@ void VulkanObj::draw()
 {
 	start_frame();
 
-	std::array<VkBuffer, 1> vertex_buffer = { prv_ObjectList[0].vertex_buffer };
-	std::array<VkBuffer, 1> vertex_buffer2 = { prv_ObjectList[1].vertex_buffer };
-	VkDeviceSize offsets[] = { 0 };
+	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
+	{
+		std::array<VkBuffer, 1> vertex_buffer = { prv_ObjectList[i].vertex_buffer };
+		VkDeviceSize offset[] = { 0 };
 
-	vkCmdBindPipeline(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, context.pipelines[0]);
-
-	vkCmdBindDescriptorSets(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, context.pipeline_layout[0], 0, 1, &prv_ObjectList[0].descriptor_set[context.swapchain.image_index], 0, nullptr);
- 	vkCmdBindVertexBuffers(context.swapchain.command_buffer[context.swapchain.image_index], 0, 1, vertex_buffer.data(), offsets);
- 	vkCmdBindIndexBuffer(context.swapchain.command_buffer[context.swapchain.image_index], prv_ObjectList[0].index_buffer, 0, VK_INDEX_TYPE_UINT32);
- 	vkCmdDrawIndexed(context.swapchain.command_buffer[context.swapchain.image_index], CAST(uint32_t, prv_ObjectList[0].indices.size()), 1, 0, 0, 0);
-
- 	vkCmdBindDescriptorSets(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, context.pipeline_layout[0], 0, 1, &prv_ObjectList[1].descriptor_set[context.swapchain.image_index], 0, nullptr);
-  	vkCmdBindVertexBuffers(context.swapchain.command_buffer[context.swapchain.image_index], 0, 1, vertex_buffer2.data(), offsets);
-  	vkCmdBindIndexBuffer(context.swapchain.command_buffer[context.swapchain.image_index], prv_ObjectList[1].index_buffer, 0, VK_INDEX_TYPE_UINT32);
-  	vkCmdDrawIndexed(context.swapchain.command_buffer[context.swapchain.image_index], CAST(uint32_t, prv_ObjectList[1].indices.size()), 1, 0, 0, 0);
+		vk_update_uniform_buffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, context.uniform.memory, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory);
+		vkCmdBindPipeline(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline);
+		vkCmdBindDescriptorSets(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline_layout, 0, 1, &prv_ObjectList[i].descriptor_set[context.swapchain.image_index], 0, nullptr);
+		vkCmdBindVertexBuffers(context.swapchain.command_buffer[context.swapchain.image_index], 0, 1, vertex_buffer.data(), offset);
+		vkCmdBindIndexBuffer(context.swapchain.command_buffer[context.swapchain.image_index], prv_ObjectList[i].index_buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(context.swapchain.command_buffer[context.swapchain.image_index], CAST(uint32_t, prv_ObjectList[i].indices.size()), 1, 0, 0, 0);
+	}
 
 	end_frame();
 }

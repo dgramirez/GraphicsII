@@ -152,7 +152,7 @@ bool vk_create_index_buffer(const VkPhysicalDevice &physical_device, const VkDev
 bool vk_create_uniform_buffer(const VkPhysicalDevice &physical_device, const VkDevice &device, const std::vector<VkImage> &swapchain_images,
 	std::vector<VkBuffer> &uniform_buffers, std::vector<VkDeviceMemory> &uniform_buffers_memory);
 bool vk_update_uniform_buffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, 
-	std::vector<VkDeviceMemory> &uniform_buffer_memory);
+	std::vector<VkDeviceMemory> &uniform_buffer_memory, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory);
 
 bool vk_create_descriptor_set_layout(const VkDevice &device, VkDescriptorSetLayout &descriptor_set_layout);
 bool vk_create_descriptor_pool(const VkDevice &device, const std::vector<VkImage> &swapchain_images, VkDescriptorPool &descriptor_pool);

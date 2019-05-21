@@ -25,8 +25,13 @@ public:
 	__declspec(property(get = get_texture)) Texture* texture;
 	
 	VkImage image;
-	VkImageView image_view;
+	VkImageView image_view = nullptr;
 	VkDeviceMemory image_memory;
+
+	VkComponentSwizzle component_r = VK_COMPONENT_SWIZZLE_IDENTITY;
+	VkComponentSwizzle component_g = VK_COMPONENT_SWIZZLE_IDENTITY;
+	VkComponentSwizzle component_b = VK_COMPONENT_SWIZZLE_IDENTITY;
+	VkComponentSwizzle component_a = VK_COMPONENT_SWIZZLE_IDENTITY;
 
 	VkBuffer vertex_buffer;
 	VkDeviceMemory vertex_memory;
@@ -34,7 +39,9 @@ public:
 	VkBuffer index_buffer;
 	VkDeviceMemory index_memory;
 
-	std::vector<VkBuffer> *uniform_buffer;
+	std::vector<VkBuffer> uniform_buffer;
+	std::vector<VkDeviceMemory> uniform_memory;
+
 	uint32_t ubuffer_range;
 	VkSampler sampler;
 	std::vector<VkDescriptorSet> descriptor_set;
@@ -54,9 +61,11 @@ public:
 	static void set_static_contexts(VkObj_DeviceProperties &device, VkCommandPool &command_pool, VkDescriptorSetLayout &descriptor_layout);
 	void init(std::vector<VkBuffer> &uniform_buffers, const uint32_t &sizeof_ubuffer,
 		VkPipelineLayout &graphics_pipeline_layout, VkPipeline &graphic_pipeline, const uint32_t &swapchain_vec_size);
+	void set_image_view(const VkComponentSwizzle &red = VK_COMPONENT_SWIZZLE_IDENTITY, const VkComponentSwizzle &green = VK_COMPONENT_SWIZZLE_IDENTITY, const VkComponentSwizzle &blue = VK_COMPONENT_SWIZZLE_IDENTITY, const VkComponentSwizzle &alpha = VK_COMPONENT_SWIZZLE_IDENTITY);
 
+	bool CreateDescriptorSet();
 	float scale = 10.0f;
-	glm::vec4 world_matrix;
+	glm::mat4 world_matrix;
 private:
 	std::vector<uint32_t> prv_Indices;
 	std::vector<Vertex> prv_Vertices;
@@ -76,7 +85,6 @@ private:
 	void CreateVertexBuffer();
 	void CreateIndexBuffer();
 	bool CreateDescriptorPool();
-	bool CreateDescriptorSet();
 
 };
 

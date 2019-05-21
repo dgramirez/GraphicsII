@@ -12,7 +12,7 @@ public:
 	VkObj_Uniform();
 
 	void init(VkObj_DeviceProperties &device, VkObj_Swapchain &swapchain, VkCommandPool &command_pool);
-
+	bool CreateUniformBuffer(std::vector<VkBuffer> &buffer, std::vector<VkDeviceMemory> &memory);
 
 	std::vector<VkBuffer> buffer;
 	std::vector<VkDeviceMemory> memory;
@@ -25,7 +25,6 @@ private:
 	VkCommandPool *pCommandPool;
 
 	bool CreateDescriptorSetLayout();
-	bool CreateUniformBuffer();
 };
 
 #endif VKOBJ_UNIFORM_H
