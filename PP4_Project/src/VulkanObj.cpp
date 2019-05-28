@@ -75,41 +75,19 @@ void VulkanObj::idle_device()
 
 void VulkanObj::reset_swapchain(unsigned short win_width, unsigned short win_height)
 {
-// 	vkDeviceWaitIdle(context.device.logical);
-// 
-// 	CleanupSwapchain();
-// 
-// 	CHECK_RESULT_NO_RETURN(vk_create_swapchain(context.device.physical, context.device.logical, prv_Window.surface, win_width, win_height,
-// 		context.swapchain.swapchain, context.swapchain.images, context.swapchain.format, context.swapchain.extent2D), "Create Swap Chain Has Failed!");
-// 	CHECK_RESULT_NO_RETURN(vk_create_swapchain_image_view(context.device.logical, context.swapchain.images, context.swapchain.format,
-// 		context.swapchain.views), "Create Image View Has Failed!");
-// 	CHECK_RESULT_NO_RETURN(vk_create_render_pass(context.device.physical, context.device.logical, context.swapchain.format,
-// 		context.device.msaa_support, context.swapchain.render_pass), "Create Render Pass Has Failed!");
-// 
-// 	CHECK_RESULT_NO_RETURN(vk_create_graphics_pipeline(context.device.logical, context.swapchain.extent2D, prv_Buffers_old.descriptor_set_layout,
-// 		context.device.msaa_support, context.swapchain.render_pass, prv_RenderGraphicsPipeline.graphics_pipeline_layout,
-// 		prv_RenderGraphicsPipeline.graphics_pipeline), "Create Graphics Pipeline Has Failed!");
-// 
-// 	CHECK_RESULT_NO_RETURN(vk_create_color_buffer(context.device.physical, context.device.logical, context.command_pool,
-// 		context.device.q_graphics, 1, context.device.msaa_support, context.swapchain.extent3D, context.swapchain.format,
-// 		prv_Texture.color_image, prv_Texture.color_image_memory, prv_Texture.color_image_view), "Create Color Buffer Has Failed!");
-// 	CHECK_RESULT_NO_RETURN(vk_create_depth_buffer(context.device.physical, context.device.logical, context.command_pool,
-// 		context.device.q_graphics, context.swapchain.extent3D, context.device.msaa_support, prv_Texture.depth_buffer,
-// 		prv_Texture.depth_buffer_memory, prv_Texture.depth_buffer_view), "Create Depth Resources Has Failed!");
-// 	CHECK_RESULT_NO_RETURN(vk_create_swapchain_frame_buffer(context.device.logical, context.swapchain.render_pass,
-// 		context.swapchain.views, context.swapchain.extent2D, prv_Texture.color_image_view, prv_Texture.depth_buffer_view,
-// 		context.swapchain.frame_buffers), "Create Frame Buffers Has Failed");
-// 
-// 	CHECK_RESULT_NO_RETURN(vk_create_uniform_buffer(context.device.physical, context.device.logical, context.swapchain.images,
-// 		prv_Buffers_old.uniform, prv_Buffers_old.uniform_memory), "Create Uniform Buffer Has Failed!");
-// 	CHECK_RESULT_NO_RETURN(vk_create_descriptor_pool(context.device.logical, context.swapchain.images, prv_Buffers_old.descriptor_pool), "Create Descriptor Pool Has Failed!");
-// 	CHECK_RESULT_NO_RETURN(vk_create_descriptor_sets(context.device.logical, context.swapchain.images, prv_Buffers_old.descriptor_pool,
-// 		prv_Buffers_old.uniform, prv_Texture.texture_image_view, prv_Texture.sampler, prv_Buffers_old.descriptor_set_layout,
-// 		prv_Buffers_old.descriptor_sets), "Create Desriptor Sets Has Failed!");
-// 	CHECK_RESULT_NO_RETURN(vk_create_command_buffer(context.device.logical, context.command_pool, context.swapchain.render_pass,
-// 		prv_RenderGraphicsPipeline.graphics_pipeline_layout, prv_RenderGraphicsPipeline.graphics_pipeline,
-// 		context.swapchain.extent2D, context.swapchain.frame_buffers, prv_Buffers_old.descriptor_sets, prv_Buffers_old.vertex, 0,
-// 		prv_Buffers_old.index, prv_ObjectList, prv_Command.command_buffers), "Create Command Buffer Has Failed!");
+	vkDeviceWaitIdle(context.device.logical);
+
+	CleanupSwapchain();
+
+	context.swapchain.init(context.window, context.device, context.command_pool);
+	context.CreatePipelines();
+	context.CreateDescriptorPool();
+
+	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
+	{
+		prv_ObjectList[i].CreateUniformBuffer();
+		prv_ObjectList[i].CreateDescriptorSet(context.descriptor_pool, context.descriptor_set_layout);
+	}
 }
 
 void VulkanObj::setup_object_list(uint32_t size)
@@ -120,6 +98,22 @@ void VulkanObj::setup_object_list(uint32_t size)
 void VulkanObj::add_to_object_list(const Object3D & object)
 {
 	prv_ObjectList.push_back(object);
+}
+
+void VulkanObj::update()
+{
+	if ( _getch() == '\033')
+		_getch();
+
+	int ch = _getch();
+	if (ch == 'A')
+		center.z = -0.001f;
+	else if (ch == 'B')
+		center.z = 0.001f;
+	else if (ch == 'C')
+		center.x = 0.001f;
+	else if (ch == 'D')
+		center.x = -0.001f;
 }
 
 void VulkanObj::start_frame()
@@ -247,10 +241,7 @@ void VulkanObj::CleanupSwapchain()
 
 	vkFreeCommandBuffers(context.device.logical, context.command_pool, CAST(uint32_t, context.swapchain.command_buffer.size()), context.swapchain.command_buffer.data());
 	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
-	{
-		vkFreeCommandBuffers(context.device.logical, context.command_pool, CAST(uint32_t, prv_ObjectList[i].command_buffer.size()), prv_ObjectList[i].command_buffer.data());
-		vkDestroyDescriptorPool(context.device.logical, prv_ObjectList[i].descriptor_pool, nullptr);
-	}
+		prv_ObjectList[i].reset();
 	
 	while (!context.pipelines.empty())
 	{
@@ -262,21 +253,16 @@ void VulkanObj::CleanupSwapchain()
 		context.pipelines.pop_back();
 	}
 	if (context.swapchain.render_pass)	vkDestroyRenderPass(context.device.logical, context.swapchain.render_pass, nullptr);
+	if (context.swapchain.render_pass_no_clear)	vkDestroyRenderPass(context.device.logical, context.swapchain.render_pass_no_clear, nullptr);
 
  	for (unsigned int i = 0; i < context.swapchain.images.size(); ++i)
  		vkDestroyImageView(context.device.logical, context.swapchain.image_views[i], nullptr);
  
  	if (context.swapchain.me)
 		vkDestroySwapchainKHR(context.device.logical, context.swapchain.me, nullptr);
- 
-//  	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
-//  	{
-// 		for (uint32_t j = 0; j < context.swapchain.images.size(); ++j)
-// 		{
-//  			vkDestroyBuffer(context.device.logical, prv_ObjectList[i].uniform_buffer[j], nullptr);
-//  			vkFreeMemory(context.device.logical, prv_ObjectList[i].uniform_memory[j], nullptr);
-// 		}
-//  	}
+
+	if (context.descriptor_pool)
+		vkDestroyDescriptorPool(context.device.logical, context.descriptor_pool, nullptr);
 }
 
 void VulkanObj::cleanup()
@@ -374,8 +360,7 @@ void VulkanObj::draw()
 		std::array<VkBuffer, 1> vertex_buffer = { prv_ObjectList[i].vertex_buffer };
 		VkDeviceSize offset[] = { 0 };
 
-//		vk_update_uniform_buffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory);
-		prv_ObjectList[i].UpdateUniformBuffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory);
+		prv_ObjectList[i].UpdateUniformBuffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory, glm::lookAt(eye, center, up));
 		vkCmdBindPipeline(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline);
 		vkCmdBindDescriptorSets(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline_layout, 0, 1, &prv_ObjectList[i].descriptor_set[context.swapchain.image_index], 0, nullptr);
 		vkCmdBindVertexBuffers(context.swapchain.command_buffer[context.swapchain.image_index], 0, 1, vertex_buffer.data(), offset);

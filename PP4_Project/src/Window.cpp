@@ -67,7 +67,6 @@ void Window::MainLoop()
 		}
 
 		Vobj->idle_device();
-
 	}
 
 }
@@ -85,6 +84,7 @@ void Window::Cleanup()
 
 void Window::DrawFrames()
 {
+//	Vobj->update();
 	Vobj->draw();
 }
 

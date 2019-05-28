@@ -461,4 +461,6 @@ bool VkObj_Swapchain::CreateCommandBuffer()
 	command_buffer_allocate_info.commandBufferCount = CAST(uint32_t, command_buffer.size());
 
 	CHECK_VKRESULT(r, vkAllocateCommandBuffers(pDeviceProperties->logical, &command_buffer_allocate_info, command_buffer.data()), "Failed to create Command Pool!");
+
+	return true;
 }

@@ -28,6 +28,7 @@ public:
 	void reset_swapchain(unsigned short win_width, unsigned short win_height);
 	void setup_object_list(uint32_t size);
 	void add_to_object_list(const Object3D& object);
+	void update();
 
 private:
 	VkObj_SemaphoresAndFences prv_SemaphoreAndFences;
@@ -35,6 +36,10 @@ private:
 
 	void start_frame();
 	void end_frame();
+
+	glm::vec3 eye = { 2.0f, 2.0f, 2.0f };
+	glm::vec3 center = { 0.0f, 0.0f, 0.0f };
+	const glm::vec3 up = { 0.0f, 0.0f, 1.0f };
 
 	uint32_t prv_Frame = 0;
 	std::vector<Object3D> prv_ObjectList;

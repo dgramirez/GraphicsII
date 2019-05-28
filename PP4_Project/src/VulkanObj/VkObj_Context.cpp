@@ -383,16 +383,15 @@ void VkObj_Context::shutdown()
 	
 	for (uint32_t i = 0; i < pipelines.size(); ++i)
 		vkDestroyPipeline(device.logical, pipelines[i], nullptr);
-
-	vkDestroyRenderPass(device.logical, swapchain.render_pass_no_clear, nullptr);
 	
 	if (command_pool)	vkDestroyCommandPool(device.logical, command_pool, nullptr);
 	
 	for (uint32_t i = 0; i < MAX_FRAMES; ++i)
-		if (query_pool[i])	vkDestroyQueryPool(device.logical, query_pool[i], nullptr);
+	{
+		if (query_pool[i])
+			vkDestroyQueryPool(device.logical, query_pool[i], nullptr);
+	}
 
-	vkDestroyDescriptorPool(device.logical, descriptor_pool, nullptr);
-	
 	device.shutdown();
 	window.shutdown();
 }

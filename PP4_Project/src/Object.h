@@ -59,12 +59,14 @@ public:
 
 	bool CreateDescriptorSet();
 	bool CreateDescriptorSet(const VkDescriptorPool &descriptor_pool, const VkDescriptorSetLayout &descriptor_set_layout);
+	void CreateUniformBuffer();
 
-	void(*uniformFctn)(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory);
-	void UpdateUniformBuffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory);
+	void(*uniformFctn)(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
+	void UpdateUniformBuffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
 	float scale;
 	glm::mat4 world_matrix;
 
+	void reset();
 	void cleanup();
 private:
 	std::vector<uint32_t> prv_Indices;
@@ -84,7 +86,6 @@ private:
 	void CreateSampler();
 	void CreateVertexBuffer();
 	void CreateIndexBuffer();
-	void CreateUniformBuffer();
 	bool CreateDescriptorPool();
 
 };

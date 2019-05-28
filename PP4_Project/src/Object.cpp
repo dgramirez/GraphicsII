@@ -695,10 +695,27 @@ bool Object3D::CreateDescriptorSet(const VkDescriptorPool &descriptor_pool, cons
 	return true;
 }
 
-void Object3D::UpdateUniformBuffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory)
+void Object3D::UpdateUniformBuffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
 {
 	if (uniformFctn)
-		uniformFctn(device, swapchain_extent, current_image, model, uniform_memory);
+		uniformFctn(device, swapchain_extent, current_image, model, uniform_memory, view);
+}
+
+void Object3D::reset()
+{
+	if (!command_buffer.empty())
+	{
+		vkFreeCommandBuffers(pDevice->logical, *pCommandPool, command_buffer.size(), command_buffer.data());
+		command_buffer.clear();
+	}
+
+	for (uint32_t i = 0; i < swapchain_size; ++i)
+	{
+		vkDestroyBuffer(pDevice->logical, uniform_buffer[i], nullptr);
+		vkFreeMemory(pDevice->logical, uniform_memory[i], nullptr);
+	}
+	uniform_buffer.clear();
+	uniform_memory.clear();
 }
 
 void Object3D::cleanup()
@@ -708,12 +725,4 @@ void Object3D::cleanup()
 	if (index_memory)	vkFreeMemory(pDevice->logical, index_memory, nullptr);
 	if (vertex_buffer)	vkDestroyBuffer(pDevice->logical, vertex_buffer, nullptr);
 	if (vertex_memory)	vkFreeMemory(pDevice->logical, vertex_memory, nullptr);
-
-	for (uint32_t i = 0; i < uniform_buffer.size(); ++i)
-	{
-		vkDestroyBuffer(pDevice->logical, uniform_buffer[i], nullptr);
-		vkFreeMemory(pDevice->logical, uniform_memory[i], nullptr);
-	}
-	uniform_buffer.clear();
-	uniform_memory.clear();
 }

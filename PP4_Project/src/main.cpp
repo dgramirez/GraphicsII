@@ -7,10 +7,10 @@ Object3D create_two_squares();
 Object3D create_axe();
 Object3D create_terrain();
 Object3D create_earth();
-void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory);
-void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory);
-void SquareFlag(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory);
-void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory);
+void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
+void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
+void SquareFlag(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
+void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
 
 int main()
 {
@@ -130,7 +130,7 @@ Object3D create_earth()
 	return myEarth;
 }
 
-void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory)
+void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
 {
 	static auto start_time = std::chrono::high_resolution_clock::now();
 	auto current_time = std::chrono::high_resolution_clock::now();
@@ -156,7 +156,7 @@ void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, con
 	memcpy(data, &mvp, sizeof(Mvp_object));
 	vkUnmapMemory(device, uniform_memory[current_image]);
 }
-void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory)
+void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
 {
 	static auto start_time = std::chrono::high_resolution_clock::now();
 	auto current_time = std::chrono::high_resolution_clock::now();
@@ -164,15 +164,10 @@ void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent,
 
 	Mvp_object mvp;
 
-#if USE_PYRAMID
-	//mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	mvp.model = model
 		* glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f))
 		* glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-#else
-	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-#endif
-	mvp.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	mvp.view = view;
 	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 100.0f);
 
 	mvp.projection[1][1] = -mvp.projection[1][1];
@@ -182,7 +177,7 @@ void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent,
 	memcpy(data, &mvp, sizeof(Mvp_object));
 	vkUnmapMemory(device, uniform_memory[current_image]);
 }
-void SquareFlag(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory)
+void SquareFlag(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
 {
 	static auto start_time = std::chrono::high_resolution_clock::now();
 	auto current_time = std::chrono::high_resolution_clock::now();
@@ -208,7 +203,7 @@ void SquareFlag(const VkDevice& device, const VkExtent3D& swapchain_extent, cons
 	memcpy(data, &mvp, sizeof(Mvp_object));
 	vkUnmapMemory(device, uniform_memory[current_image]);
 }
-void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory)
+void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
 {
 	static auto start_time = std::chrono::high_resolution_clock::now();
 	auto current_time = std::chrono::high_resolution_clock::now();
@@ -216,13 +211,8 @@ void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, c
 
 	Mvp_object mvp;
 
-#if USE_PYRAMID
-	//mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	mvp.model = model
 		* glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-#else
-	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-#endif
 	mvp.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 100.0f);
 
