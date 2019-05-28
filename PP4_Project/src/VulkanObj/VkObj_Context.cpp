@@ -288,7 +288,7 @@ bool VkObj_Context::CreatePipelines()
 	VkPipelineLayoutCreateInfo pipeline_layout_create_info = {};
 	pipeline_layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipeline_layout_create_info.setLayoutCount = 1;
-	pipeline_layout_create_info.pSetLayouts = &uniform.prv_DescriptorSetLayout;
+	pipeline_layout_create_info.pSetLayouts = &descriptor_set_layout;
 	pipeline_layout_create_info.pushConstantRangeCount = 0;
 	pipeline_layout_create_info.pPushConstantRanges = nullptr;
 	
@@ -331,11 +331,70 @@ bool VkObj_Context::CreatePipelines()
 	return true;
 }
 
+bool VkObj_Context::CreateDescriptorPool()
+{
+	std::array<VkDescriptorPoolSize, 2> descriptor_pool_size = {};
+	descriptor_pool_size[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptor_pool_size[0].descriptorCount = 0xFF;
+	descriptor_pool_size[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	descriptor_pool_size[1].descriptorCount = 0xFF;
+
+	VkDescriptorPoolCreateInfo create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	create_info.poolSizeCount = CAST(uint32_t, descriptor_pool_size.size());
+	create_info.pPoolSizes = descriptor_pool_size.data();
+	create_info.maxSets = 0xFF;
+
+	CHECK_VKRESULT(r, vkCreateDescriptorPool(device.logical, &create_info, nullptr, &descriptor_pool), "Failed to create a Desriptor Pool! Error Code: ");
+
+	return true;
+}
+
+bool VkObj_Context::CreateDescriptorSetLayout()
+{
+	VkDescriptorSetLayoutBinding mvp_layout_binding = {};
+	mvp_layout_binding.binding = 0;
+	mvp_layout_binding.descriptorCount = 1;
+	mvp_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	mvp_layout_binding.pImmutableSamplers = nullptr;
+	mvp_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+	VkDescriptorSetLayoutBinding sampler_layout_binding = {};
+	sampler_layout_binding.binding = 1;
+	sampler_layout_binding.descriptorCount = 1;
+	sampler_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	sampler_layout_binding.pImmutableSamplers = nullptr;
+	sampler_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	std::array<VkDescriptorSetLayoutBinding, 2> bindings = { mvp_layout_binding, sampler_layout_binding };
+	VkDescriptorSetLayoutCreateInfo create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	create_info.bindingCount = CAST(uint32_t, bindings.size());
+	create_info.pBindings = bindings.data();
+
+	CHECK_VKRESULT(a, vkCreateDescriptorSetLayout(device.logical, &create_info, nullptr, &descriptor_set_layout), "Failed to create Descriptor Set Layout!");
+
+	return true;
+}
+
 void VkObj_Context::shutdown()
 {
+	vkDestroyDescriptorSetLayout(device.logical, descriptor_set_layout, nullptr);
+	
+	for (uint32_t i = 0; i < pipelines.size(); ++i)
+		vkDestroyPipeline(device.logical, pipelines[i], nullptr);
+
+	vkDestroyRenderPass(device.logical, swapchain.render_pass_no_clear, nullptr);
+	
 	if (command_pool)	vkDestroyCommandPool(device.logical, command_pool, nullptr);
+	
 	for (uint32_t i = 0; i < MAX_FRAMES; ++i)
 		if (query_pool[i])	vkDestroyQueryPool(device.logical, query_pool[i], nullptr);
+
+	vkDestroyDescriptorPool(device.logical, descriptor_pool, nullptr);
+	
+	device.shutdown();
+	window.shutdown();
 }
 
 bool VkObj_Context::init(GLFWwindow *win, std::vector<Object3D> &object_list)
@@ -353,8 +412,8 @@ bool VkObj_Context::init(GLFWwindow *win, std::vector<Object3D> &object_list)
 	//Create the swapchain
 	swapchain.init(window, device, command_pool); 
 
-	uniform.init(device, swapchain, command_pool);
-
+	CreateDescriptorPool();
+	CreateDescriptorSetLayout();
 	CreatePipelines();
 	pObjectList = &object_list;
 

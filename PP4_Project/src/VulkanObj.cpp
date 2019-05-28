@@ -7,18 +7,14 @@ bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_w
 {
 	context.init(window, prv_ObjectList);
 	
-	Object3D::set_static_contexts(
-		context.device, context.command_pool, context.uniform.prv_DescriptorSetLayout);
+	Object3D::set_static_contexts( context.device, context.command_pool);
 
 	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
 	{
-		prv_ObjectList[i].init(context.uniform.buffer, sizeof(Mvp_object),
-			context.pipeline_layout[0], context.pipelines[0], VkObj_Swapchain::swapchain_size);
+		prv_ObjectList[i].init(sizeof(Mvp_object), context.pipeline_layout[0], context.pipelines[0], VkObj_Swapchain::swapchain_size);
 
 		context.CreateCommandBuffer(prv_ObjectList[i], i);
-		context.uniform.CreateUniformBuffer(prv_ObjectList[i].uniform_buffer, prv_ObjectList[i].uniform_memory);
-
-		prv_ObjectList[i].CreateDescriptorSet();
+		prv_ObjectList[i].CreateDescriptorSet(context.descriptor_pool, context.descriptor_set_layout);
 	}
 
 	//Create Semaphores
@@ -229,66 +225,76 @@ void VulkanObj::end_frame()
 
 void VulkanObj::CleanupSwapchain()
 {
-// 	if (prv_Texture.color_image_view)		vkDestroyImageView(context.device.logical, prv_Texture.color_image_view, nullptr);
-// 	if (prv_Texture.color_image)			vkDestroyImage(context.device.logical, prv_Texture.color_image, nullptr);
-// 	if (prv_Texture.color_image_memory)		vkFreeMemory(context.device.logical, prv_Texture.color_image_memory, nullptr);
-// 	if (prv_Texture.depth_buffer_view)		vkDestroyImageView(context.device.logical, prv_Texture.depth_buffer_view, nullptr);
-// 	if (prv_Texture.depth_buffer)			vkDestroyImage(context.device.logical, prv_Texture.depth_buffer, nullptr);
-// 	if (prv_Texture.depth_buffer_memory)	vkFreeMemory(context.device.logical, prv_Texture.depth_buffer_memory, nullptr);
-// 
-// 	for (unsigned int i = 0; i < context.swapchain.frame_buffers.size(); ++i)
-// 		vkDestroyFramebuffer(context.device.logical, context.swapchain.frame_buffers[i], nullptr);
-// 
-// 
-// 	vkFreeCommandBuffers(context.device.logical, context.command_pool, CAST(uint32_t, prv_Command.command_buffers.size()), prv_Command.command_buffers.data());
-// 
-// 	if (prv_Buffers_old.descriptor_pool)						vkDestroyDescriptorPool(context.device.logical, prv_Buffers_old.descriptor_pool, nullptr);
-// 	if (prv_RenderGraphicsPipeline.graphics_pipeline)			vkDestroyPipeline(context.device.logical, prv_RenderGraphicsPipeline.graphics_pipeline, nullptr);
-// 	if (prv_RenderGraphicsPipeline.graphics_pipeline_layout)	vkDestroyPipelineLayout(context.device.logical, prv_RenderGraphicsPipeline.graphics_pipeline_layout, nullptr);
-// 	if (context.swapchain.render_pass)					vkDestroyRenderPass(context.device.logical, context.swapchain.render_pass, nullptr);
-// 
-// 	for (unsigned int i = 0; i < context.swapchain.images.size(); ++i)
-// 		vkDestroyImageView(context.device.logical, context.swapchain.views[i], nullptr);
-// 
-// 	if (context.swapchain)								vkDestroySwapchainKHR(context.device.logical, context.swapchain.swapchain, nullptr);
-// 
-// 	for (uint32_t i = 0; i < context.swapchain.images.size(); ++i)
-// 	{
-// 		vkDestroyBuffer(context.device.logical, prv_Buffers_old.uniform[i], nullptr);
-// 		vkFreeMemory(context.device.logical, prv_Buffers_old.uniform_memory[i], nullptr);
-// 	}
+	if (context.swapchain.msaa.image)
+	{
+		vkDestroyImageView(	context.device.logical, context.swapchain.msaa.view,	nullptr);
+		vkDestroyImage(		context.device.logical, context.swapchain.msaa.image,	nullptr);
+		vkFreeMemory(		context.device.logical, context.swapchain.msaa.memory,	nullptr);
+	}
+
+	if (context.swapchain.zbuffer.image)
+	{
+		vkDestroyImageView(	context.device.logical,	context.swapchain.zbuffer.view,		nullptr);
+		vkDestroyImage(		context.device.logical,	context.swapchain.zbuffer.image,	nullptr);
+		vkFreeMemory(		context.device.logical,	context.swapchain.zbuffer.memory,	nullptr);
+	}
+
+	if (!context.swapchain.frame_buffers.empty())
+	{
+		for (uint32_t i = 0; i < context.swapchain.frame_buffers.size(); ++i)
+			vkDestroyFramebuffer(context.device.logical, context.swapchain.frame_buffers[i], nullptr);
+	}
+
+	vkFreeCommandBuffers(context.device.logical, context.command_pool, CAST(uint32_t, context.swapchain.command_buffer.size()), context.swapchain.command_buffer.data());
+	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
+	{
+		vkFreeCommandBuffers(context.device.logical, context.command_pool, CAST(uint32_t, prv_ObjectList[i].command_buffer.size()), prv_ObjectList[i].command_buffer.data());
+		vkDestroyDescriptorPool(context.device.logical, prv_ObjectList[i].descriptor_pool, nullptr);
+	}
+	
+	while (!context.pipelines.empty())
+	{
+		uint32_t last = (uint32_t)context.pipelines.size() - 1;
+		vkDestroyPipelineLayout(context.device.logical, context.pipeline_layout[last], nullptr);
+		vkDestroyPipeline(context.device.logical, context.pipelines[last], nullptr);
+
+		context.pipeline_layout.pop_back();
+		context.pipelines.pop_back();
+	}
+	if (context.swapchain.render_pass)	vkDestroyRenderPass(context.device.logical, context.swapchain.render_pass, nullptr);
+
+ 	for (unsigned int i = 0; i < context.swapchain.images.size(); ++i)
+ 		vkDestroyImageView(context.device.logical, context.swapchain.image_views[i], nullptr);
+ 
+ 	if (context.swapchain.me)
+		vkDestroySwapchainKHR(context.device.logical, context.swapchain.me, nullptr);
+ 
+//  	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
+//  	{
+// 		for (uint32_t j = 0; j < context.swapchain.images.size(); ++j)
+// 		{
+//  			vkDestroyBuffer(context.device.logical, prv_ObjectList[i].uniform_buffer[j], nullptr);
+//  			vkFreeMemory(context.device.logical, prv_ObjectList[i].uniform_memory[j], nullptr);
+// 		}
+//  	}
 }
 
 void VulkanObj::cleanup()
 {
-// 	CleanupSwapchain();
-// 
-// 	prv_Allocator.shutdown();
-// 	prv_StagingManager.shutdown();
-// 
-// 	for (unsigned int i = 0; i < MAX_FRAMES; ++i)
-// 	{
-// 		if (prv_SemaphoreAndFences.render_finished_semaphores[i])	vkDestroySemaphore(context.device.logical, prv_SemaphoreAndFences.render_finished_semaphores[i], nullptr);
-// 		if (prv_SemaphoreAndFences.image_available_semaphores[i])	vkDestroySemaphore(context.device.logical, prv_SemaphoreAndFences.image_available_semaphores[i], nullptr);
-// 		if (prv_SemaphoreAndFences.fences[i])						vkDestroyFence(context.device.logical, prv_SemaphoreAndFences.fences[i], nullptr);
-// 	}
-// 
-// 	if (prv_Buffers_old.descriptor_set_layout)	vkDestroyDescriptorSetLayout(context.device.logical, prv_Buffers_old.descriptor_set_layout, nullptr);
-// 	if (prv_Texture.sampler)				vkDestroySampler(context.device.logical, prv_Texture.sampler, nullptr);
-// 	if (prv_Texture.texture_image_view)		vkDestroyImageView(context.device.logical, prv_Texture.texture_image_view, nullptr);
-// 
-// 	if (prv_Texture.texture_image)			vkDestroyImage(context.device.logical, prv_Texture.texture_image, nullptr);
-// 	if (prv_Texture.texture_image_memory)	vkFreeMemory(context.device.logical, prv_Texture.texture_image_memory, nullptr);
-// 
-// 	if (prv_Buffers_old.index)					vkDestroyBuffer(context.device.logical, prv_Buffers_old.index, nullptr);
-// 	if (prv_Buffers_old.index_memory)			vkFreeMemory(context.device.logical, prv_Buffers_old.index_memory, nullptr);
-// 
-// 	if (prv_Buffers_old.vertex)					vkDestroyBuffer(context.device.logical, prv_Buffers_old.vertex, nullptr);
-// 	if (prv_Buffers_old.vertex_memory)			vkFreeMemory(context.device.logical, prv_Buffers_old.vertex_memory, nullptr);
-// 
-// //	prv_Pools.shutdown();
-// 	context.device.shutdown();
-// 	prv_Window.shutdown();
+ 	CleanupSwapchain();
+
+	for (unsigned int i = 0; i < MAX_FRAMES; ++i)
+	{
+		if (prv_SemaphoreAndFences.render_finished_semaphores[i])	vkDestroySemaphore(context.device.logical, prv_SemaphoreAndFences.render_finished_semaphores[i], nullptr);
+		if (prv_SemaphoreAndFences.image_available_semaphores[i])	vkDestroySemaphore(context.device.logical, prv_SemaphoreAndFences.image_available_semaphores[i], nullptr);
+		if (prv_SemaphoreAndFences.fences[i])						vkDestroyFence(context.device.logical, prv_SemaphoreAndFences.fences[i], nullptr);
+	}
+
+	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
+		prv_ObjectList[i].cleanup();
+
+	context.shutdown();
+
 }
 
 void VulkanObj::draw_frames()
@@ -368,7 +374,8 @@ void VulkanObj::draw()
 		std::array<VkBuffer, 1> vertex_buffer = { prv_ObjectList[i].vertex_buffer };
 		VkDeviceSize offset[] = { 0 };
 
-		vk_update_uniform_buffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, context.uniform.memory, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory);
+//		vk_update_uniform_buffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory);
+		prv_ObjectList[i].UpdateUniformBuffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory);
 		vkCmdBindPipeline(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline);
 		vkCmdBindDescriptorSets(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline_layout, 0, 1, &prv_ObjectList[i].descriptor_set[context.swapchain.image_index], 0, nullptr);
 		vkCmdBindVertexBuffers(context.swapchain.command_buffer[context.swapchain.image_index], 0, 1, vertex_buffer.data(), offset);

@@ -11,7 +11,7 @@ class Object3D
 {
 public:
 	Object3D() = default;
-	Object3D(const char* fbx_filename, Texture* texture_dot_h = nullptr);
+	Object3D(const char* fbx_filename, Texture* texture_dot_h = nullptr, float _scale = 10);
 	Object3D(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices, Texture* texture_dot_h);
 	~Object3D();
 
@@ -50,22 +50,22 @@ public:
 	uint32_t swapchain_size;
 	VkDescriptorPool descriptor_pool;
 
-	struct {
-		std::vector<VkSemaphore> image_available_semaphores;
-		std::vector<VkSemaphore> render_finished_semaphores;
-		std::vector<VkFence> fences;
-	};
-
 	std::vector<VkCommandBuffer> command_buffer;
 
-	static void set_static_contexts(VkObj_DeviceProperties &device, VkCommandPool &command_pool, VkDescriptorSetLayout &descriptor_layout);
-	void init(std::vector<VkBuffer> &uniform_buffers, const uint32_t &sizeof_ubuffer,
+	static void set_static_contexts(VkObj_DeviceProperties &device, VkCommandPool &command_pool);
+	void init(const uint32_t &sizeof_ubuffer,
 		VkPipelineLayout &graphics_pipeline_layout, VkPipeline &graphic_pipeline, const uint32_t &swapchain_vec_size);
 	void set_image_view(const VkComponentSwizzle &red = VK_COMPONENT_SWIZZLE_IDENTITY, const VkComponentSwizzle &green = VK_COMPONENT_SWIZZLE_IDENTITY, const VkComponentSwizzle &blue = VK_COMPONENT_SWIZZLE_IDENTITY, const VkComponentSwizzle &alpha = VK_COMPONENT_SWIZZLE_IDENTITY);
 
 	bool CreateDescriptorSet();
-	float scale = 10.0f;
+	bool CreateDescriptorSet(const VkDescriptorPool &descriptor_pool, const VkDescriptorSetLayout &descriptor_set_layout);
+
+	void(*uniformFctn)(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory);
+	void UpdateUniformBuffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory);
+	float scale;
 	glm::mat4 world_matrix;
+
+	void cleanup();
 private:
 	std::vector<uint32_t> prv_Indices;
 	std::vector<Vertex> prv_Vertices;
@@ -84,6 +84,7 @@ private:
 	void CreateSampler();
 	void CreateVertexBuffer();
 	void CreateIndexBuffer();
+	void CreateUniformBuffer();
 	bool CreateDescriptorPool();
 
 };

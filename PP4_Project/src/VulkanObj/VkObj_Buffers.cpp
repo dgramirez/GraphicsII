@@ -71,7 +71,7 @@ bool vk_create_uniform_buffer(const VkPhysicalDevice &physical_device, const VkD
 	return true;
 }
 
-bool vk_update_uniform_buffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, std::vector<VkDeviceMemory> &uniform_buffer_memory, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory)
+bool vk_update_uniform_buffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory)
 {
 	static auto start_time = std::chrono::high_resolution_clock::now();
 	auto current_time = std::chrono::high_resolution_clock::now();
@@ -88,7 +88,7 @@ bool vk_update_uniform_buffer(const VkDevice& device, const VkExtent3D& swapchai
 	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 #endif
 	mvp.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 10.0f);
+	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 100.0f);
 
 	mvp.projection[1][1] = -mvp.projection[1][1];
 

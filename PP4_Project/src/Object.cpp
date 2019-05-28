@@ -4,8 +4,9 @@ VkObj_DeviceProperties *Object3D::pDevice = nullptr;
 VkCommandPool *Object3D::pCommandPool = nullptr;
 VkDescriptorSetLayout *Object3D::pDescriptorSetLayout = nullptr;
 
-Object3D::Object3D(const char* fbx_filename, Texture* texture_dot_h)
+Object3D::Object3D(const char* fbx_filename, Texture* texture_dot_h, float _scale)
 {
+	scale = _scale;
 	ImportFbx(fbx_filename);
 	if (!texture_dot_h)
 		prv_Texture = new Texture(prv_TextureFilename);
@@ -23,48 +24,45 @@ Object3D::~Object3D()
 	return;
 }
 
-void Object3D::set_static_contexts(VkObj_DeviceProperties &device, VkCommandPool &command_pool, VkDescriptorSetLayout &descriptor_layout)
+void Object3D::set_static_contexts(VkObj_DeviceProperties &device, VkCommandPool &command_pool)
 {
 	pDevice = &device;
 	pCommandPool = &command_pool;
-	pDescriptorSetLayout = &descriptor_layout;
 }
 
-void Object3D::init(std::vector<VkBuffer> &uniform_buffers, const uint32_t &sizeof_ubuffer,
-	VkPipelineLayout &graphics_pipeline_layout, VkPipeline &graphic_pipeline, const uint32_t &swapchain_vec_size)
+void Object3D::init(const uint32_t &sizeof_ubuffer, VkPipelineLayout &graphics_pipeline_layout, VkPipeline &graphic_pipeline, const uint32_t &swapchain_vec_size)
 {
 	ubuffer_range = sizeof_ubuffer;
 	pipeline_layout = &graphics_pipeline_layout;
 	pipeline = &graphic_pipeline;
 	swapchain_size = swapchain_vec_size;
 
-	CreateImage();
-	CreateSampler();
+	prv_Texture->init(*pDevice, *pCommandPool);
 	CreateVertexBuffer();
 	CreateIndexBuffer();
-	CreateDescriptorPool();
+	CreateUniformBuffer();
 }
 
 void Object3D::set_image_view(const VkComponentSwizzle &red, const VkComponentSwizzle &green, const VkComponentSwizzle &blue, const VkComponentSwizzle &alpha)
 {
-	//Image View Create Info
-	VkImageViewCreateInfo create_info = {};
-	create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	create_info.image = image;
-	create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	create_info.format = VK_FORMAT_R8G8B8A8_UNORM;
-	create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	create_info.subresourceRange.baseMipLevel = 0;
-	create_info.subresourceRange.levelCount = texture->mip_levels;
-	create_info.subresourceRange.baseArrayLayer = 0;
-	create_info.subresourceRange.layerCount = 1;
-	create_info.components.r = component_r;
-	create_info.components.g = component_g;
-	create_info.components.b = component_b;
-	create_info.components.a = component_a;
-
-	//Create the Surface (With Results) [VK_SUCCESS = 0]
-	vkCreateImageView(pDevice->logical, &create_info, nullptr, &image_view), "Failed to Create Image View";
+// 	//Image View Create Info
+// 	VkImageViewCreateInfo create_info = {};
+// 	create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+// 	create_info.image = image;
+// 	create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+// 	create_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+// 	create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+// 	create_info.subresourceRange.baseMipLevel = 0;
+// 	create_info.subresourceRange.levelCount = texture->mip_levels;
+// 	create_info.subresourceRange.baseArrayLayer = 0;
+// 	create_info.subresourceRange.layerCount = 1;
+// 	create_info.components.r = component_r;
+// 	create_info.components.g = component_g;
+// 	create_info.components.b = component_b;
+// 	create_info.components.a = component_a;
+// 
+// 	//Create the Surface (With Results) [VK_SUCCESS = 0]
+// 	vkCreateImageView(pDevice->logical, &create_info, nullptr, &image_view), "Failed to Create Image View";
 }
 
 void Object3D::ProcessFbxMesh(FbxNode* node)
@@ -442,75 +440,72 @@ void Object3D::ImportFbx(const char* fbx_filename)
 
 void Object3D::CreateImage()
 {
-	//Get the image size for the texture
-	VkDeviceSize image_size = prv_Texture->width * prv_Texture->height * sizeof(unsigned int);
-
-	//Get the staging bugger and memory needed to allocate
-	VkBuffer staging_buffer;
-	VkDeviceMemory staging_buffer_memory;
-
-	//Create the staging buffer
-	vk_create_buffer(pDevice->physical, pDevice->logical, image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, staging_buffer, staging_buffer_memory);
-
-	//TODO: If using a .h file created from TGA, Find some way to adjust the pixel channels.
-
-
-	void* pixel_data;
-	if (texture->data_h)
-		pixel_data = (void*)texture->data_h;
-	else
-		pixel_data = (void*)texture->data;
-
-	//Allocate the data into the buffer
-	void* data = nullptr;
-	vkMapMemory(pDevice->logical, staging_buffer_memory, 0, image_size, 0, &data);
-	memcpy(data, pixel_data, (unsigned int)image_size);
-	vkUnmapMemory(pDevice->logical, staging_buffer_memory);
-
-	VkExtent3D extent = { texture->width, texture->height, 1 };
-	//Create the image, using appropriate information (Mip Levels, Texture data, etc.)
-	vk_create_image(pDevice->physical, pDevice->logical, extent, texture->mip_levels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
-		VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, image_memory);
-
-	//Transition, using memory barriers, from Undefined Layout to Transfer to Destination (Optimal)
-	vk_transition_image_layout(pDevice->logical, *pCommandPool, pDevice->q_graphics, texture->mip_levels, image, 
-		VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-	//Copy the buffer to the image
-	vk_copy_buffer_to_image(pDevice->logical, *pCommandPool, pDevice->q_graphics, staging_buffer, image, extent);
-
-	//Destroy memory created from staging buffer
-	vkDestroyBuffer(pDevice->logical, staging_buffer, nullptr);
-	vkFreeMemory(pDevice->logical, staging_buffer_memory, nullptr);
-
-	//Create the mipmaps for texture
-	vk_create_mipmaps(pDevice->logical, *pCommandPool, pDevice->q_graphics, image, texture->width, texture->height, texture->mip_levels);
-
-	//Create Image View
-	set_image_view();
+// 	//Get the image size for the texture
+// 	VkDeviceSize image_size = prv_Texture->width * prv_Texture->height * sizeof(unsigned int);
+// 
+// 	//Get the staging bugger and memory needed to allocate
+// 	VkBuffer staging_buffer;
+// 	VkDeviceMemory staging_buffer_memory;
+// 
+// 	//Create the staging buffer
+// 	vk_create_buffer(pDevice->physical, pDevice->logical, image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+// 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, staging_buffer, staging_buffer_memory);
+// 
+// 	void* pixel_data;
+// 	if (texture->data_h)
+// 		pixel_data = (void*)texture->data_h;
+// 	else
+// 		pixel_data = (void*)texture->data;
+// 
+// 	//Allocate the data into the buffer
+// 	void* data = nullptr;
+// 	vkMapMemory(pDevice->logical, staging_buffer_memory, 0, image_size, 0, &data);
+// 	memcpy(data, pixel_data, (unsigned int)image_size);
+// 	vkUnmapMemory(pDevice->logical, staging_buffer_memory);
+// 
+// 	VkExtent3D extent = { texture->width, texture->height, 1 };
+// 	//Create the image, using appropriate information (Mip Levels, Texture data, etc.)
+// 	vk_create_image(pDevice->physical, pDevice->logical, extent, texture->mip_levels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
+// 		VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, image_memory);
+// 
+// 	//Transition, using memory barriers, from Undefined Layout to Transfer to Destination (Optimal)
+// 	vk_transition_image_layout(pDevice->logical, *pCommandPool, pDevice->q_graphics, texture->mip_levels, image, 
+// 		VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+// 
+// 	//Copy the buffer to the image
+// 	vk_copy_buffer_to_image(pDevice->logical, *pCommandPool, pDevice->q_graphics, staging_buffer, image, extent);
+// 
+// 	//Destroy memory created from staging buffer
+// 	vkDestroyBuffer(pDevice->logical, staging_buffer, nullptr);
+// 	vkFreeMemory(pDevice->logical, staging_buffer_memory, nullptr);
+// 
+// 	//Create the mipmaps for texture
+// 	vk_create_mipmaps(pDevice->logical, *pCommandPool, pDevice->q_graphics, image, texture->width, texture->height, texture->mip_levels);
+// 
+// 	//Create Image View
+// 	set_image_view();
 }
 
 void Object3D::CreateSampler()
 {
-	//Create the sampler create info
-	VkSamplerCreateInfo sampler_create_info = {};
-	sampler_create_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-	sampler_create_info.magFilter = VK_FILTER_LINEAR;
-	sampler_create_info.minFilter = VK_FILTER_LINEAR;
-	sampler_create_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-	sampler_create_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-	sampler_create_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-	sampler_create_info.anisotropyEnable = false;
-	sampler_create_info.maxAnisotropy = 1;
-	sampler_create_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-	sampler_create_info.unnormalizedCoordinates = false;
-	sampler_create_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	sampler_create_info.mipLodBias = 0.0f;
-	sampler_create_info.minLod = 0.0f;
-	sampler_create_info.maxLod = 0.0f;
-
-	vkCreateSampler(pDevice->logical, &sampler_create_info, nullptr, &sampler);
+// 	//Create the sampler create info
+// 	VkSamplerCreateInfo sampler_create_info = {};
+// 	sampler_create_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+// 	sampler_create_info.magFilter = VK_FILTER_LINEAR;
+// 	sampler_create_info.minFilter = VK_FILTER_LINEAR;
+// 	sampler_create_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+// 	sampler_create_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+// 	sampler_create_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+// 	sampler_create_info.anisotropyEnable = false;
+// 	sampler_create_info.maxAnisotropy = 1;
+// 	sampler_create_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+// 	sampler_create_info.unnormalizedCoordinates = false;
+// 	sampler_create_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+// 	sampler_create_info.mipLodBias = 0.0f;
+// 	sampler_create_info.minLod = 0.0f;
+// 	sampler_create_info.maxLod = 0.0f;
+// 
+// 	vkCreateSampler(pDevice->logical, &sampler_create_info, nullptr, &sampler);
 }
 
 void Object3D::CreateVertexBuffer()
@@ -557,6 +552,20 @@ void Object3D::CreateIndexBuffer()
 
 	vkDestroyBuffer(pDevice->logical, staging_buffer, nullptr);
 	vkFreeMemory(pDevice->logical, staging_buffer_memory, nullptr);
+}
+
+void Object3D::CreateUniformBuffer()
+{
+	VkDeviceSize buffer_size = sizeof(Mvp_object);
+
+	uniform_buffer.resize(swapchain_size);
+	uniform_memory.resize(swapchain_size);
+
+	for (uint32_t i = 0; i < swapchain_size; ++i)
+	{
+		vk_create_buffer(pDevice->physical, pDevice->logical, buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			uniform_buffer[i], uniform_memory[i]);
+	}
 }
 
 bool Object3D::CreateDescriptorPool()
@@ -630,4 +639,81 @@ bool Object3D::CreateDescriptorSet()
 	}
 
 	return true;
+}
+
+bool Object3D::CreateDescriptorSet(const VkDescriptorPool &descriptor_pool, const VkDescriptorSetLayout &descriptor_set_layout)
+{
+	std::vector<VkDescriptorSetLayout> descriptor_set_layout_vector(swapchain_size, descriptor_set_layout);
+
+	VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {};
+	descriptor_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	descriptor_set_allocate_info.descriptorSetCount = swapchain_size;
+	descriptor_set_allocate_info.descriptorPool = descriptor_pool;
+	descriptor_set_allocate_info.pSetLayouts = descriptor_set_layout_vector.data();
+
+	descriptor_set.resize(swapchain_size); //Was Based on Swapchain Size
+	CHECK_VKRESULT(r, vkAllocateDescriptorSets(pDevice->logical, &descriptor_set_allocate_info, descriptor_set.data()), "Failed to Allocate Descriptor Set!");
+
+	for (uint32_t i = 0; i < swapchain_size; ++i)
+	{
+		VkDescriptorBufferInfo descriptor_buffer_info = {};
+		descriptor_buffer_info.buffer = uniform_buffer[i];
+		descriptor_buffer_info.offset = 0;
+		descriptor_buffer_info.range = ubuffer_range;
+
+		VkDescriptorImageInfo descriptor_image_info = {};
+		descriptor_image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		descriptor_image_info.imageView = prv_Texture->image_view;
+		descriptor_image_info.sampler = prv_Texture->sampler;
+
+		std::array<VkWriteDescriptorSet, 2> write_descriptor_set;
+		write_descriptor_set[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_descriptor_set[0].dstSet = descriptor_set[i];
+		write_descriptor_set[0].dstBinding = 0;
+		write_descriptor_set[0].dstArrayElement = 0;
+		write_descriptor_set[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		write_descriptor_set[0].descriptorCount = 1;
+		write_descriptor_set[0].pBufferInfo = &descriptor_buffer_info;
+		write_descriptor_set[0].pImageInfo = nullptr;
+		write_descriptor_set[0].pTexelBufferView = nullptr;
+		write_descriptor_set[0].pNext = nullptr;
+
+		write_descriptor_set[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_descriptor_set[1].dstSet = descriptor_set[i];
+		write_descriptor_set[1].dstBinding = 1;
+		write_descriptor_set[1].dstArrayElement = 0;
+		write_descriptor_set[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		write_descriptor_set[1].descriptorCount = 1;
+		write_descriptor_set[1].pBufferInfo = nullptr;
+		write_descriptor_set[1].pImageInfo = &descriptor_image_info;
+		write_descriptor_set[1].pTexelBufferView = nullptr;
+		write_descriptor_set[1].pNext = nullptr;
+
+		vkUpdateDescriptorSets(pDevice->logical, CAST(uint32_t, write_descriptor_set.size()), write_descriptor_set.data(), 0, nullptr);
+	}
+
+	return true;
+}
+
+void Object3D::UpdateUniformBuffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory)
+{
+	if (uniformFctn)
+		uniformFctn(device, swapchain_extent, current_image, model, uniform_memory);
+}
+
+void Object3D::cleanup()
+{
+	if (prv_Texture)	prv_Texture->cleanup(*pDevice);
+	if (index_buffer)	vkDestroyBuffer(pDevice->logical, index_buffer, nullptr);
+	if (index_memory)	vkFreeMemory(pDevice->logical, index_memory, nullptr);
+	if (vertex_buffer)	vkDestroyBuffer(pDevice->logical, vertex_buffer, nullptr);
+	if (vertex_memory)	vkFreeMemory(pDevice->logical, vertex_memory, nullptr);
+
+	for (uint32_t i = 0; i < uniform_buffer.size(); ++i)
+	{
+		vkDestroyBuffer(pDevice->logical, uniform_buffer[i], nullptr);
+		vkFreeMemory(pDevice->logical, uniform_memory[i], nullptr);
+	}
+	uniform_buffer.clear();
+	uniform_memory.clear();
 }

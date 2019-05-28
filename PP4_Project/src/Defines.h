@@ -117,4 +117,12 @@
 
 #define TUTORIAL_TRANSITION 0
 
+#define OBJECT_TYPE_FBX 0
+#define OBJECT_TYPE_OBJ 1
+#define OBJECT_TYPE_DOTH 2
+
+#define TEXTURE_TYPE_STBI 0
+#define TEXTURE_TYPE_HEAP 1
+#define TEXTURE_TYPE_DOTH 2
+
 #endif // #ifndef DEFINES_H

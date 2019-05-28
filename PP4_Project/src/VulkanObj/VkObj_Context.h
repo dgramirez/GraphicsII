@@ -16,11 +16,13 @@ public:
 	VkObj_WindowProperties window;
 	VkObj_DeviceProperties device;
 	VkObj_Swapchain swapchain;
-	VkObj_Uniform uniform;
+	
+
 	std::vector<VkPipeline> pipelines;
 	std::vector<VkPipelineLayout> pipeline_layout;
 	std::vector<Object3D> *pObjectList;
 
+	
 	void shutdown();
 
 	bool init(GLFWwindow *win, std::vector<Object3D> &object_list);
@@ -33,6 +35,12 @@ public:
 
 	bool CreatePipelines();
 //	bool CreatePipelines(const char* vertex_shader, const char* pixel_shader);
+
+	//	VkObj_Uniform uniform;
+	VkDescriptorPool descriptor_pool;
+	VkDescriptorSetLayout descriptor_set_layout;
+	bool CreateDescriptorPool();
+	bool CreateDescriptorSetLayout();
 
 	VkCommandPool command_pool;
 	std::vector<VkQueryPool> query_pool;
