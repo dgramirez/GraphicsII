@@ -89,14 +89,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FBXSDK_SHARED;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;$(ProjectDir)src\VulkanObj;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;$(ProjectDir)src\VulkanObj;$(ProjectDir)vendor\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;F:\School\PP4\GraphicsII_NewStart\PP4_Project\vendor\soil\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;F:\School\PP4\GraphicsII_NewStart\PP4_Project\vendor\soil\lib;$(ProjectDir)vendor\sdl\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -106,14 +106,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FBXSDK_SHARED;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;$(ProjectDir)src\VulkanObj;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;$(ProjectDir)src\VulkanObj;$(ProjectDir)vendor\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;F:\School\PP4\GraphicsII_NewStart\PP4_Project\vendor\soil\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;F:\School\PP4\GraphicsII_NewStart\PP4_Project\vendor\soil\lib;$(ProjectDir)vendor\sdl\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -125,7 +125,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FBXSDK_SHARED;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;$(ProjectDir)src\VulkanObj;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;$(ProjectDir)src\VulkanObj;$(ProjectDir)vendor\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -133,8 +133,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;F:\School\PP4\GraphicsII_NewStart\PP4_Project\vendor\soil\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;F:\School\PP4\GraphicsII_NewStart\PP4_Project\vendor\soil\lib;$(ProjectDir)vendor\sdl\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -146,7 +146,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FBXSDK_SHARED;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;$(ProjectDir)src\VulkanObj;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)vendor\vulkan\include;$(ProjectDir)vendor\glfw\include;$(ProjectDir)vendor\glm;$(ProjectDir)vendor\fbxsdk\include;$(ProjectDir)src\VulkanObj;$(ProjectDir)vendor\sdl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -154,8 +154,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;F:\School\PP4\GraphicsII_NewStart\PP4_Project\vendor\soil\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\glfw\lib-vc2015;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;F:\School\PP4\GraphicsII_NewStart\PP4_Project\vendor\soil\lib;$(ProjectDir)vendor\sdl\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;libfbxsdk.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

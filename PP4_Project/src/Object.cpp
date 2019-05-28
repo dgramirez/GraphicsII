@@ -705,7 +705,7 @@ void Object3D::reset()
 {
 	if (!command_buffer.empty())
 	{
-		vkFreeCommandBuffers(pDevice->logical, *pCommandPool, command_buffer.size(), command_buffer.data());
+		vkFreeCommandBuffers(pDevice->logical, *pCommandPool, (uint32_t)command_buffer.size(), command_buffer.data());
 		command_buffer.clear();
 	}
 

@@ -169,7 +169,7 @@ bool VkObj_Swapchain::init(VkObj_WindowProperties &window_properties, VkObj_Devi
 bool VkObj_Swapchain::CreateSwapchain()
 {
 	//Get Extent Info
-	glfwGetFramebufferSize(pWindowProperties->window, (int*)&extent2D.width, (int*)&extent2D.height);
+	SDL_Vulkan_GetDrawableSize(pWindowProperties->window, (int*)&extent2D.width, (int*)&extent2D.height);
 	
 	//Getting Swapchain Information for Create Info
 	VkStruct_SwapchainSupportDetails support = vk_query_swapchain_support(pDeviceProperties->physical, pWindowProperties->surface);

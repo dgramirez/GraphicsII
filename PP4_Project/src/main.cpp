@@ -12,7 +12,7 @@ void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent,
 void SquareFlag(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
 void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
 
-int main()
+int main(int argc, char* args[])
 {
 	Window* myWindow = new Window(800, 600, "My New Window");
 

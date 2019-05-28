@@ -27,8 +27,9 @@ private:
 	unsigned short prv_WinWidth;
 	unsigned short prv_WinHeight;
 	const char* prv_WinTitle;
-	GLFWwindow* window = nullptr;
-	
+	SDL_Window* window = nullptr;
+	SDL_Surface* surface = nullptr;
+		
 	//Private Variables, Vulkan
 	VulkanObj* Vobj = nullptr;
 

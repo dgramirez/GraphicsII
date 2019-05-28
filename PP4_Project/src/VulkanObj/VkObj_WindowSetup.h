@@ -6,12 +6,12 @@
 class VkObj_WindowProperties {
 public:
 	VkObj_WindowProperties();
-	bool init(const char *title, GLFWwindow *win = nullptr);
+	bool init(const char *title, SDL_Window *win = nullptr);
 	void shutdown();
 
 	VkInstance instance;
 	VkSurfaceKHR surface;
-	GLFWwindow* window;
+	SDL_Window* window;
 
 private:
 

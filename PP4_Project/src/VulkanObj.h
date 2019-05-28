@@ -20,7 +20,7 @@ public:
 	VulkanObj();
 	~VulkanObj();
 
-	bool init(const char* title, GLFWwindow* window, unsigned short win_width, unsigned short win_height);
+	bool init(const char* title, SDL_Window* window, unsigned short win_width, unsigned short win_height);
 	void draw_frames();
 	void draw();
 	void cleanup();

@@ -396,7 +396,7 @@ void VkObj_Context::shutdown()
 	window.shutdown();
 }
 
-bool VkObj_Context::init(GLFWwindow *win, std::vector<Object3D> &object_list)
+bool VkObj_Context::init(SDL_Window *win, std::vector<Object3D> &object_list)
 {
 	//Create Instance, Validation Layer, and Surface
 	window.init("New Vulkan Application", win);

@@ -25,7 +25,7 @@ public:
 	
 	void shutdown();
 
-	bool init(GLFWwindow *win, std::vector<Object3D> &object_list);
+	bool init(SDL_Window *win, std::vector<Object3D> &object_list);
 
 	bool CreateQueryPool();
 	bool CreateCommandPool();

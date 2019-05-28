@@ -29,40 +29,64 @@ void Window::setup_object_list(const std::vector<Object3D>& initial_objects)
 
 void Window::Init()
 {
-	//Initialize glfw
-	if (!glfwInit())
+	//Initialize SDL
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
-		LOG("Initializing GLFW Failed!");
+		LOG("Iniitalizing SDL Failed!");
 		return;
 	}
 
-	//Creating a GLFWwindow
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	window = glfwCreateWindow(prv_WinWidth, prv_WinHeight, prv_WinTitle, nullptr, nullptr);
-	if (!window)
+	SDL_Vulkan_LoadLibrary(0);
+
+	//Create SDL Window
+	window = SDL_CreateWindow(prv_WinTitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, prv_WinWidth, prv_WinHeight, SDL_WINDOW_VULKAN);
+	if (window == nullptr)
 	{
-		LOG("Window Creation Failed!");
+		LOG("Creating the window has failed!");
 		return;
 	}
-	glfwMakeContextCurrent(window);
-	glfwSetWindowUserPointer(window, this);
-	
-	glfwSetFramebufferSizeCallback(window, WindowResizeCallback);
 
 	//Setting up Vulkan
 	if (!Vobj->init(prv_WinTitle, window, win_width, win_height))
 	{
 		LOG("Vulkan has failed its initialization.");
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
+		//glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
+
+	// 	//Initialize glfw
+// 	if (!glfwInit())
+// 	{
+// 		LOG("Initializing GLFW Failed!");
+// 		return;
+// 	}
+// 
+// 	//Creating a GLFWwindow
+// 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+// 	window = glfwCreateWindow(prv_WinWidth, prv_WinHeight, prv_WinTitle, nullptr, nullptr);
+// 	if (!window)
+// 	{
+// 		LOG("Window Creation Failed!");
+// 		return;
+// 	}
+// 	glfwMakeContextCurrent(window);
+// 	glfwSetWindowUserPointer(window, this);
+// 	
+// 	glfwSetFramebufferSizeCallback(window, WindowResizeCallback);
+// 
 }
 
 void Window::MainLoop()
 {
+	SDL_Event e;
 	if (window)
 	{
-		while (!glfwWindowShouldClose(window)) {
-			glfwPollEvents();
+		bool quit = false;
+		while (!quit)
+		{
+			SDL_PollEvent(&e);
+			if (e.type == SDL_QUIT)
+				quit = true;
+
 			DrawFrames();
 		}
 
@@ -76,8 +100,8 @@ void Window::Cleanup()
 	if (Vobj)	Vobj->cleanup();
 
 	if (window) {
-		glfwDestroyWindow(window);
-		glfwTerminate();
+		SDL_DestroyWindow(window);
+		SDL_Quit();
 	}
 
 }

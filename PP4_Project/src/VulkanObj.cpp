@@ -3,7 +3,7 @@
 VulkanObj::VulkanObj() {}
 VulkanObj::~VulkanObj() { cleanup(); }
 
-bool VulkanObj::init(const char* title, GLFWwindow* window, unsigned short win_width, unsigned short win_height)
+bool VulkanObj::init(const char* title, SDL_Window* window, unsigned short win_width, unsigned short win_height)
 {
 	context.init(window, prv_ObjectList);
 	

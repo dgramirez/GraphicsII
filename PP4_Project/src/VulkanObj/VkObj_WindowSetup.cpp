@@ -24,7 +24,7 @@ const std::vector<const char*> validation_layers = {
 VkObj_WindowProperties::VkObj_WindowProperties()
 	:instance(nullptr), surface(nullptr), window(nullptr) {}
 
-bool VkObj_WindowProperties::init(const char *title, GLFWwindow *win)
+bool VkObj_WindowProperties::init(const char *title, SDL_Window *win)
 {
 	if (!window)
 		window = win;
@@ -86,7 +86,7 @@ bool VkObj_WindowProperties::CreateInstance(const char* title)
 bool VkObj_WindowProperties::CreateSurface()
 {
 	//Create the Surface (With Results) [VK_SUCCESS = 0]
-	CHECK_VKRESULT(r, glfwCreateWindowSurface(instance, window, nullptr, &surface), "Failed to create Surface");
+	SDL_Vulkan_CreateSurface(window, instance, &surface);
 
 	//Surface has been created successfully
 	return true;
@@ -118,9 +118,9 @@ bool VkObj_WindowProperties::CheckValidationLayerSupport()
 std::vector<const char*> VkObj_WindowProperties::GetRequiredExtensions()
 {
 	uint32_t extensions_count;
-	const char** extensions;
-	extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
-	std::vector<const char*> extensions_vector(extensions, extensions + extensions_count);
+	SDL_Vulkan_GetInstanceExtensions(window, &extensions_count, nullptr);
+	std::vector<const char*> extensions_vector(extensions_count);
+	SDL_Vulkan_GetInstanceExtensions(window, &extensions_count, extensions_vector.data());
 
 	if (validation_layers_enabled)
 		extensions_vector.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
