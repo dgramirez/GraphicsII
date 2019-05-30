@@ -87,7 +87,7 @@ void Window::MainLoop()
 			if (e.type == SDL_QUIT)
 				quit = true;
 
-			DrawFrames();
+			DrawFrames(e);
 		}
 
 		Vobj->idle_device();
@@ -106,9 +106,9 @@ void Window::Cleanup()
 
 }
 
-void Window::DrawFrames()
+void Window::DrawFrames(const SDL_Event &e)
 {
-//	Vobj->update();
+	Vobj->update(e);
 	Vobj->draw();
 }
 

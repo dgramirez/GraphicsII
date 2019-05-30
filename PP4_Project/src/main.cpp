@@ -119,11 +119,10 @@ Object3D create_terrain()
 	
 	return myTerrain;
 }
-
 Object3D create_earth()
 {
 	Object3D myEarth("earth2.fbx", nullptr, 75);
-	myEarth.world_matrix = glm::rotate(glm::mat4(1.0f), glm::radians(-180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	myEarth.world_matrix = glm::mat4(1.0f);
 	myEarth.uniformFctn = EarthRotation;
 
 
@@ -138,17 +137,9 @@ void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, con
 
 	Mvp_object mvp;
 
-#if USE_PYRAMID
-	//mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	mvp.model = model
-		* glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f))
-		* glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-#else
-	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-#endif
-	mvp.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 100.0f);
-
+	mvp.model = model;
+	mvp.view = view;
+	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 20.0f);
 	mvp.projection[1][1] = -mvp.projection[1][1];
 
 	void* data;
@@ -164,12 +155,9 @@ void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent,
 
 	Mvp_object mvp;
 
-	mvp.model = model
-		* glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f))
-		* glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	mvp.model = model * glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	mvp.view = view;
-	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 100.0f);
-
+	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 20.0f);
 	mvp.projection[1][1] = -mvp.projection[1][1];
 
 	void* data;
@@ -193,7 +181,7 @@ void SquareFlag(const VkDevice& device, const VkExtent3D& swapchain_extent, cons
 #else
 	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 #endif
-	mvp.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	mvp.view = view;
 	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 100.0f);
 
 	mvp.projection[1][1] = -mvp.projection[1][1];
@@ -211,10 +199,9 @@ void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, c
 
 	Mvp_object mvp;
 
-	mvp.model = model
-		* glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	mvp.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 100.0f);
+	mvp.model = glm::transpose(model) * glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	mvp.view = view;
+	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 20.0f);
 
 	mvp.projection[1][1] = -mvp.projection[1][1];
 

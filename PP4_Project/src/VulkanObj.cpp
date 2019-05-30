@@ -100,20 +100,42 @@ void VulkanObj::add_to_object_list(const Object3D & object)
 	prv_ObjectList.push_back(object);
 }
 
-void VulkanObj::update()
+void VulkanObj::update(const SDL_Event &e)
 {
-	if ( _getch() == '\033')
-		_getch();
-
-	int ch = _getch();
-	if (ch == 'A')
-		center.z = -0.001f;
-	else if (ch == 'B')
-		center.z = 0.001f;
-	else if (ch == 'C')
-		center.x = 0.001f;
-	else if (ch == 'D')
-		center.x = -0.001f;
+	if (e.type == SDL_KEYDOWN)
+		switch (e.key.keysym.sym)
+		{
+		case SDLK_LEFT:
+			myview = glm::rotate(myview, glm::radians(0.1f), glm::vec3(0, 1, 0));
+			break;
+		case SDLK_RIGHT:
+			myview = glm::rotate(myview, glm::radians(-0.1f), glm::vec3(0, 1, 0));
+			break;
+		case SDLK_UP:
+			myview = glm::rotate(myview, glm::radians(0.1f), glm::vec3(1, 0, 0));
+			break;
+		case SDLK_DOWN:
+			myview = glm::rotate(myview, glm::radians(-0.1f), glm::vec3(1, 0, 0));
+			break;
+		case SDLK_w:
+			myview = glm::translate(myview, glm::vec3(0.0f, 0.0f, -0.1f));
+			break;
+		case SDLK_a:
+			myview = glm::translate(myview, glm::vec3(-0.1f, 0.0f, 0.0f));
+			break;
+		case SDLK_s:
+			myview = glm::translate(myview, glm::vec3(0.0f, 0.0f, 0.1f));
+			break;
+		case SDLK_d:
+			myview = glm::translate(myview, glm::vec3(0.1f, 0.0f, 0.0f));
+			break;
+		case SDLK_q:
+			myview = glm::translate(myview, glm::vec3(0.0f, -0.1f, 0.0f));
+			break;
+		case SDLK_e:
+			myview = glm::translate(myview, glm::vec3(0.0f, 0.1f, 0.0f));
+			break;
+		}
 }
 
 void VulkanObj::start_frame()
@@ -360,7 +382,7 @@ void VulkanObj::draw()
 		std::array<VkBuffer, 1> vertex_buffer = { prv_ObjectList[i].vertex_buffer };
 		VkDeviceSize offset[] = { 0 };
 
-		prv_ObjectList[i].UpdateUniformBuffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory, glm::lookAt(eye, center, up));
+		prv_ObjectList[i].UpdateUniformBuffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory, glm::inverse(myview));
 		vkCmdBindPipeline(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline);
 		vkCmdBindDescriptorSets(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline_layout, 0, 1, &prv_ObjectList[i].descriptor_set[context.swapchain.image_index], 0, nullptr);
 		vkCmdBindVertexBuffers(context.swapchain.command_buffer[context.swapchain.image_index], 0, 1, vertex_buffer.data(), offset);

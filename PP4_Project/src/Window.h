@@ -37,7 +37,7 @@ private:
 	void Init();
 	void MainLoop();
 	void Cleanup();
-	void DrawFrames();
+	void DrawFrames(const SDL_Event &e);
 	static void WindowResizeCallback(GLFWwindow* window, int width, int height);
 };
 
