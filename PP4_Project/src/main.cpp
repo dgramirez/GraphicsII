@@ -139,7 +139,7 @@ void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, con
 
 	mvp.model = model;
 	mvp.view = view;
-	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 20.0f);
+	mvp.projection = glm::infinitePerspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f);
 	mvp.projection[1][1] = -mvp.projection[1][1];
 
 	void* data;
@@ -157,7 +157,8 @@ void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent,
 
 	mvp.model = model * glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	mvp.view = view;
-	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 20.0f);
+//	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 20.0f);
+	mvp.projection = glm::infinitePerspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f);
 	mvp.projection[1][1] = -mvp.projection[1][1];
 
 	void* data;
@@ -182,8 +183,9 @@ void SquareFlag(const VkDevice& device, const VkExtent3D& swapchain_extent, cons
 	mvp.model = glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 #endif
 	mvp.view = view;
-	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 100.0f);
-
+//	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 100.0f);
+	mvp.projection = glm::infinitePerspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f);
+	
 	mvp.projection[1][1] = -mvp.projection[1][1];
 
 	void* data;
@@ -201,7 +203,7 @@ void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, c
 
 	mvp.model = glm::transpose(model) * glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	mvp.view = view;
-	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 20.0f);
+	mvp.projection = glm::infinitePerspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f);
 
 	mvp.projection[1][1] = -mvp.projection[1][1];
 

@@ -135,10 +135,10 @@ void Texture::CreateDefaultSampler(const VkObj_DeviceProperties &device)
 	sampler_create_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
 	sampler_create_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
 	sampler_create_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-	sampler_create_info.anisotropyEnable = true;
+	sampler_create_info.anisotropyEnable = VK_TRUE;
 	sampler_create_info.maxAnisotropy = device.msaa_support;
 	sampler_create_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-	sampler_create_info.unnormalizedCoordinates = false;
+	sampler_create_info.unnormalizedCoordinates = VK_FALSE;
 	sampler_create_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 	sampler_create_info.mipLodBias = 0.0f;
 	sampler_create_info.minLod = 0.0f;
