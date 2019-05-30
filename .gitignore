@@ -1,9 +1,8 @@
 vs
-Release
-Debug
-x64
 ipch
 Documentation
+bin
+.vs
 *.suo
 *.sdf
 *.db
