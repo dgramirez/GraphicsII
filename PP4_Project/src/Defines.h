@@ -4,7 +4,6 @@
 #pragma region VULKAN_INCLUDE_AND_DEFINES
 
 #define GLFW_INCLUDE_VULKAN
-#include "GLFW/glfw3.h"
 #include "SDL.h"
 #include "SDL_vulkan.h"
 
@@ -50,6 +49,8 @@
 #include "texture_h/celestial.h"
 #include "texture_h/axeTexture.h"
 #include "../vendor/fbxsdk/include/fbxsdk.h"
+#include "InputController.h"
+#include "../vendor/fullsail/XTime.h"
 
 #define MAX_UINT32	0xFFFFFFFF
 #define MAX_UINT64	0xFFFFFFFFFFFFFFFF

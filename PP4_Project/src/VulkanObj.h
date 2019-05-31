@@ -25,7 +25,7 @@ public:
 	void draw();
 	void cleanup();
 	void idle_device();
-	void reset_swapchain(unsigned short win_width, unsigned short win_height);
+	void reset_swapchain();
 	void setup_object_list(uint32_t size);
 	void add_to_object_list(const Object3D& object);
 	void update(const SDL_Event &e);
@@ -37,7 +37,7 @@ private:
 	void start_frame();
 	void end_frame();
 
-	glm::mat4 myview = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, 5.0f));
+	glm::mat4 myview = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, 5.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	uint32_t prv_Frame = 0;
 	std::vector<Object3D> prv_ObjectList;

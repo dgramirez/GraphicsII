@@ -158,7 +158,6 @@ bool VkObj_Swapchain::init(VkObj_WindowProperties &window_properties, VkObj_Devi
 
 	CreateSwapchain();
 	CreateRenderPass();
-	CreateRenderPassNoClear();
 	CreateMSAA();
 	CreateDepthBuffer();
 	CreateFrameBuffer();
@@ -302,82 +301,6 @@ bool VkObj_Swapchain::CreateRenderPass()
 	render_pass_create_info.pDependencies = &subpass_dependency;
 
 	CHECK_VKRESULT(r, vkCreateRenderPass(pDeviceProperties->logical, &render_pass_create_info, nullptr, &render_pass), "Failed to create Render Pass!");
-
-	return true;
-}
-
-bool VkObj_Swapchain::CreateRenderPassNoClear()
-{
-	VkAttachmentDescription color_attachment_description = {};
-	color_attachment_description.format = format;
-	color_attachment_description.samples = pDeviceProperties->msaa_support;
-	color_attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	color_attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	color_attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	color_attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	color_attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	color_attachment_description.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentReference color_attachment_reference = {};
-	color_attachment_reference.attachment = 0;
-	color_attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentDescription color_attachment_resolve = {};
-	color_attachment_resolve.format = format;
-	color_attachment_resolve.samples = VK_SAMPLE_COUNT_1_BIT;
-	color_attachment_resolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	color_attachment_resolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	color_attachment_resolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	color_attachment_resolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	color_attachment_resolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	color_attachment_resolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-	VkAttachmentReference color_attachment_resolve_reference = {};
-	color_attachment_resolve_reference.attachment = 2;
-	color_attachment_resolve_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentDescription depth_attachment_description = {};
-	depth_attachment_description.format = vk_get_depth_format(pDeviceProperties->physical);
-	depth_attachment_description.samples = pDeviceProperties->msaa_support;
-	depth_attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	depth_attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depth_attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	depth_attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depth_attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	depth_attachment_description.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-	VkAttachmentReference depth_attachment_reference = {};
-	depth_attachment_reference.attachment = 1;
-	depth_attachment_reference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-	VkSubpassDescription subpass_description = {};
-	subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass_description.colorAttachmentCount = 1;
-	subpass_description.pColorAttachments = &color_attachment_reference;
-	subpass_description.pDepthStencilAttachment = &depth_attachment_reference;
-	subpass_description.pResolveAttachments = &color_attachment_resolve_reference;
-
-	VkSubpassDependency subpass_dependency = {};
-	subpass_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	subpass_dependency.dstSubpass = 0;
-	subpass_dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	subpass_dependency.srcAccessMask = 0;
-	subpass_dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	subpass_dependency.dstAccessMask =
-		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-	std::array<VkAttachmentDescription, 3> attachments = { color_attachment_description, depth_attachment_description, color_attachment_resolve };
-	VkRenderPassCreateInfo render_pass_create_info = {};
-	render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	render_pass_create_info.attachmentCount = CAST(uint32_t, attachments.size());
-	render_pass_create_info.pAttachments = attachments.data();
-	render_pass_create_info.subpassCount = 1;
-	render_pass_create_info.pSubpasses = &subpass_description;
-	render_pass_create_info.dependencyCount = 1;
-	render_pass_create_info.pDependencies = &subpass_dependency;
-
-	CHECK_VKRESULT(r, vkCreateRenderPass(pDeviceProperties->logical, &render_pass_create_info, nullptr, &render_pass_no_clear), "Failed to create Render Pass!");
 
 	return true;
 }

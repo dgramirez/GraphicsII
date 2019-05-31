@@ -63,6 +63,9 @@
     <ClCompile Include="src\VulkanObj\VkObj_Context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vendor\fullsail\XTime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Window.h">
@@ -117,6 +120,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\VulkanObj\VkObj_Context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InputController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\fullsail\XTime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

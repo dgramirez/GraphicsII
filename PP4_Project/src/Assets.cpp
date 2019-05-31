@@ -14,7 +14,7 @@ Texture::Texture(const int32_t &width, const int32_t &height, void *pixels, cons
 Texture::Texture(const char* filename)
 {
 	prv_Data = stbi_load(filename, &prv_Width, &prv_Height, nullptr, 4);
-	prv_MipLevels = (int32_t)log2(std::min(prv_Width, prv_Height)) + 1;
+	prv_MipLevels = (int32_t)std::log2(min(prv_Width, prv_Height)) + 1;
 	prv_TextureType = TEXTURE_TYPE_STBI;
 	prv_Sampler = nullptr;
 	prv_Image = nullptr;
@@ -136,7 +136,7 @@ void Texture::CreateDefaultSampler(const VkObj_DeviceProperties &device)
 	sampler_create_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
 	sampler_create_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
 	sampler_create_info.anisotropyEnable = VK_TRUE;
-	sampler_create_info.maxAnisotropy = device.msaa_support;
+	sampler_create_info.maxAnisotropy = (float)device.msaa_support;
 	sampler_create_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 	sampler_create_info.unnormalizedCoordinates = VK_FALSE;
 	sampler_create_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;

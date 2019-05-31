@@ -125,7 +125,6 @@ Object3D create_earth()
 	myEarth.world_matrix = glm::mat4(1.0f);
 	myEarth.uniformFctn = EarthRotation;
 
-
 	return myEarth;
 }
 
@@ -195,13 +194,10 @@ void SquareFlag(const VkDevice& device, const VkExtent3D& swapchain_extent, cons
 }
 void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
 {
-	static auto start_time = std::chrono::high_resolution_clock::now();
-	auto current_time = std::chrono::high_resolution_clock::now();
-	float delta_time = std::chrono::duration<float, std::chrono::seconds::period>(current_time - start_time).count();
-
+	float delta = (float)myTime.TotalTime();
 	Mvp_object mvp;
 
-	mvp.model = glm::transpose(model) * glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	mvp.model = model * glm::rotate(glm::mat4(1.0f), delta * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	mvp.view = view;
 	mvp.projection = glm::infinitePerspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f);
 

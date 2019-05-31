@@ -416,8 +416,8 @@ bool vk_check_page(const VkDeviceSize &a_memory_offset, const VkDeviceSize &b_me
 
 bool vk_granularity_conflict(const uint64_t &type_1, const uint64_t &type_2)
 {
-	uint64_t t1 = std::max(type_1, type_2);
-	uint64_t t2 = std::min(type_1, type_2);
+	uint64_t t1 = max(type_1, type_2);
+	uint64_t t2 = min(type_1, type_2);
 
 	if (t1 == VKDEFINE_ALLOCATION_TYPE_FREE)
 		return false;
@@ -438,7 +438,7 @@ VkSampleCountFlagBits get_highest_msaa_sample_count(const VkPhysicalDevice &phys
 	VkPhysicalDeviceProperties physical_device_properties;
 	vkGetPhysicalDeviceProperties(physical_device, &physical_device_properties);
 
-	VkSampleCountFlags flags = std::min(physical_device_properties.limits.framebufferColorSampleCounts,
+	VkSampleCountFlags flags = min(physical_device_properties.limits.framebufferColorSampleCounts,
 		physical_device_properties.limits.framebufferDepthSampleCounts);
 
 	if (flags & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }

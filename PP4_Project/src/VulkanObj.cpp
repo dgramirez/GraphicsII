@@ -3,6 +3,8 @@
 VulkanObj::VulkanObj() {}
 VulkanObj::~VulkanObj() { cleanup(); }
 
+XTime myTime;
+
 bool VulkanObj::init(const char* title, SDL_Window* window, unsigned short win_width, unsigned short win_height)
 {
 	context.init(window, prv_ObjectList);
@@ -73,7 +75,7 @@ void VulkanObj::idle_device()
 	vkDeviceWaitIdle(context.device.logical);
 }
 
-void VulkanObj::reset_swapchain(unsigned short win_width, unsigned short win_height)
+void VulkanObj::reset_swapchain()
 {
 	vkDeviceWaitIdle(context.device.logical);
 
@@ -102,40 +104,38 @@ void VulkanObj::add_to_object_list(const Object3D & object)
 
 void VulkanObj::update(const SDL_Event &e)
 {
-	if (e.type == SDL_KEYDOWN)
-		switch (e.key.keysym.sym)
-		{
-		case SDLK_LEFT:
-			myview = glm::rotate(myview, glm::radians(0.1f), glm::vec3(0, 1, 0));
-			break;
-		case SDLK_RIGHT:
-			myview = glm::rotate(myview, glm::radians(-0.1f), glm::vec3(0, 1, 0));
-			break;
-		case SDLK_UP:
-			myview = glm::rotate(myview, glm::radians(0.1f), glm::vec3(1, 0, 0));
-			break;
-		case SDLK_DOWN:
-			myview = glm::rotate(myview, glm::radians(-0.1f), glm::vec3(1, 0, 0));
-			break;
-		case SDLK_w:
-			myview = glm::translate(myview, glm::vec3(0.0f, 0.0f, -0.1f));
-			break;
-		case SDLK_a:
-			myview = glm::translate(myview, glm::vec3(-0.1f, 0.0f, 0.0f));
-			break;
-		case SDLK_s:
-			myview = glm::translate(myview, glm::vec3(0.0f, 0.0f, 0.1f));
-			break;
-		case SDLK_d:
-			myview = glm::translate(myview, glm::vec3(0.1f, 0.0f, 0.0f));
-			break;
-		case SDLK_q:
-			myview = glm::translate(myview, glm::vec3(0.0f, -0.1f, 0.0f));
-			break;
-		case SDLK_e:
-			myview = glm::translate(myview, glm::vec3(0.0f, 0.1f, 0.0f));
-			break;
-		}
+	float posrotspeed = float(glm::radians(60.0f) * myTime.SmoothDelta());
+	float negrotspeed = float(glm::radians(-60.0f) * myTime.SmoothDelta());
+	float posmovspeed = float(5.0f * myTime.SmoothDelta());
+	float negmovspeed = float(-5.0f * myTime.SmoothDelta());
+
+	if (InputController::r_negYaw)
+		myview = glm::rotate(myview, posrotspeed, glm::vec3(0, 1, 0));
+	if (InputController::r_posYaw)
+		myview = glm::rotate(myview, negrotspeed, glm::vec3(0, 1, 0));
+	if (InputController::r_posPitch)
+		myview = glm::rotate(myview, posrotspeed, glm::vec3(1, 0, 0));
+	if (InputController::r_negPitch)
+		myview = glm::rotate(myview, negrotspeed, glm::vec3(1, 0, 0));
+	if (InputController::r_posRoll)
+		myview = glm::rotate(myview, posrotspeed, glm::vec3(0, 0, 1));
+	if (InputController::r_negRoll)
+		myview = glm::rotate(myview, negrotspeed, glm::vec3(0, 0, 1));
+
+
+	if (InputController::m_forward)
+		myview = glm::translate(myview, glm::vec3(0.0f, 0.0f, negmovspeed));
+	if (InputController::m_back)
+		myview = glm::translate(myview, glm::vec3(0.0f, 0.0f, posmovspeed));
+	if (InputController::m_left)
+		myview = glm::translate(myview, glm::vec3(negmovspeed, 0.0f, 0.0f));
+	if (InputController::m_right)
+		myview = glm::translate(myview, glm::vec3(posmovspeed, 0.0f, 0.0f));
+	if (InputController::m_up)
+		myview = glm::translate(myview, glm::vec3(0.0f, negmovspeed, 0.0f));
+	if (InputController::m_down)
+		myview = glm::translate(myview, glm::vec3(0.0f, posmovspeed, 0.0f));
+
 }
 
 void VulkanObj::start_frame()
@@ -145,7 +145,10 @@ void VulkanObj::start_frame()
 	VkResult frame_result = vkAcquireNextImageKHR(context.device.logical, context.swapchain.me, MAX_UINT64,
 		prv_SemaphoreAndFences.image_available_semaphores[prv_Frame], VK_NULL_HANDLE, &context.swapchain.image_index);
 	if (frame_result == VK_ERROR_OUT_OF_DATE_KHR)
+	{
+		reset_swapchain();
 		return;
+	}
 	else if (frame_result != VK_SUCCESS && frame_result != VK_SUBOPTIMAL_KHR)
 	{
 		LOG("CANNOT DRAW FRAME!!!!!");
@@ -227,13 +230,13 @@ void VulkanObj::end_frame()
 
 	VkResult frame_result = vkQueuePresentKHR(context.device.q_present, &present_info);
 
-	if (frame_result == VK_ERROR_OUT_OF_DATE_KHR)
+	if (frame_result == VK_ERROR_OUT_OF_DATE_KHR || frame_result == VK_SUBOPTIMAL_KHR)
 	{
-		LOG("Swapchain Out of Date!")
+		reset_swapchain();
 	}
-	else if (frame_result == VK_SUBOPTIMAL_KHR)
+	else if (frame_result != VK_SUCCESS)
 	{
-		LOG("Present Queue is Suboptimal!")
+		LOG("QUEUE PRESENT IS UNSUCCESSFUL!	")
 	}
 
 	prv_Frame = (prv_Frame + 1) % MAX_FRAMES;
@@ -275,7 +278,6 @@ void VulkanObj::CleanupSwapchain()
 		context.pipelines.pop_back();
 	}
 	if (context.swapchain.render_pass)	vkDestroyRenderPass(context.device.logical, context.swapchain.render_pass, nullptr);
-	if (context.swapchain.render_pass_no_clear)	vkDestroyRenderPass(context.device.logical, context.swapchain.render_pass_no_clear, nullptr);
 
  	for (unsigned int i = 0; i < context.swapchain.images.size(); ++i)
  		vkDestroyImageView(context.device.logical, context.swapchain.image_views[i], nullptr);

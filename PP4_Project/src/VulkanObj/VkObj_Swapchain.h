@@ -36,7 +36,6 @@ public:
 	VkSwapchainKHR me;
 
 	VkRenderPass render_pass;
-	VkRenderPass render_pass_no_clear;
 
 	struct VkStruct_Image{
 		VkImage image;
@@ -54,7 +53,6 @@ public:
 private:
 	bool CreateSwapchain();
 	bool CreateRenderPass();
-	bool CreateRenderPassNoClear();
 	bool CreateMSAA();
 	bool CreateDepthBuffer();
 	bool CreateFrameBuffer();
