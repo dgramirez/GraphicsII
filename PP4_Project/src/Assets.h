@@ -2,7 +2,6 @@
 #define ASSETS_H
 
 #include "Defines.h"
-
 class VkObj_DeviceProperties;
 
 class Texture

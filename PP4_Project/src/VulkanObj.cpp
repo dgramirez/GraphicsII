@@ -106,8 +106,24 @@ void VulkanObj::update(const SDL_Event &e)
 {
 	float posrotspeed = float(glm::radians(60.0f) * myTime.SmoothDelta());
 	float negrotspeed = float(glm::radians(-60.0f) * myTime.SmoothDelta());
-	float posmovspeed = float(5.0f * myTime.SmoothDelta());
-	float negmovspeed = float(-5.0f * myTime.SmoothDelta());
+	float posmovspeed = 10 * float(5.0f * myTime.SmoothDelta());
+	float negmovspeed = 10 * float(-5.0f * myTime.SmoothDelta());
+
+	if (InputController::speed1 && InputController::speed2)
+	{
+		posmovspeed *= 0.125;
+		negmovspeed *= 0.125;
+	}
+	else if (InputController::speed1)
+	{
+		posmovspeed *= 0.5;
+		negmovspeed *= 0.5;
+	}
+	else if (InputController::speed2)
+	{
+		posmovspeed *= 0.25;
+		negmovspeed *= 0.25;
+	}
 
 	if (InputController::r_negYaw)
 		myview = glm::rotate(myview, posrotspeed, glm::vec3(0, 1, 0));
@@ -132,9 +148,9 @@ void VulkanObj::update(const SDL_Event &e)
 	if (InputController::m_right)
 		myview = glm::translate(myview, glm::vec3(posmovspeed, 0.0f, 0.0f));
 	if (InputController::m_up)
-		myview = glm::translate(myview, glm::vec3(0.0f, negmovspeed, 0.0f));
-	if (InputController::m_down)
 		myview = glm::translate(myview, glm::vec3(0.0f, posmovspeed, 0.0f));
+	if (InputController::m_down)
+		myview = glm::translate(myview, glm::vec3(0.0f, negmovspeed, 0.0f));
 
 }
 
@@ -379,7 +395,29 @@ void VulkanObj::draw()
 {
 	start_frame();
 
-	for (uint32_t i = 0; i < prv_ObjectList.size(); ++i)
+	for (uint32_t i = 0; i < 1; ++i)
+	{
+		std::array<VkBuffer, 1> vertex_buffer = { prv_ObjectList[i].vertex_buffer };
+		VkDeviceSize offset[] = { 0 };
+
+		prv_ObjectList[i].UpdateUniformBuffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory, glm::inverse(myview));
+		vkCmdBindPipeline(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline);
+		vkCmdBindDescriptorSets(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline_layout, 0, 1, &prv_ObjectList[i].descriptor_set[context.swapchain.image_index], 0, nullptr);
+		vkCmdBindVertexBuffers(context.swapchain.command_buffer[context.swapchain.image_index], 0, 1, vertex_buffer.data(), offset);
+		vkCmdBindIndexBuffer(context.swapchain.command_buffer[context.swapchain.image_index], prv_ObjectList[i].index_buffer, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(context.swapchain.command_buffer[context.swapchain.image_index], CAST(uint32_t, prv_ObjectList[i].indices.size()), 1, 0, 0, 0);
+	}
+
+	std::array<VkClearDepthStencilValue, 1> clear_value = { { 1.0f, 128 } };
+	VkImageSubresourceRange range = {};
+	range.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+	range.baseMipLevel = 0;
+	range.levelCount = 1;
+	range.baseArrayLayer = 0;
+	range.layerCount = 1;
+	vkCmdClearDepthStencilImage(context.swapchain.command_buffer[context.swapchain.image_index], context.swapchain.zbuffer.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, clear_value.data(), 1, &range);
+
+	for (uint32_t i = 1; i < prv_ObjectList.size(); ++i)
 	{
 		std::array<VkBuffer, 1> vertex_buffer = { prv_ObjectList[i].vertex_buffer };
 		VkDeviceSize offset[] = { 0 };

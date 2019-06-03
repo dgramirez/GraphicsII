@@ -1,8 +1,13 @@
 #ifndef WINDOWS_H
 #define WINDOWS_H
 
-#include "VulkanObj.h"
-#include <memory>
+class VulkanObj;
+class Object3D;
+union SDL_Event;
+struct SDL_Surface;
+struct SDL_Window;
+#include <vector>
+
 
 class Window
 {
@@ -23,13 +28,13 @@ public:
 	void setup_object_list(const std::vector<Object3D>& initial_objects);
 
 private:
-	//Private Variables, GLFW
+	//Private Variables, SDL
 	SDL_Surface* surface = nullptr;
 	SDL_Window* window = nullptr;
 	const char* prv_WinTitle;
 	bool prv_Fullscreen;
 	bool prv_Render;
-	bool prv_focused = true;
+	bool prv_Focused;
 	int prv_WinWidth;
 	int prv_WinHeight;
 	
@@ -37,7 +42,7 @@ private:
 	//Private Variables, Vulkan
 	VulkanObj* Vobj = nullptr;
 
-	//Private Methods, GLFW
+	//Private Methods, SDL
 	void Init();
 	void MainLoop();
 	void Cleanup();

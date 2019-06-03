@@ -1,4 +1,6 @@
 #include "Window.h"
+#include "VulkanObj.h"
+#include <memory>
 
 Window::Window(unsigned int width, unsigned int height, const char* title)
 {
@@ -7,9 +9,9 @@ Window::Window(unsigned int width, unsigned int height, const char* title)
 	prv_WinTitle = title;
 	prv_Render = true;
 	prv_Fullscreen = false;
+	prv_Focused = true;
 	Vobj = new VulkanObj();
 }
-
 
 Window::~Window()
 {
@@ -120,14 +122,14 @@ void Window::SDL_EventWindow(SDL_Event &e)
 		case SDL_WINDOWEVENT_SIZE_CHANGED:
 		case SDL_WINDOWEVENT_RESTORED:
 		case SDL_WINDOWEVENT_MAXIMIZED:
-			prv_focused = true;
+			prv_Focused = true;
 			SDL_GetWindowSize(window, &prv_WinWidth, &prv_WinHeight);
 			Vobj->reset_swapchain();
 			break;
 
 		case SDL_WINDOWEVENT_MINIMIZED:
-			prv_focused = false;
-			while (!prv_focused)
+			prv_Focused = false;
+			while (!prv_Focused)
 			{
 				SDL_GetWindowSize(window, &prv_WinWidth, &prv_WinHeight);
 				SDL_PollEvent(&e);
@@ -195,6 +197,13 @@ void Window::SDL_EventKeyDown(SDL_Event &e)
 		InputController::m_up = true;
 	if (key == SDLK_e)
 		InputController::m_down = true;
+
+	if (key == SDLK_LSHIFT)
+		InputController::speed1 = true;
+	if (key == SDLK_LCTRL)
+		InputController::speed2 = true;
+	if (key == SDLK_z)
+		InputController::stop_rot = !InputController::stop_rot;
 }
 
 void Window::SDL_EventKeyUp(SDL_Event &e)
@@ -226,4 +235,9 @@ void Window::SDL_EventKeyUp(SDL_Event &e)
 		InputController::m_up = false;
 	if (key == SDLK_e)
 		InputController::m_down = false;
+
+	if (key == SDLK_LSHIFT)
+		InputController::speed1 = false;
+	if (key == SDLK_LCTRL)
+		InputController::speed2 = false;
 }

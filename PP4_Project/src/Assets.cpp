@@ -1,4 +1,5 @@
 #include "Assets.h"
+#include "Defines.h"
 #include "VkObj_Shared.h"
 #include "VkObj_Devices.h"
 

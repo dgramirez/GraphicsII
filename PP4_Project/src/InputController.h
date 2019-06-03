@@ -16,6 +16,11 @@ struct InputController
 	static inline bool r_negRoll	= false;
 	static inline bool r_posYaw		= false;
 	static inline bool r_negYaw		= false;
+
+	static inline bool speed1		= false;
+	static inline bool speed2		= false;
+
+	static inline bool stop_rot		= false;
 };
 
 #endif

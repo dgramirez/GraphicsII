@@ -11,8 +11,8 @@ class Object3D
 {
 public:
 	Object3D() = default;
-	Object3D(const char* fbx_filename, Texture* texture_dot_h = nullptr, float _scale = 10);
 	Object3D(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices, Texture* texture_dot_h);
+	Object3D(const char* fbx_filename, const char* texture_filelocation = "", Texture* texture_dot_h = nullptr, float _scale = 10, Object3D* parent = nullptr);
 	~Object3D();
 
 	std::vector<Vertex> get_vertices() { return prv_Vertices; }
@@ -23,10 +23,6 @@ public:
 	
 	Texture* get_texture() const { return prv_Texture; }
 	__declspec(property(get = get_texture)) Texture* texture;
-	
-	VkImage image;
-	VkImageView image_view = nullptr;
-	VkDeviceMemory image_memory;
 
 	VkComponentSwizzle component_r = VK_COMPONENT_SWIZZLE_IDENTITY;
 	VkComponentSwizzle component_g = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -48,16 +44,17 @@ public:
 	VkPipelineLayout *pipeline_layout;
 	VkPipeline *pipeline;
 	uint32_t swapchain_size;
-	VkDescriptorPool descriptor_pool;
 
 	std::vector<VkCommandBuffer> command_buffer;
+
+	Object3D *parent;
+	glm::mat4 origin;
 
 	static void set_static_contexts(VkObj_DeviceProperties &device, VkCommandPool &command_pool);
 	void init(const uint32_t &sizeof_ubuffer,
 		VkPipelineLayout &graphics_pipeline_layout, VkPipeline &graphic_pipeline, const uint32_t &swapchain_vec_size);
 	void set_image_view(const VkComponentSwizzle &red = VK_COMPONENT_SWIZZLE_IDENTITY, const VkComponentSwizzle &green = VK_COMPONENT_SWIZZLE_IDENTITY, const VkComponentSwizzle &blue = VK_COMPONENT_SWIZZLE_IDENTITY, const VkComponentSwizzle &alpha = VK_COMPONENT_SWIZZLE_IDENTITY);
 
-	bool CreateDescriptorSet();
 	bool CreateDescriptorSet(const VkDescriptorPool &descriptor_pool, const VkDescriptorSetLayout &descriptor_set_layout);
 	void CreateUniformBuffer();
 
@@ -77,17 +74,15 @@ private:
 	static VkCommandPool *pCommandPool;
 	static VkDescriptorSetLayout *pDescriptorSetLayout;
 	const char *prv_TextureFilename;
+	const char *prv_TextureFileLocation;
 	void ProcessFbxMesh(FbxNode* node);
 	void Compactify(const std::vector<Vertex>& vertex2);
 	void SetUVs(FbxArray<FbxVector2>& uv, const FbxMesh* mesh);
 	void GetTextureFilename(FbxNode* child_node, const char* return_value);
 	void ImportFbx(const char* fbx_filename);
-	void CreateImage();
 	void CreateSampler();
 	void CreateVertexBuffer();
 	void CreateIndexBuffer();
-	bool CreateDescriptorPool();
-
 };
 
 #endif // ifndef OBJECT_H

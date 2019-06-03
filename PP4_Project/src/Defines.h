@@ -52,6 +52,10 @@
 #include "InputController.h"
 #include "../vendor/fullsail/XTime.h"
 
+typedef void (*UniformFctn)(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& swapchain_current_image,
+	std::vector<VkDeviceMemory> &uniform_memory,
+	const glm::mat4 &model, const glm::mat4 &view, const glm::mat4 &perspective);
+
 #define MAX_UINT32	0xFFFFFFFF
 #define MAX_UINT64	0xFFFFFFFFFFFFFFFF
 
