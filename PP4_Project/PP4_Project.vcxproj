@@ -103,7 +103,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;$(ProjectDir)vendor\sdl\lib\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\fbxsdk\lib\$(Configuration);$(ProjectDir)vendor\sdl\lib\</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;libfbxsdk.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -120,7 +120,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;$(ProjectDir)vendor\sdl\lib\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\fbxsdk\lib\$(Configuration);$(ProjectDir)vendor\sdl\lib\</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;libfbxsdk.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -141,7 +141,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;$(ProjectDir)vendor\sdl\lib\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\fbxsdk\lib\$(Configuration);$(ProjectDir)vendor\sdl\lib\</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;libfbxsdk.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -162,7 +162,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\fbxsdk\lib\dbg;$(ProjectDir)vendor\fbxsdk\lib\rel;$(ProjectDir)vendor\sdl\lib\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\vulkan\Lib;$(ProjectDir)vendor\fbxsdk\lib\$(Configuration);$(ProjectDir)vendor\sdl\lib\</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;libfbxsdk.lib;SDL2.lib;SDL2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

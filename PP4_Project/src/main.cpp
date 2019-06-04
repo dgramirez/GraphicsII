@@ -39,6 +39,9 @@
 #define DISTANCE_NEPTUNE	SIZE_SPHERE + 2793.00f
 #define DISTANCE_PLUTO		SIZE_SPHERE + 3670.00f
 
+#define GRID_LENGTH 10.0f
+#define GRID_SUBLENGTH 1.0f
+
 Object3D create_pyramid();
 Object3D create_axe();
 Object3D create_eyes();
@@ -68,6 +71,7 @@ int main(int argc, char* args[])
 	Object3D pyramid = create_pyramid();
 	Object3D eyes = create_eyes();
 	Object3D axe = create_axe();
+	Object3D grid = create_grid();
 //	Object3D terrain = create_terrain();
 	Object3D Skybox = Object3D(".\\assets\\solarsystem\\SpaceSkybox.fbx", ".\\assets\\solarsystem\\texture\\", nullptr, 0.1f, nullptr);
 	Skybox.uniformFctn = skybox_uniform;
@@ -118,6 +122,7 @@ int main(int argc, char* args[])
 
 	Object_List.push_back(eyes);
 	Object_List.push_back(axe);
+	Object_List.push_back(grid);
 
 	myWindow->setup_object_list(Object_List);
 
@@ -224,19 +229,59 @@ Object3D create_terrain()
 	
 	return myTerrain;
 }
-// Object3D create_grid()
-// {
-// // 	std::vector<Vertex> pyramid_vertex = {
-// // 	{ { 0.0f, -0.5f,  0.0f, 1.0f}, V_COLOR_RED	 , {0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Top point
-// // 	{ { 0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_GREEN , {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 1
-// // 	{ {-0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_BLUE  , {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 2
-// // 	{ { 0.5f,  0.5f, -0.5f, 1.0f}, V_COLOR_CYAN  , {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 3
-// // 	{ {-0.5f,  0.5f, -0.5f, 1.0f}, V_COLOR_YELLOW, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} }	//Bottom Vertex 4;
-// // 	};
-// // 
-// // r
-// 
-// }
+Object3D create_grid()
+{
+	std::vector<Vertex> pyramid_vertex = {
+	{ { 0.0f, -0.5f,  0.0f, 1.0f}, V_COLOR_RED	 , {0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Top point
+	{ { 0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_GREEN , {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 1
+	{ {-0.5f,  0.5f,  0.5f, 1.0f}, V_COLOR_BLUE  , {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 2
+	{ { 0.5f,  0.5f, -0.5f, 1.0f}, V_COLOR_CYAN  , {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 3
+	{ {-0.5f,  0.5f, -0.5f, 1.0f}, V_COLOR_YELLOW, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} }	//Bottom Vertex 4;
+	};
+
+	std::vector<Vertex> grid_vertices;
+	std::vector<uint32_t> grid_indices;
+	uint32_t index = 0;
+	for (float i = -GRID_LENGTH; i <= GRID_LENGTH; i += GRID_SUBLENGTH)
+	{
+		//Setup 
+		grid_vertices.resize(grid_vertices.size() + 8);
+
+		//Vertical
+		grid_vertices[index + 0] = { { i + 0.0f, 0.0f, -GRID_LENGTH, 1.0f}, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+		grid_vertices[index + 1] = { { i + 0.1f, 0.0f, -GRID_LENGTH, 1.0f}, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+		grid_vertices[index + 2] = { { i + 0.0f, 0.0f,  GRID_LENGTH, 1.0f}, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+		grid_vertices[index + 3] = { { i + 0.1f, 0.0f,  GRID_LENGTH, 1.0f}, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+		grid_indices.push_back(index + 0);
+		grid_indices.push_back(index + 1);
+		grid_indices.push_back(index + 2);
+		grid_indices.push_back(index + 0);
+		grid_indices.push_back(index + 2);
+		grid_indices.push_back(index + 3);
+
+		//Horizontal
+		grid_vertices[index + 4] = { { -GRID_LENGTH, 0.0f, i + 0.0f, 1.0f}, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+		grid_vertices[index + 5] = { { -GRID_LENGTH, 0.0f, i + 0.1f, 1.0f}, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+		grid_vertices[index + 6] = { {  GRID_LENGTH, 0.0f, i + 0.0f, 1.0f}, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+		grid_vertices[index + 7] = { {  GRID_LENGTH, 0.0f, i + 0.1f, 1.0f}, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+		grid_indices.push_back(index + 4);
+		grid_indices.push_back(index + 5);
+		grid_indices.push_back(index + 6);
+		grid_indices.push_back(index + 4);
+		grid_indices.push_back(index + 5);
+		grid_indices.push_back(index + 7);
+		index += 8;
+	}
+
+	Texture* grid_texture = new Texture(".\\assets\\misc\\white_pixel.png");
+	Object3D Grid(grid_vertices, grid_indices, grid_texture);
+
+	Grid.world_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	Grid.uniformFctn = AxeRotation;
+
+	return Grid;
+
+}
 Object3D create_earth()
 {
 	Object3D myEarth("earth2.fbx", nullptr, nullptr, 75);
