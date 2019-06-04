@@ -255,21 +255,21 @@ Object3D create_grid()
 		grid_indices.push_back(index + 0);
 		grid_indices.push_back(index + 1);
 		grid_indices.push_back(index + 2);
-		grid_indices.push_back(index + 0);
-		grid_indices.push_back(index + 2);
+		grid_indices.push_back(index + 1);
 		grid_indices.push_back(index + 3);
+		grid_indices.push_back(index + 2);
 
 		//Horizontal
 		grid_vertices[index + 4] = { { -GRID_LENGTH, 0.0f, i + 0.0f, 1.0f}, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 		grid_vertices[index + 5] = { { -GRID_LENGTH, 0.0f, i + 0.1f, 1.0f}, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 		grid_vertices[index + 6] = { {  GRID_LENGTH, 0.0f, i + 0.0f, 1.0f}, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 		grid_vertices[index + 7] = { {  GRID_LENGTH, 0.0f, i + 0.1f, 1.0f}, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
-		grid_indices.push_back(index + 4);
-		grid_indices.push_back(index + 5);
 		grid_indices.push_back(index + 6);
-		grid_indices.push_back(index + 4);
-		grid_indices.push_back(index + 5);
 		grid_indices.push_back(index + 7);
+		grid_indices.push_back(index + 4);
+		grid_indices.push_back(index + 7);
+		grid_indices.push_back(index + 5);
+		grid_indices.push_back(index + 4);
 		index += 8;
 	}
 

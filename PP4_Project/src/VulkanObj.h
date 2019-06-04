@@ -37,6 +37,10 @@ private:
 
 	glm::mat4 myview = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, 5.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	float viewspd = 1.0f;
+	bool infinite_perspective = true;
+	float zoom = 45.0f;
+	float nearplane = 0.1f;
+	float farplane = 1000.0f;
 
 	uint32_t prv_Frame = 0;
 	std::vector<Object3D> prv_ObjectList;
