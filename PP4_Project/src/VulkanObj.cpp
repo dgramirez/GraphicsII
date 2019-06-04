@@ -104,26 +104,24 @@ void VulkanObj::add_to_object_list(const Object3D & object)
 
 void VulkanObj::update(const SDL_Event &e)
 {
+	if (e.type == SDL_KEYDOWN)
+	{
+		if (e.key.keysym.sym == SDLK_KP_PLUS)
+			viewspd += 0.25f;
+
+		if (e.key.keysym.sym == SDLK_KP_MINUS)
+		{
+			viewspd -= 0.25f;
+			if (viewspd < 0.25f)
+				viewspd = 0.25f;
+		}
+	}
+
 	float posrotspeed = float(glm::radians(60.0f) * myTime.SmoothDelta());
 	float negrotspeed = float(glm::radians(-60.0f) * myTime.SmoothDelta());
-	float posmovspeed = 10 * float(5.0f * myTime.SmoothDelta());
-	float negmovspeed = 10 * float(-5.0f * myTime.SmoothDelta());
+	float posmovspeed = viewspd * float(5.0f * myTime.SmoothDelta());
+	float negmovspeed = viewspd * float(-5.0f * myTime.SmoothDelta());
 
-	if (InputController::speed1 && InputController::speed2)
-	{
-		posmovspeed *= 0.125;
-		negmovspeed *= 0.125;
-	}
-	else if (InputController::speed1)
-	{
-		posmovspeed *= 0.5;
-		negmovspeed *= 0.5;
-	}
-	else if (InputController::speed2)
-	{
-		posmovspeed *= 0.25;
-		negmovspeed *= 0.25;
-	}
 
 	if (InputController::r_negYaw)
 		myview = glm::rotate(myview, posrotspeed, glm::vec3(0, 1, 0));
