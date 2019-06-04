@@ -193,6 +193,7 @@
     <ClInclude Include="src\Maths.h" />
     <ClInclude Include="src\texture_h\axeTexture.h" />
     <ClInclude Include="src\texture_h\celestial.h" />
+    <ClInclude Include="src\texture_h\eyeball.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Buffers.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Command.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Context.h" />

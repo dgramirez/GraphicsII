@@ -128,5 +128,8 @@
     <ClInclude Include="src\Assets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\texture_h\eyeball.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #include "Window.h"
 #include "Assets.h"
 #include "Object.h"
+#include "texture_h/eyeball.h"
 
 #define SKYBOX 0
 #define SUN 1
@@ -40,6 +41,7 @@
 
 Object3D create_pyramid();
 Object3D create_axe();
+Object3D create_eyes();
 Object3D create_sphere(const char* fbxfilepath, const char* texturelocation, Texture* texturedoth = nullptr, const float &scale_down = 10.0f, const glm::mat4 &model_matrix = glm::mat4(1.0f));
 void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
 void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
@@ -63,7 +65,7 @@ int main(int argc, char* args[])
 	Window* myWindow = new Window(800, 600, "My New Window");
 
 	Object3D pyramid = create_pyramid();
-//	Object3D two_squares = create_two_squares();
+	Object3D eyes = create_eyes();
 	Object3D axe = create_axe();
 //	Object3D terrain = create_terrain();
 	Object3D Skybox = Object3D(".\\assets\\solarsystem\\SpaceSkybox.fbx", ".\\assets\\solarsystem\\texture\\", nullptr, 0.1f, nullptr);
@@ -113,7 +115,7 @@ int main(int argc, char* args[])
 	Object_List[PLUTO].world_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(DISTANCE_PLUTO, 0.0f, 0.0f));
 	Object_List[PLUTO].uniformFctn = SunRotation;
 
-	Object_List.push_back(pyramid);
+	Object_List.push_back(eyes);
 
 	myWindow->setup_object_list(Object_List);
 
@@ -200,6 +202,19 @@ Object3D create_axe()
 	axe.world_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, -1.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	axe.uniformFctn = AxeRotation;
 	return axe;
+}
+Object3D create_eyes()
+{
+	Texture* myEyeTexture = new Texture("assets\\misc\\Eye_D.jpg");
+
+	uint32_t verts = sizeof(eyeball_data) / sizeof(_OBJ_VERT_);
+	uint32_t inds = sizeof(eyeball_indicies) / sizeof(unsigned int);
+
+	Object3D myEyes(eyeball_data, verts, eyeball_indicies, inds, myEyeTexture);
+	myEyes.world_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, -3.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	myEyes.uniformFctn = PyramidRotation;
+
+	return myEyes;
 }
 Object3D create_terrain()
 {

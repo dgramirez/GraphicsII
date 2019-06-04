@@ -25,6 +25,31 @@ Object3D::Object3D(const char* fbx_filename, const char* texture_filelocation, T
 		prv_Texture = new Texture(prv_TextureFilename);
 }
 
+Object3D::Object3D(const OBJ_VERT* object_vertices, const unsigned int &vertices_size, const unsigned int* object_indices, const unsigned int & indices_size, Texture* texture_dot_h)
+{
+	prv_Vertices.resize(vertices_size);
+	for (uint32_t i = 0; i < prv_Vertices.size(); ++i)
+	{
+		prv_Vertices[i].position.x = object_vertices[i].pos[0];
+		prv_Vertices[i].position.y = object_vertices[i].pos[1];
+		prv_Vertices[i].position.z = object_vertices[i].pos[2];
+		prv_Vertices[i].position.w = 1.0f;
+
+		prv_Vertices[i].uv.x = object_vertices[i].uvw[0];
+		prv_Vertices[i].uv.y = object_vertices[i].uvw[1];
+
+		prv_Vertices[i].normal.x = object_vertices[i].nrm[0];
+		prv_Vertices[i].normal.x = object_vertices[i].nrm[0];
+		prv_Vertices[i].normal.x = object_vertices[i].nrm[0];
+	}
+
+	prv_Indices.resize(indices_size);
+	for (uint32_t i = 0; i < prv_Indices.size(); ++i)
+		prv_Indices[i] = object_indices[i];
+
+	prv_Texture = texture_dot_h;
+}
+
 Object3D::~Object3D()
 {
 	return;

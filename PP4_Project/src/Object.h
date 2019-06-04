@@ -7,12 +7,23 @@
 #include "VulkanObj/VkObj_Shared.h"
 #include "VulkanObj/VkObj_Devices.h"
 
+#ifndef __OBJ_VERT__
+typedef struct _OBJ_VERT_
+{
+	float pos[3];
+	float uvw[3];
+	float nrm[3];
+}OBJ_VERT;
+#define __OBJ_VERT__
+#endif
+
 class Object3D
 {
 public:
 	Object3D() = default;
 	Object3D(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices, Texture* texture_dot_h);
 	Object3D(const char* fbx_filename, const char* texture_filelocation = "", Texture* texture_dot_h = nullptr, float _scale = 10, Object3D* parent = nullptr);
+	Object3D(const OBJ_VERT* object_vertices, const unsigned int &vertices_size, const unsigned int* object_indices, const unsigned int & indices_size, Texture* texture_dot_h);
 	~Object3D();
 
 	std::vector<Vertex> get_vertices() { return prv_Vertices; }
