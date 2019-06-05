@@ -21,6 +21,17 @@ struct InputController
 	static inline bool speed2		= false;
 
 	static inline bool stop_rot		= false;
+
+	static inline bool Lshift		= false;
+	static inline bool Rshift		= false;
+	static inline bool Lctrl		= false;
+	static inline bool Rctrl		= false;
+	static inline bool Lalt			= false;
+	static inline bool Ralt			= false;
+	
+	static inline bool zCommand		= false;
+	static inline bool xCommand		= false;
+	static inline bool findpluto	= false;
 };
 
 #endif

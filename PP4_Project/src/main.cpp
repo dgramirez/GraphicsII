@@ -15,7 +15,7 @@
 #define NEPTUNE 9
 #define PLUTO 10
 
-#define SIZE_SPHERE 79.1f
+#define SIZE_SPHERE			79.1f
 #define SIZE_SUN			SIZE_SPHERE / 139.2f
 #define SIZE_MERCURY		SIZE_SPHERE /  0.50f
 #define SIZE_VENUS			SIZE_SPHERE /  1.20f
@@ -47,22 +47,23 @@ Object3D create_axe();
 Object3D create_eyes();
 Object3D create_sphere(const char* fbxfilepath, const char* texturelocation, Texture* texturedoth = nullptr, const float &scale_down = 10.0f, const glm::mat4 &model_matrix = glm::mat4(1.0f));
 Object3D create_grid();
-void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
-void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
+void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
 
-void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, const glm::mat4 &model, const glm::mat4 &view, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days);
-void SunRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
-void MercuryRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
-void VenusRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
-void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
-void MarsRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
-void JupiterRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
-void SaturnRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
-void UranusRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
-void NeptuneRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
-void PlutoRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
-void EarthMoonRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
-void skybox_uniform(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view);
+void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, const glm::mat4 &model, const glm::mat4 &view, const glm::mat4 &perspective, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days);
+void SunRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void MercuryRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void VenusRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void MarsRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void JupiterRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void SaturnRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void UranusRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void NeptuneRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void PlutoRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void EarthMoonRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void skybox_uniform(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective);
+void write_to_buffer(const VkDevice &device, const uint32_t &current_image, std::vector<VkDeviceMemory> &uniform_memory, const Mvp_object &mvp);
 
 int main(int argc, char* args[])
 {
@@ -79,16 +80,16 @@ int main(int argc, char* args[])
 	float planetscale = 75.0f;
 	std::vector<Object3D> Object_List;
 	Object_List.push_back(Skybox);
-	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Sun.fbx", ".\\assets\\solarsystem\\texture\\", nullptr, SIZE_SUN));
-	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Mercury.fbx", ".\\assets\\solarsystem\\texture\\", nullptr, SIZE_MERCURY));
-	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Venus.fbx", ".\\assets\\solarsystem\\texture\\", nullptr, SIZE_VENUS));
-	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Earth.fbx", ".\\assets\\solarsystem\\texture\\", nullptr, SIZE_EARTH));
-	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Mars.fbx", ".\\assets\\solarsystem\\texture\\", nullptr, SIZE_MARS));
-	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Jupiter.fbx", ".\\assets\\solarsystem\\texture\\", nullptr, SIZE_JUPITER));
-	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Saturn.fbx", ".\\assets\\solarsystem\\texture\\", nullptr, SIZE_SATURN));
-	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Uranus.fbx", ".\\assets\\solarsystem\\texture\\", nullptr, SIZE_URANUS));
-	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Neptune.fbx", ".\\assets\\solarsystem\\texture\\", nullptr, SIZE_NEPTUNE));
-	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Pluto.fbx", ".\\assets\\solarsystem\\texture\\", nullptr, SIZE_PLUTO));
+	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Sun.fbx",		".\\assets\\solarsystem\\texture\\", nullptr, SIZE_SUN));
+	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Mercury.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_MERCURY));
+	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Venus.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_VENUS));
+	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Earth.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_EARTH));
+	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Mars.fbx",		".\\assets\\solarsystem\\texture\\", nullptr, SIZE_MARS));
+	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Jupiter.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_JUPITER));
+	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Saturn.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_SATURN));
+	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Uranus.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_URANUS));
+	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Neptune.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_NEPTUNE));
+	Object_List.push_back(create_sphere(".\\assets\\solarsystem\\Pluto.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_PLUTO));
 
 	Object_List[SUN].world_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(DISTANCE_SUN, 0.0f, 0.0f));
 	Object_List[SUN].uniformFctn = SunRotation;
@@ -112,13 +113,13 @@ int main(int argc, char* args[])
 	Object_List[SATURN].uniformFctn = SaturnRotation;
 
 	Object_List[URANUS].world_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(DISTANCE_URANUS, 0.0f, 0.0f));
-	Object_List[URANUS].uniformFctn = SunRotation;
+	Object_List[URANUS].uniformFctn = UranusRotation;
 
 	Object_List[NEPTUNE].world_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(DISTANCE_NEPTUNE, 0.0f, 0.0f));
-	Object_List[NEPTUNE].uniformFctn = SunRotation;
+	Object_List[NEPTUNE].uniformFctn = NeptuneRotation;
 
 	Object_List[PLUTO].world_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(DISTANCE_PLUTO, 0.0f, 0.0f));
-	Object_List[PLUTO].uniformFctn = SunRotation;
+	Object_List[PLUTO].uniformFctn = PlutoRotation;
 
 	Object_List.push_back(eyes);
 	Object_List.push_back(axe);
@@ -307,7 +308,7 @@ Object3D create_sphere(const char* fbxfilepath, const char* texturelocation, Tex
 	return mySphere;
 }
 
-void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	static auto start_time = std::chrono::high_resolution_clock::now();
 	auto current_time = std::chrono::high_resolution_clock::now();
@@ -318,15 +319,12 @@ void AxeRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, con
 	mvp.model = model;
 	mvp.view = view;
 	//	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 20.0f);
-	mvp.projection = glm::infinitePerspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f);
+	mvp.projection = perspective;
 	mvp.projection[1][1] = -mvp.projection[1][1];
 
-	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_memory[current_image]);
+	write_to_buffer(device, current_image, uniform_memory, mvp);
 }
-void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	static auto start_time = std::chrono::high_resolution_clock::now();
 	auto current_time = std::chrono::high_resolution_clock::now();
@@ -337,117 +335,72 @@ void PyramidRotation(const VkDevice& device, const VkExtent3D& swapchain_extent,
 	mvp.model = model * glm::rotate(glm::mat4(1.0f), delta_time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	mvp.view = view;
 //	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 20.0f);
-	mvp.projection = glm::infinitePerspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f);
+	mvp.projection = perspective;
 	mvp.projection[1][1] = -mvp.projection[1][1];
-
-	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_memory[current_image]);
+	write_to_buffer(device, current_image, uniform_memory, mvp);
 }
 
-void SunRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void SunRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, 27.0f, 0.0f);
-
-	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_memory[current_image]);
+	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, perspective, 27.0f, 0.0f);
+	write_to_buffer(device, current_image, uniform_memory, mvp);
 }
-void MercuryRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void MercuryRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, 59.0f, 87.97f);
-
-	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_memory[current_image]);
+	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, perspective, 59.0f, 87.97f);
+	write_to_buffer(device, current_image, uniform_memory, mvp);
 }
-void VenusRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void VenusRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, 243.0f, 224.7f);
-
-	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_memory[current_image]);
+	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, perspective, 243.0f, 224.7f);
+	write_to_buffer(device, current_image, uniform_memory, mvp);
 }
-void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void EarthRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, 1.0f, 365.25f);
-
-	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_memory[current_image]);
+	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, perspective, 1.0f, 365.25f);
+	write_to_buffer(device, current_image, uniform_memory, mvp);
 }
-void MarsRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void MarsRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, 1.02749125f, 365.25f);
-
-	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_memory[current_image]);
+	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, perspective, 1.02749125f, 365.25f);
+	write_to_buffer(device, current_image, uniform_memory, mvp);
 }
-void JupiterRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void JupiterRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, 0.4125f, 4330.6f);
-
-	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_memory[current_image]);
+	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, perspective, 0.4125f, 4330.6f);
+	write_to_buffer(device, current_image, uniform_memory, mvp);
 }
-void SaturnRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void SaturnRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, 0.444f, 10775.7f);
-
-	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_memory[current_image]);
+	write_to_buffer(device, current_image, uniform_memory, mvp);
 }
-void UranusRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void UranusRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, 0.71805f, 30687.0f);
-
-	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_memory[current_image]);
+	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, perspective, 0.71805f, 30687.0f);
+	write_to_buffer(device, current_image, uniform_memory, mvp);
 }
-void NeptuneRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void NeptuneRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, 0.67125f, 59757.8f);
-
-	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_memory[current_image]);
+	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, perspective, 0.67125f, 59757.8f);
+	write_to_buffer(device, current_image, uniform_memory, mvp);
 }
-void PlutoRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void PlutoRotation(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, 6.39f, 90520.0f);
-
-	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
-	vkUnmapMemory(device, uniform_memory[current_image]);
+	PlanetaryRotation(swapchain_extent.width / (float)swapchain_extent.height, mvp, model, view, perspective, 6.39f, 90520.0f);
+	write_to_buffer(device, current_image, uniform_memory, mvp);
 }
 
-void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, const glm::mat4 &model, const glm::mat4 &view, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days)
+void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, const glm::mat4 &model, const glm::mat4 &view, const glm::mat4 &perspective, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days)
 {
 	static auto start_time = std::chrono::high_resolution_clock::now();
 	auto current_time = std::chrono::high_resolution_clock::now();
@@ -484,11 +437,11 @@ void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, const glm::mat4 &mod
 	mvp.model *= glm::rotate(glm::mat4(1.0f), planet_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	mvp.view = view;
-	mvp.projection = glm::infinitePerspective(glm::radians(45.0f), aspect_ratio, 0.1f);
+	mvp.projection = perspective;
 	mvp.projection[1][1] = -mvp.projection[1][1];
 }
 
-void skybox_uniform(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void skybox_uniform(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	Mvp_object mvp;
 	mvp.model = glm::mat4(1.0f);
@@ -503,3 +456,10 @@ void skybox_uniform(const VkDevice& device, const VkExtent3D& swapchain_extent, 
 	vkUnmapMemory(device, uniform_memory[current_image]);
 }
 
+void write_to_buffer(const VkDevice &device, const uint32_t &current_image, std::vector<VkDeviceMemory> &uniform_memory, const Mvp_object &mvp)
+{
+	void* data;
+	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
+	memcpy(data, &mvp, sizeof(Mvp_object));
+	vkUnmapMemory(device, uniform_memory[current_image]);
+}

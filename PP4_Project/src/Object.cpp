@@ -623,10 +623,10 @@ bool Object3D::CreateDescriptorSet(const VkDescriptorPool &descriptor_pool, cons
 	return true;
 }
 
-void Object3D::UpdateUniformBuffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view)
+void Object3D::UpdateUniformBuffer(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& current_image, const glm::mat4 &model, std::vector<VkDeviceMemory> &uniform_memory, const glm::mat4 &view, const glm::mat4 &perspective)
 {
 	if (uniformFctn)
-		uniformFctn(device, swapchain_extent, current_image, model, uniform_memory, view);
+		uniformFctn(device, swapchain_extent, current_image, model, uniform_memory, view, perspective);
 }
 
 void Object3D::reset()

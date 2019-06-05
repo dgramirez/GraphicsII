@@ -67,6 +67,8 @@ bool VulkanObj::init(const char* title, SDL_Window* window, unsigned short win_w
 // 		context.swapchain.extent2D, context.swapchain.frame_buffers, prv_Buffers_old.descriptor_sets, prv_Buffers_old.vertex, 0, 
 // 		prv_Buffers_old.index, prv_ObjectList, prv_Command.command_buffers), "Create Command Buffer Has Failed!");
 
+	myperspective = glm::infinitePerspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane);
+
 	return true;
 }
 
@@ -104,8 +106,26 @@ void VulkanObj::add_to_object_list(const Object3D & object)
 
 void VulkanObj::update(const SDL_Event &e)
 {
+	update_window_title();
 	if (e.type == SDL_KEYDOWN)
 	{
+		SDL_Keycode key = e.key.keysym.sym;
+
+		if (key == SDLK_F1)
+		{
+			infinite_perspective = true;
+			nearplane = 0.1f;
+			myperspective = glm::infinitePerspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane);
+		}
+
+		if (key == SDLK_F2)
+		{
+			infinite_perspective = false;
+			nearplane = 0.1f;
+			farplane = 100.0f;
+			myperspective = glm::perspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane, farplane);
+		}
+
 		if (e.key.keysym.sym == SDLK_KP_PLUS)
 			viewspd += 0.25f;
 
@@ -115,8 +135,96 @@ void VulkanObj::update(const SDL_Event &e)
 			if (viewspd < 0.25f)
 				viewspd = 0.25f;
 		}
+
 	}
 
+	if (InputController::Lshift)
+	{
+		if (InputController::zCommand)
+		{
+			nearplane -= 5.0f * (float)myTime.Delta();
+
+			if (nearplane < 0.1f)
+				nearplane = 0.1f;
+
+			if (infinite_perspective)
+				myperspective = glm::infinitePerspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane);
+			else
+				myperspective = glm::perspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane, farplane);
+		}
+
+		if (InputController::xCommand)
+		{
+			nearplane += 5.0f * (float)myTime.Delta();
+
+			if (nearplane > farplane * 0.9f)
+				nearplane = farplane * 0.9f;
+
+			if (infinite_perspective)
+				myperspective = glm::infinitePerspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane);
+			else
+				myperspective = glm::perspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane, farplane);
+		}
+	}
+	if (InputController::Lctrl && !infinite_perspective)
+	{
+		if (InputController::zCommand)
+		{
+			farplane -= 5.0f * (float)myTime.Delta();
+
+			if (farplane * 0.9f < nearplane)
+				farplane += 1.0f * (float)myTime.Delta();
+
+			myperspective = glm::perspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane, farplane);
+		}
+
+		if (InputController::xCommand)
+		{
+			farplane += 5.0f * (float)myTime.Delta();
+
+			if (farplane > 10000.0f)
+				farplane = 10000.0f;
+
+			myperspective = glm::perspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane, farplane);
+		}
+	}
+	if (InputController::Lctrl)
+	{
+		if (InputController::findpluto)
+		{
+			glm::vec3 eye = { myview[3].x, myview[3].y, myview[3].z };
+			glm::vec3 center = { prv_ObjectList[10].world_matrix[3].x, prv_ObjectList[10].world_matrix[3].y, prv_ObjectList[10].world_matrix[3].z};
+			glm::vec3 up = { 0.0f, 0.0f, 1.0f };
+			view_inversed = glm::lookAt(eye, center, up);
+			myview = inverse(view_inversed);
+		}
+	}
+	if (InputController::Lalt)
+	{
+		if (InputController::zCommand)
+		{
+			zoom -= 5.0f * (float)myTime.Delta();
+			if (zoom < 45.0f)
+				zoom = 45.0f;
+
+			if (infinite_perspective)
+				myperspective = glm::infinitePerspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane);
+			else
+				myperspective = glm::perspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane, farplane);
+		}
+
+		if (InputController::xCommand)
+		{
+			zoom += 5.0f * (float)myTime.Delta();
+			if (zoom > 175.0f)
+				zoom = 175.0f;
+
+			if (infinite_perspective)
+				myperspective = glm::infinitePerspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane);
+			else
+				myperspective = glm::perspective(glm::radians(zoom), context.swapchain.extent2D.width / (float)context.swapchain.extent2D.height, nearplane, farplane);
+		}
+	}
 	float posrotspeed = float(glm::radians(60.0f) * myTime.SmoothDelta());
 	float negrotspeed = float(glm::radians(-60.0f) * myTime.SmoothDelta());
 	float posmovspeed = viewspd * float(5.0f * myTime.SmoothDelta());
@@ -124,32 +232,83 @@ void VulkanObj::update(const SDL_Event &e)
 
 
 	if (InputController::r_negYaw)
+	{
 		myview = glm::rotate(myview, posrotspeed, glm::vec3(0, 1, 0));
+		view_inversed = glm::inverse(myview);
+	}
 	if (InputController::r_posYaw)
+	{
 		myview = glm::rotate(myview, negrotspeed, glm::vec3(0, 1, 0));
+		view_inversed = glm::inverse(myview);
+	}
 	if (InputController::r_posPitch)
+	{
 		myview = glm::rotate(myview, posrotspeed, glm::vec3(1, 0, 0));
+		view_inversed = glm::inverse(myview);
+	}
 	if (InputController::r_negPitch)
+	{
 		myview = glm::rotate(myview, negrotspeed, glm::vec3(1, 0, 0));
-	if (InputController::r_posRoll)
-		myview = glm::rotate(myview, posrotspeed, glm::vec3(0, 0, 1));
+		view_inversed = glm::inverse(myview);
+	}
 	if (InputController::r_negRoll)
+	{
+		myview = glm::rotate(myview, posrotspeed, glm::vec3(0, 0, 1));
+		view_inversed = glm::inverse(myview);
+	}
+	if (InputController::r_posRoll)
+	{
 		myview = glm::rotate(myview, negrotspeed, glm::vec3(0, 0, 1));
+		view_inversed = glm::inverse(myview);
+	}
 
 
 	if (InputController::m_forward)
+	{
 		myview = glm::translate(myview, glm::vec3(0.0f, 0.0f, negmovspeed));
+		view_inversed = glm::inverse(myview);
+	}
 	if (InputController::m_back)
+	{
 		myview = glm::translate(myview, glm::vec3(0.0f, 0.0f, posmovspeed));
+		view_inversed = glm::inverse(myview);
+	}
 	if (InputController::m_left)
+	{
 		myview = glm::translate(myview, glm::vec3(negmovspeed, 0.0f, 0.0f));
+		view_inversed = glm::inverse(myview);
+	}
 	if (InputController::m_right)
+	{
 		myview = glm::translate(myview, glm::vec3(posmovspeed, 0.0f, 0.0f));
+		view_inversed = glm::inverse(myview);
+	}
 	if (InputController::m_up)
+	{
 		myview = glm::translate(myview, glm::vec3(0.0f, posmovspeed, 0.0f));
+		view_inversed = glm::inverse(myview);
+	}
 	if (InputController::m_down)
+	{
 		myview = glm::translate(myview, glm::vec3(0.0f, negmovspeed, 0.0f));
+		view_inversed = glm::inverse(myview);
+	}
 
+}
+
+void VulkanObj::update_window_title()
+{
+	char buffer[255];
+	ZeroMemory(buffer, 255);
+	sprintf_s(buffer, sizeof(buffer), "Fov: %f | Near: %f | Far: %f | MovSpd: %f", zoom, nearplane, farplane, viewspd);
+
+	int length = strlen(buffer);
+	char* title = new char[length + 1];
+	ZeroMemory(title, length + 1);
+
+	strcpy(title, buffer);
+
+	SDL_SetWindowTitle(context.window.window, title);
 }
 
 void VulkanObj::start_frame()
@@ -398,7 +557,7 @@ void VulkanObj::draw()
 		std::array<VkBuffer, 1> vertex_buffer = { prv_ObjectList[i].vertex_buffer };
 		VkDeviceSize offset[] = { 0 };
 
-		prv_ObjectList[i].UpdateUniformBuffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory, glm::inverse(myview));
+		prv_ObjectList[i].UpdateUniformBuffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory, view_inversed, myperspective);
 		vkCmdBindPipeline(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline);
 		vkCmdBindDescriptorSets(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline_layout, 0, 1, &prv_ObjectList[i].descriptor_set[context.swapchain.image_index], 0, nullptr);
 		vkCmdBindVertexBuffers(context.swapchain.command_buffer[context.swapchain.image_index], 0, 1, vertex_buffer.data(), offset);
@@ -420,7 +579,7 @@ void VulkanObj::draw()
 		std::array<VkBuffer, 1> vertex_buffer = { prv_ObjectList[i].vertex_buffer };
 		VkDeviceSize offset[] = { 0 };
 
-		prv_ObjectList[i].UpdateUniformBuffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory, glm::inverse(myview));
+		prv_ObjectList[i].UpdateUniformBuffer(context.device.logical, context.swapchain.extent3D, context.swapchain.image_index, prv_ObjectList[i].world_matrix, prv_ObjectList[i].uniform_memory, view_inversed, myperspective);
 		vkCmdBindPipeline(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline);
 		vkCmdBindDescriptorSets(context.swapchain.command_buffer[context.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList[i].pipeline_layout, 0, 1, &prv_ObjectList[i].descriptor_set[context.swapchain.image_index], 0, nullptr);
 		vkCmdBindVertexBuffers(context.swapchain.command_buffer[context.swapchain.image_index], 0, 1, vertex_buffer.data(), offset);

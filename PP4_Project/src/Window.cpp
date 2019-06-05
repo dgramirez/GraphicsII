@@ -193,17 +193,33 @@ void Window::SDL_EventKeyDown(SDL_Event &e)
 		InputController::m_left = true;
 	if (key == SDLK_d)
 		InputController::m_right = true;
-	if (key == SDLK_q)
-		InputController::m_up = true;
 	if (key == SDLK_e)
+		InputController::m_up = true;
+	if (key == SDLK_q)
 		InputController::m_down = true;
 
-	if (key == SDLK_LSHIFT)
-		InputController::speed1 = true;
-	if (key == SDLK_LCTRL)
-		InputController::speed2 = true;
-	if (key == SDLK_z)
+	if (key == SDLK_F5)
 		InputController::stop_rot = !InputController::stop_rot;
+
+	if (key == SDLK_LSHIFT)
+		InputController::Lshift = true;
+	if (key == SDLK_RSHIFT)
+		InputController::Rshift = true;
+	if (key == SDLK_LCTRL)
+		InputController::Lctrl = true;
+	if (key == SDLK_RCTRL)
+		InputController::Rctrl = true;
+	if (key == SDLK_LALT)
+		InputController::Lalt = true;
+	if (key == SDLK_RALT)
+		InputController::Ralt = true;
+
+	if (key == SDLK_z)
+		InputController::zCommand = true;
+	if (key == SDLK_x)
+		InputController::xCommand = true;
+	if (key == SDLK_f)
+		InputController::findpluto = true;
 }
 
 void Window::SDL_EventKeyUp(SDL_Event &e)
@@ -231,13 +247,28 @@ void Window::SDL_EventKeyUp(SDL_Event &e)
 		InputController::m_left = false;
 	if (key == SDLK_d)
 		InputController::m_right = false;
-	if (key == SDLK_q)
-		InputController::m_up = false;
 	if (key == SDLK_e)
+		InputController::m_up = false;
+	if (key == SDLK_q)
 		InputController::m_down = false;
 
 	if (key == SDLK_LSHIFT)
-		InputController::speed1 = false;
+		InputController::Lshift = false;
+	if (key == SDLK_RSHIFT)
+		InputController::Rshift = false;
 	if (key == SDLK_LCTRL)
-		InputController::speed2 = false;
+		InputController::Lctrl	= false;
+	if (key == SDLK_RCTRL)
+		InputController::Rctrl	= false;
+	if (key == SDLK_LALT)
+		InputController::Lalt	= false;
+	if (key == SDLK_RALT)
+		InputController::Ralt	= false;
+
+	if (key == SDLK_z)
+		InputController::zCommand = false;
+	if (key == SDLK_x)
+		InputController::xCommand = false;
+	if (key == SDLK_f)
+		InputController::findpluto = false;
 }

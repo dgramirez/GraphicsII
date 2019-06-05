@@ -27,6 +27,7 @@ public:
 	void setup_object_list(uint32_t size);
 	void add_to_object_list(const Object3D& object);
 	void update(const SDL_Event &e);
+	void update_window_title();
 
 private:
 	VkObj_SemaphoresAndFences prv_SemaphoreAndFences;
@@ -36,6 +37,8 @@ private:
 	void end_frame();
 
 	glm::mat4 myview = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, 5.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat4 view_inversed = glm::inverse(myview);
+	glm::mat4 myperspective;
 	float viewspd = 1.0f;
 	bool infinite_perspective = true;
 	float zoom = 45.0f;

@@ -191,6 +191,7 @@
     <ClInclude Include="src\Assets.h" />
     <ClInclude Include="src\Defines.h" />
     <ClInclude Include="src\Maths.h" />
+    <ClInclude Include="src\objects\Camera.h" />
     <ClInclude Include="src\texture_h\axeTexture.h" />
     <ClInclude Include="src\texture_h\celestial.h" />
     <ClInclude Include="src\texture_h\eyeball.h" />
