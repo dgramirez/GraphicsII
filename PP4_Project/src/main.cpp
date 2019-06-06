@@ -2,45 +2,6 @@
 #include "objects/base_files/Object.h"
 #include "objects/Camera.h"
 
-#define SKYBOX 0
-#define SUN 1
-#define MERCURY 2
-#define VENUS 3
-#define EARTH 4
-#define MARS 5
-#define JUPITER 6
-#define SATURN 7
-#define URANUS 8
-#define NEPTUNE 9
-#define PLUTO 10
-
-#define SIZE_SPHERE			79.1f
-#define SIZE_SUN			SIZE_SPHERE / 139.2f
-#define SIZE_MERCURY		SIZE_SPHERE /  0.50f
-#define SIZE_VENUS			SIZE_SPHERE /  1.20f
-#define SIZE_EARTH			SIZE_SPHERE /  1.30f
-#define SIZE_EARTHMOON		SIZE_SPHERE /  0.35f
-#define SIZE_MARS			SIZE_SPHERE /  0.70f
-#define SIZE_JUPITER		SIZE_SPHERE / 14.30f
-#define SIZE_SATURN			SIZE_SPHERE / 12.50f
-#define SIZE_URANUS			SIZE_SPHERE /  5.10f
-#define SIZE_NEPTUNE		SIZE_SPHERE /  5.00f
-#define SIZE_PLUTO			SIZE_SPHERE /  0.23f
-
-#define DISTANCE_SUN						 0.00f
-#define DISTANCE_MERCURY	SIZE_SPHERE +   35.98f
-#define DISTANCE_VENUS		SIZE_SPHERE +   67.24f
-#define DISTANCE_EARTH		SIZE_SPHERE +   92.96f
-#define DISTANCE_MARS		SIZE_SPHERE +  141.60f
-#define DISTANCE_JUPITER	SIZE_SPHERE +  483.80f
-#define DISTANCE_SATURN		SIZE_SPHERE +  890.80f
-#define DISTANCE_URANUS		SIZE_SPHERE + 1784.00f
-#define DISTANCE_NEPTUNE	SIZE_SPHERE + 2793.00f
-#define DISTANCE_PLUTO		SIZE_SPHERE + 3670.00f
-
-#define GRID_LENGTH 10.0f
-#define GRID_SUBLENGTH 1.0f
-
 Object* create_pyramid();
 Object* create_axe();
 Object* create_eyes();
@@ -50,7 +11,7 @@ Object* create_grid();
 void AxeRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void PyramidRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 
-void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, const glm::mat4 &model, const glm::mat4 &view, const glm::mat4 &perspective, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days);
+void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, Object &obj, Camera &camera, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days);
 void SunRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void MercuryRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void VenusRotation(const VkObj_Context &context, Object &obj, Camera &camera);
@@ -248,7 +209,7 @@ Object* create_grid()
 	Texture *grid_texture = new Texture(".\\assets\\misc\\white_pixel.png");
 	Object *Grid = new Object(grid_vertices, grid_indices, grid_texture);
 
-	Grid->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	Grid->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-180.0f), glm::vec3(0.0f,0.0f,1.0f));
 	Grid->uniform_function = AxeRotation;
 
 	return Grid;
@@ -289,65 +250,65 @@ void PyramidRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 void SunRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj.model_matrix, camera.view_inverse, camera.perspective, 27.0f, 0.0f);
+	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 27.0f, 0.0f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void MercuryRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj.model_matrix, camera.view_inverse, camera.perspective, 59.0f, 87.97f);
+	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 59.0f, 87.97f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void VenusRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj.model_matrix, camera.view_inverse, camera.perspective, 243.0f, 224.7f);
+	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 243.0f, 224.7f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void EarthRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj.model_matrix, camera.view_inverse, camera.perspective, 1.0f, 365.25f);
+	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 1.0f, 365.25f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void MarsRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj.model_matrix, camera.view_inverse, camera.perspective, 1.02749125f, 365.25f);
+	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 1.02749125f, 365.25f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void JupiterRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj.model_matrix, camera.view_inverse, camera.perspective, 0.4125f, 4330.6f);
+	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 0.4125f, 4330.6f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void SaturnRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj.model_matrix, camera.view_inverse, camera.perspective, 0.444f, 10755.7f);
+	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 0.444f, 10755.7f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void UranusRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj.model_matrix, camera.view_inverse, camera.perspective, 0.71805f, 30687.0f);
+	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 0.71805f, 30687.0f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void NeptuneRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj.model_matrix, camera.view_inverse, camera.perspective, 0.67125f, 59757.8f);
+	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 0.67125f, 59757.8f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void PlutoRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
 	Mvp_object mvp;
-	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj.model_matrix, camera.view_inverse, camera.perspective, 6.39f, 90520.0f);
+	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 6.39f, 90520.0f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 
-void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, const glm::mat4 &model, const glm::mat4 &view, const glm::mat4 &perspective, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days)
+void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, Object &obj, Camera &camera, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days)
 {
 	float earth_rotation_time = (float)myTime.Delta() * glm::radians(72.0f); //1 Second = 72 Degrees Rotation. 5 Seconds = 360 Degrees Rotation. 1 Earth Day = 5 Seconds Simulation
 	float planet_rotation = 0.0f;
@@ -371,16 +332,18 @@ void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, const glm::mat4 &mod
 
 
 	//Rotation around the Sun (Origin)
-	mvp.model = glm::rotate(glm::mat4(1.0f), sun_rotation, glm::vec3(0.0f, 0.0f, 1.0f));
+	mvp.model = glm::rotate(glm::mat4(1.0f), -sun_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	//Translation for model
-	mvp.model *= model;
+	mvp.model *= obj.model_matrix;
 
 	//Rotation on itself
-	mvp.model *= glm::rotate(glm::mat4(1.0f), planet_rotation, glm::vec3(0.0f, 0.0f, 1.0f));
+	mvp.model *= glm::rotate(glm::mat4(1.0f), -planet_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 
-	mvp.view = view;
-	mvp.projection = perspective;
+	obj.model_matrix = mvp.model;
+
+	mvp.view = camera.view_inverse;
+	mvp.projection = camera.perspective;
 	mvp.projection[1][1] = -mvp.projection[1][1];
 }
 

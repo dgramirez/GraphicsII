@@ -39,11 +39,17 @@ public:
 	Mesh* get_mesh() { return pMesh; }
 	__declspec(property(get = get_mesh)) Mesh *mesh;
 
-	glm::mat4 model_matrix;
-
+	glm::mat4 get_model_matrix() { return prv_ModelMatrix; }
+	glm::mat4 get_model_matrix_previous() { return prv_ModelMatrixPrevious; }
+	void set_model_matrix(const glm::mat4 &matrix) { prv_ModelMatrixPrevious = prv_ModelMatrix; prv_ModelMatrix = matrix; }
+	__declspec(property(get = get_model_matrix, put = set_model_matrix)) glm::mat4 model_matrix;
+	__declspec(property(get = get_model_matrix_previous)) glm::mat4 model_matrix_previous;
+//	glm::mat4 model_matrix;
 private:
 	Mesh *pMesh;
 	Texture *pTexture;
+	glm::mat4 prv_ModelMatrixPrevious;
+	glm::mat4 prv_ModelMatrix;
 
 	uint32_t uniform_size_bytes;
 

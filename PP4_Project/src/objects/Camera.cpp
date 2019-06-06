@@ -17,6 +17,21 @@ void Camera::init(glm::mat4 translation, glm::mat4 rotation, bool infinite_persp
 		prv_Perspective = glm::perspective(fov, myContext.swapchain.swapchain_aspect, prv_Nearplane, prv_Farplane);
 }
 
+void Camera::set_object_list(std::vector<Object*> &object_list)
+{
+	pObjectList = object_list;
+}
+
+void Camera::set_planet_lookup(const uint32_t &x)
+{
+	if (x > PLUTO)
+		planet_lookup = PLUTO;
+	else if (x < MERCURY)
+		planet_lookup = MERCURY;
+	else
+		planet_lookup = x;
+}
+
 void Camera::update(const SDL_Event &e)
 {
 	Update_FunctionButtons(e);
@@ -116,8 +131,9 @@ void Camera::Update_CommandButtons(const SDL_Event &e)
 	{
 		if (InputController::findpluto)
 		{
+			glm::mat4 planet_model_matrix = pObjectList[planet_lookup]->model_matrix;
 			glm::vec3 eye = { prv_View[3].x, prv_View[3].y, prv_View[3].z };
-			glm::vec3 center = { 0.0f, 0.0f, 0.0f };
+			glm::vec3 center = { planet_model_matrix[3].x, planet_model_matrix[3].y, planet_model_matrix[3].z };
 			glm::vec3 up = { 0.0f, 0.0f, 1.0f };
 			prv_ViewInv = glm::lookAt(eye, center, up);
 			prv_View = inverse(prv_ViewInv);

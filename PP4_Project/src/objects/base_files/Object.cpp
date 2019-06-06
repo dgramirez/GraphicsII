@@ -19,7 +19,7 @@ Object::Object(const char* fbx_filename, const char *texture_folderlocation, flo
 	strcpy(texture_filepath, texture_folderlocation);
 	strcat(texture_filepath, pMesh->texture_filename);
 
-	int len = strlen(texture_filepath);
+	uint32_t len = (uint32_t)strlen(texture_filepath);
 	char *fp = new char[len + 1];
 	strcpy_s(fp, len + 1, texture_filepath);
 	pTexture = new Texture(fp);
@@ -44,6 +44,7 @@ Object::~Object()
 // |_|       \__,_| |_.__/  |_| |_|  \___|
 void Object::init(const uint32_t &sizeof_ubuffer, VkPipelineLayout &graphics_pipeline_layout, VkPipeline &graphic_pipeline)
 {
+	prv_ModelMatrixPrevious = glm::mat4(1.0f);
 	pMesh->init();
 	pTexture->init();
 

@@ -63,8 +63,9 @@ bool VulkanObj::init(const char* title, SDL_Window* window, unsigned short win_w
 // 		myContext.swapchain.extent2D, myContext.swapchain.frame_buffers, prv_Buffers_old.descriptor_sets, prv_Buffers_old.vertex, 0, 
 // 		prv_Buffers_old.index, prv_ObjectList, prv_Command.command_buffers), "Create Command Buffer Has Failed!");
 
-	camera.init(glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, 5.0f)), glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-
+	camera.init(glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, -5.0f, 5.0f)), glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+	camera.set_object_list(prv_ObjectList);
+	camera.set_planet_lookup(MERCURY);
 	return true;
 }
 
