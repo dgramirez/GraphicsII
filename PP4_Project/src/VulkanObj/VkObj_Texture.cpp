@@ -1,55 +1,5 @@
 #include "VkObj_Texture.h"
 
-bool vk_create_texture_image(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkCommandPool &command_pool, const VkQueue graphics_queue,
-std::vector<Object3D> &object_list, const VkExtent3D &texture_extent, VkSampleCountFlagBits &msaa_sample, VkImage &texture_image, VkDeviceMemory &texture_image_memory)
-{
-// 	//Get the image size for the texture
-// 	VkDeviceSize image_size = object_list[0].texture->width * object_list[0].texture->height * sizeof(unsigned int);
-// 
-// 	//Get the staging bugger and memory needed to allocate
-// 	VkBuffer staging_buffer;
-// 	VkDeviceMemory staging_buffer_memory;
-// 
-// 	//Create the buffer needed for the texture
-// 	vk_create_buffer(physical_device, device, image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-// 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, staging_buffer, staging_buffer_memory);
-// 
-// // 	Change the Color Format from ARGB to ABGR [Reads from Left to Right, TGA is BGRA while Vulkan is SRGB]
-// 	std::vector<unsigned int> converted_pixels(object_list[0].texture->width * object_list[0].texture->height);
-// 	for (uint32_t i = 0; i < converted_pixels.size(); ++i)
-// 	{
-// 		Color current_pixel(object_list[0].texture->data_h[i]);
-// 		Color new_pixel = (current_pixel.a << 24) | (current_pixel.b << 16) | (current_pixel.g << 8) | current_pixel.r;
-// 		converted_pixels[i] = new_pixel.color;
-// 	}
-// 
-// 	//Allocate the data into the buffer
-// 	void* data = nullptr;
-// 	vkMapMemory(device, staging_buffer_memory, 0, image_size, 0, &data);
-// 	memcpy(data, converted_pixels.data(), (unsigned int)image_size);
-// 	vkUnmapMemory(device, staging_buffer_memory);
-// 
-// 	//Create the image, using appropriate information (Mip Levels, Texture data, etc.)
-// 	vk_create_image(physical_device, device, texture_extent, object_list[0].texture->mip_levels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
-// 		VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture_image, texture_image_memory);
-// 
-// 	//Transition, using memory barriers, from Undefined Layout to Transfer to Destination (Optimal)
-// 	vk_transition_image_layout(device, command_pool, graphics_queue, object_list[0].texture->mip_levels, texture_image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-// 	
-// 	//Copy the buffer to the image
-// 	vk_copy_buffer_to_image(device, command_pool, graphics_queue, staging_buffer, texture_image, texture_extent);
-// 	
-// 	//Destroy memory created from staging buffer
-// 	vkDestroyBuffer(device, staging_buffer, nullptr);
-// 	vkFreeMemory(device, staging_buffer_memory, nullptr);
-// 	
-// 	//Create the mipmaps for texture
-// 	vk_create_mipmaps(device, command_pool, graphics_queue, texture_image, object_list[0].texture->width, object_list[0].texture->height, object_list[0].texture->mip_levels);
-// 
-// 	//Texture Image was created successfuly!
- 	return true;
-}
-
 bool vk_create_texture_image_view(const VkDevice &device, const VkImage &texture_image, const VkImageAspectFlags &aspect_flag, const uint32_t &mip_level, VkImageView &texture_image_view)
 {
 	//Create the texture view

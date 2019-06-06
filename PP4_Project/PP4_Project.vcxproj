@@ -167,15 +167,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Object.cpp" />
-    <ClCompile Include="src\Assets.cpp" />
+    <ClCompile Include="src\objects\base_files\Mesh.cpp" />
+    <ClCompile Include="src\objects\base_files\Object.cpp" />
+    <ClCompile Include="src\objects\base_files\Texture.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\objects\Camera.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_Buffers.cpp" />
-    <ClCompile Include="src\VulkanObj\VkObj_Command.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_Context.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_Devices.cpp" />
-    <ClCompile Include="src\VulkanObj\VkObj_Pools.cpp" />
-    <ClCompile Include="src\VulkanObj\VkObj_RenderGraphicsPipeline.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_SemaphoresAndFences.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_Shared.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_Swapchain.cpp" />
@@ -187,18 +186,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\InputController.h" />
-    <ClInclude Include="src\Object.h" />
-    <ClInclude Include="src\Assets.h" />
+    <ClInclude Include="src\objects\base_files\Object.h" />
+    <ClInclude Include="src\objects\base_files\Texture.h" />
     <ClInclude Include="src\Defines.h" />
     <ClInclude Include="src\Maths.h" />
     <ClInclude Include="src\objects\Camera.h" />
+    <ClInclude Include="src\objects\base_files\Mesh.h" />
     <ClInclude Include="src\texture_h\axeTexture.h" />
     <ClInclude Include="src\texture_h\celestial.h" />
     <ClInclude Include="src\texture_h\eyeball.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Buffers.h" />
-    <ClInclude Include="src\VulkanObj\VkObj_Command.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Context.h" />
-    <ClInclude Include="src\VulkanObj\VkObj_RenderGraphicsPipeline.h" />
     <ClInclude Include="src\VulkanObj\VkObj_SemaphoresAndFences.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Texture.h" />
     <ClInclude Include="src\VulkanObj\VkObj_WindowSetup.h" />

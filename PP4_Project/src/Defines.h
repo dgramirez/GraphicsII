@@ -48,13 +48,17 @@
 
 #include "texture_h/celestial.h"
 #include "texture_h/axeTexture.h"
-#include "../vendor/fbxsdk/include/fbxsdk.h"
+#include "texture_h/eyeball.h"
+
 #include "InputController.h"
+#include "../vendor/fbxsdk/include/fbxsdk.h"
 #include "../vendor/fullsail/XTime.h"
 
-typedef void (*UniformFctn)(const VkDevice& device, const VkExtent3D& swapchain_extent, const uint32_t& swapchain_current_image,
-	std::vector<VkDeviceMemory> &uniform_memory,
-	const glm::mat4 &model, const glm::mat4 &view, const glm::mat4 &perspective);
+class VkObj_Context;
+class Object;
+class Camera;
+
+typedef void(*UniformFctn)(const VkObj_Context &context, Object &obj, Camera &camera);
 
 #define MAX_UINT32	0xFFFFFFFF
 #define MAX_UINT64	0xFFFFFFFFFFFFFFFF

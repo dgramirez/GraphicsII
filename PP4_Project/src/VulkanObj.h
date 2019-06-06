@@ -10,7 +10,8 @@
 #include "VulkanObj/VkObj_Command.h"
 #include "VulkanObj/VkObj_SemaphoresAndFences.h"
 #include "VulkanObj/VkObj_Context.h"
-#include "Object.h"
+#include "objects/base_files/Object.h"
+#include "objects/Camera.h"
 
 class VulkanObj
 {
@@ -25,7 +26,7 @@ public:
 	void idle_device();
 	void reset_swapchain();
 	void setup_object_list(uint32_t size);
-	void add_to_object_list(const Object3D& object);
+	void add_to_object_list(Object* object);
 	void update(const SDL_Event &e);
 	void update_window_title();
 
@@ -35,18 +36,11 @@ private:
 
 	void start_frame();
 	void end_frame();
+	Camera camera;
 
-	glm::mat4 myview = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, 5.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	glm::mat4 view_inversed = glm::inverse(myview);
-	glm::mat4 myperspective;
-	float viewspd = 1.0f;
-	bool infinite_perspective = true;
-	float zoom = 45.0f;
-	float nearplane = 0.1f;
-	float farplane = 1000.0f;
 
 	uint32_t prv_Frame = 0;
-	std::vector<Object3D> prv_ObjectList;
+	std::vector<Object*> prv_ObjectList;
 
 	void CleanupSwapchain();
 };

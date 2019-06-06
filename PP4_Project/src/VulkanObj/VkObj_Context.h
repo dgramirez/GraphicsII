@@ -6,8 +6,6 @@
 #include "VkObj_Swapchain.h"
 #include "VkObj_Uniform.h"
 
-class Object3D;
-
 class VkObj_Context
 {
 public:
@@ -16,22 +14,19 @@ public:
 	VkObj_WindowProperties window;
 	VkObj_DeviceProperties device;
 	VkObj_Swapchain swapchain;
-	
 
 	std::vector<VkPipeline> pipelines;
 	std::vector<VkPipelineLayout> pipeline_layout;
-	std::vector<Object3D> *pObjectList;
-
 	
 	void shutdown();
 
-	bool init(SDL_Window *win, std::vector<Object3D> &object_list);
+	bool init(SDL_Window *win);
 
 	bool CreateQueryPool();
 	bool CreateCommandPool();
 
 	std::vector<VkCommandBuffer> command_buffer;
-	bool CreateCommandBuffer(Object3D &object, uint32_t index);
+//	bool CreateCommandBuffer(Object3D &object, uint32_t index);
 
 	bool CreatePipelines();
 //	bool CreatePipelines(const char* vertex_shader, const char* pixel_shader);
@@ -46,5 +41,7 @@ public:
 	std::vector<VkQueryPool> query_pool;
 private:
 };
+
+extern VkObj_Context myContext;
 
 #endif

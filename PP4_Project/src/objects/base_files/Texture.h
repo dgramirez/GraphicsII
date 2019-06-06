@@ -1,8 +1,8 @@
 #ifndef ASSETS_H
 #define ASSETS_H
 
-#include "Defines.h"
-class VkObj_DeviceProperties;
+#include "../Defines.h"
+#include "../VulkanObj/VkObj_Context.h"
 
 class Texture
 {
@@ -32,14 +32,14 @@ public:
 	__declspec(property(get = get_image_memory)) VkDeviceMemory image_memory;
 	__declspec(property(get = get_sampler)) VkSampler sampler;
 
-	void init(const VkObj_DeviceProperties &device, const VkCommandPool &command_pool);
+	void init();
 	void swizzle(const VkComponentSwizzle &r, const VkComponentSwizzle &g, const VkComponentSwizzle &b, const VkComponentSwizzle &a);
-	void set_sampler(const VkObj_DeviceProperties &device, const VkSamplerCreateInfo &sampler_create_info);
-	void cleanup(const VkObj_DeviceProperties &device);
+	void set_sampler(const VkSamplerCreateInfo &sampler_create_info);
+	void cleanup();
 private:
-	void CreateImage(const VkObj_DeviceProperties &device, const VkCommandPool &command_pool);
-	void CreateImageView(const VkObj_DeviceProperties &device);
-	void CreateDefaultSampler(const VkObj_DeviceProperties &device);
+	void CreateImage();
+	void CreateImageView();
+	void CreateDefaultSampler();
 
 	void *prv_Data;
 	int32_t prv_Width, prv_Height, prv_MipLevels;

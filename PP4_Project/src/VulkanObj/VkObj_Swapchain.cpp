@@ -1,6 +1,7 @@
 #include "VkObj_Swapchain.h"
 
 uint32_t VkObj_Swapchain::swapchain_size = 0;
+float VkObj_Swapchain::swapchain_aspect = 0.0f;
 
 //Swapchain Creation
 bool vk_create_swapchain(const VkPhysicalDevice &physical_device, const VkDevice &device, const VkSurfaceKHR &surface, const uint32_t &window_width, const uint32_t &window_height,
@@ -169,7 +170,8 @@ bool VkObj_Swapchain::CreateSwapchain()
 {
 	//Get Extent Info
 	SDL_Vulkan_GetDrawableSize(pWindowProperties->window, (int*)&extent2D.width, (int*)&extent2D.height);
-	
+	swapchain_aspect = (float)extent2D.width / (float)extent2D.height;
+
 	//Getting Swapchain Information for Create Info
 	VkStruct_SwapchainSupportDetails support = vk_query_swapchain_support(pDeviceProperties->physical, pWindowProperties->surface);
 

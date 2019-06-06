@@ -48,6 +48,7 @@ public:
 	uint32_t image_index;
 
 	static uint32_t swapchain_size;
+	static float swapchain_aspect;
 	std::vector<VkCommandBuffer> command_buffer;
 
 private:
