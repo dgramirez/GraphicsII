@@ -28,7 +28,6 @@ Mesh::Mesh(const OBJ_VERT* object_vertices, const unsigned int &vertices_size, c
 		prv_Vertices[i].position.x = object_vertices[i].pos[0];
 		prv_Vertices[i].position.y = object_vertices[i].pos[1];
 		prv_Vertices[i].position.z = object_vertices[i].pos[2];
-		prv_Vertices[i].position.w = 1.0f;
 
 		prv_Vertices[i].uv.x = object_vertices[i].uvw[0];
 		prv_Vertices[i].uv.y = object_vertices[i].uvw[1];
@@ -120,6 +119,20 @@ void Mesh::CreateIndexBuffer()
 	vkFreeMemory(myContext.device.logical, staging_buffer_memory, nullptr);
 }
 
+void Mesh::SetupTangent()
+{
+	uint32_t indices_size = CAST(uint32_t,prv_Indices.size());
+	for (uint32_t i = 0; i < indices_size; i += 3)
+	{
+		glm::vec3 vert0 = prv_Vertices[i].position;
+		glm::vec3 vert1 = prv_Vertices[i + 1].position;
+		glm::vec3 vert2 = prv_Vertices[i + 2].position;
+
+		glm::vec3 edge0 = vert1 - vert0;
+		glm::vec3 edge1 = vert2 - vert0;
+	}
+}
+
 // .----------------.  .----------------.  .----------------.        .----------------.  .----------------.  .----------------.
 //| .--------------. || .--------------. || .--------------. |      | .--------------. || .--------------. || .--------------. |
 //| |  _________   | || |   ______     | || |  ____  ____  | |      | |    _______   | || |  ________    | || |  ___  ____   | |
@@ -131,6 +144,41 @@ void Mesh::CreateIndexBuffer()
 //| |              | || |              | || |              | |      | |              | || |              | || |              | |
 //| '--------------' || '--------------' || '--------------' |      | '--------------' || '--------------' || '--------------' |
 // '----------------'  '----------------'  '----------------'        '----------------'  '----------------'  '----------------'
+void Mesh::ImportFbx(const char* fbx_filename)
+{
+	// Change the following filename to a suitable filename value.
+	const char* lFilename = fbx_filename;
+
+	// Initialize the SDK manager. This object handles all our memory management.
+	FbxManager* lSdkManager = FbxManager::Create();
+
+	// Create the IO settings object.
+	FbxIOSettings *ios = FbxIOSettings::Create(lSdkManager, IOSROOT);
+	lSdkManager->SetIOSettings(ios);
+
+	// Create an importer using the SDK manager.
+	FbxImporter* lImporter = FbxImporter::Create(lSdkManager, "");
+
+	// Use the first argument as the filename for the importer.
+	if (!lImporter->Initialize(lFilename, -1, lSdkManager->GetIOSettings())) {
+		printf("Call to FbxImporter::Initialize() failed.\n");
+		printf("Error returned: %s\n\n", lImporter->GetStatus().GetErrorString());
+		exit(-1);
+	}
+
+	// Create a new scene so that it can be populated by the imported file.
+	FbxScene* lScene = FbxScene::Create(lSdkManager, "myScene");
+
+	// Import the contents of the file into the scene.
+	lImporter->Import(lScene);
+
+	// The file is imported; so get rid of the importer.
+	lImporter->Destroy();
+
+	// Process the scene and build DirectX Arrays
+	ProcessFbxMesh(lScene->GetRootNode());
+}
+
 void Mesh::ProcessFbxMesh(FbxNode* node)
 {
 	//FBX Mesh stuff
@@ -149,42 +197,42 @@ void Mesh::ProcessFbxMesh(FbxNode* node)
 			{
 				LOG("\nMesh:" << childNode->GetName())
 
-					// Get index count from mesh
-					int* PolygonIndices = mesh->GetPolygonVertices();
+				// Get index count from mesh
+				int* PolygonIndices = mesh->GetPolygonVertices();
 				prv_Indices.resize(mesh->GetPolygonVertexCount());
 				LOG("\nIndice Count:" << indices.size())
 
-					// No need to allocate int array, FBX does for us
-					for (uint32_t i = 0; i < indices.size(); ++i)
-						prv_Indices[i] = PolygonIndices[i];
+				// No need to allocate int array, FBX does for us
+				for (uint32_t i = 0; i < indices.size(); ++i)
+					prv_Indices[i] = PolygonIndices[i];
 
 				prv_Vertices.resize(mesh->GetControlPointsCount());
 				LOG("\nVertex Count:" << prv_Vertices.size())
 
-					// Get UV from mesh
-					SetUVs(TexUV, mesh);
+				// Get UV from mesh
+				SetUVs(TexUV, mesh);
 
 
 				// Get Normal count from mesh
 				mesh->GetPolygonVertexNormals(normalsVec);
 				LOG("\nNormalVec Count:" << normalsVec.Size())
 
-					// Declare a new array for the second vertex array
-					// Note the size is numIndices not numVertices
-					std::vector<Vertex> vertices2(prv_Indices.size());
+				// Declare a new array for the second vertex array
+				// Note the size is numIndices not numVertices
+				std::vector<Vertex> vertices2(prv_Indices.size());
 
 				LOG("\nindex count BEFORE/AFTER compaction " << prv_Indices.size())
-					LOG("\nvertex count ORIGINAL (FBX source): " << prv_Vertices.size())
+				LOG("\nvertex count ORIGINAL (FBX source): " << prv_Vertices.size())
 
-					//================= Process Vertices ===================
-					for (int j = 0; j < prv_Vertices.size(); j++)
-					{
-						FbxVector4 vert = mesh->GetControlPointAt(j);
-						prv_Vertices[j].position = { vert.mData[0] / scale, vert.mData[1] / scale, vert.mData[2] / scale, 1.0f };
+				//================= Process Vertices ===================
+				for (int j = 0; j < prv_Vertices.size(); j++)
+				{
+					FbxVector4 vert = mesh->GetControlPointAt(j);
+					prv_Vertices[j].position = { vert.mData[0] / scale, vert.mData[1] / scale, vert.mData[2] / scale };
 
-						// Generate random normal
-						vertices[j].normal = RAND_NORMAL;
-					}
+					// Generate random normal
+					vertices[j].normal = RAND_NORMAL;
+				}
 
 				// align (expand) vertex array and set the normals
 				for (int j = 0; j < prv_Indices.size(); ++j)
@@ -205,18 +253,17 @@ void Mesh::ProcessFbxMesh(FbxNode* node)
 
 				LOG("\nvertex count AFTER expansion: " << prv_Indices.size())
 
-
-					if (true)
-					{
-						Compactify(vertices2);
-					}
-					else
-					{
-						prv_Vertices.clear();
-						prv_Vertices.resize(prv_Indices.size());
-						for (uint32_t i = 0; i < indices.size(); ++i)
-							prv_Vertices[i] = vertices2[i];
-					}
+				if (true)
+				{
+					Compactify(vertices2);
+				}
+				else
+				{
+					prv_Vertices.clear();
+					prv_Vertices.resize(prv_Indices.size());
+					for (uint32_t i = 0; i < indices.size(); ++i)
+						prv_Vertices[i] = vertices2[i];
+				}
 
 				GetTextureFilename(childNode, prv_TextureFilename);
 				// 
@@ -224,49 +271,6 @@ void Mesh::ProcessFbxMesh(FbxNode* node)
 			// 
 			ProcessFbxMesh(childNode);
 		}
-}
-
-void Mesh::Compactify(const std::vector<Vertex>& vertex2)
-{
-	/*Compactify*/
-	const float epsilon = 0.0001f;
-	size_t indices_count = prv_Indices.size();
-
-	prv_Indices.clear();
-	prv_Vertices.clear();
-
-	for (int i = 0; i < indices_count; ++i)
-	{
-		for (unsigned int j = 0; j <= prv_Vertices.size(); ++j)
-		{
-			if (j == prv_Vertices.size())
-			{
-				prv_Indices.push_back(CAST(uint32_t, prv_Vertices.size()));
-				prv_Vertices.push_back(Vertex(vertex2[i]));
-				break;
-			}
-			else if ((abs(vertex2[i].position.x - prv_Vertices[j].position.x)) < epsilon &&
-				(abs(vertex2[i].position.y - prv_Vertices[j].position.y)) < epsilon &&
-				(abs(vertex2[i].position.z - prv_Vertices[j].position.z)) < epsilon &&
-
-				(abs(vertex2[i].normal.x - prv_Vertices[j].normal.x)) < epsilon &&
-				(abs(vertex2[i].normal.y - prv_Vertices[j].normal.y)) < epsilon &&
-				(abs(vertex2[i].normal.z - prv_Vertices[j].normal.z)) < epsilon &&
-
-				(abs(vertex2[i].position.x - prv_Vertices[j].position.x)) < epsilon &&
-				(abs(vertex2[i].position.y - prv_Vertices[j].position.y)) < epsilon)
-			{
-				prv_Indices.push_back(j);
-				break;
-			}
-
-		}
-	}
-
-
-	LOG("\nvertex count AFTER compaction: " << prv_Vertices.size())
-		LOG("\nSize reduction: " << ((float)(prv_Indices.size() - prv_Vertices.size()) / (float)(prv_Indices.size())) * 100.00f << "%")
-		LOG("\nor " << prv_Vertices.size() / (float)prv_Indices.size() << " of the expanded size")
 }
 
 void Mesh::SetUVs(FbxArray<FbxVector2>& uv, const FbxMesh* mesh)
@@ -358,6 +362,49 @@ void Mesh::SetUVs(FbxArray<FbxVector2>& uv, const FbxMesh* mesh)
 			}
 		}
 	}
+}
+
+void Mesh::Compactify(const std::vector<Vertex>& vertex2)
+{
+	/*Compactify*/
+	const float epsilon = 0.0001f;
+	size_t indices_count = prv_Indices.size();
+
+	prv_Indices.clear();
+	prv_Vertices.clear();
+
+	for (int i = 0; i < indices_count; ++i)
+	{
+		for (unsigned int j = 0; j <= prv_Vertices.size(); ++j)
+		{
+			if (j == prv_Vertices.size())
+			{
+				prv_Indices.push_back(CAST(uint32_t, prv_Vertices.size()));
+				prv_Vertices.push_back(Vertex(vertex2[i]));
+				break;
+			}
+			else if ((abs(vertex2[i].position.x - prv_Vertices[j].position.x)) < epsilon &&
+				(abs(vertex2[i].position.y - prv_Vertices[j].position.y)) < epsilon &&
+				(abs(vertex2[i].position.z - prv_Vertices[j].position.z)) < epsilon &&
+
+				(abs(vertex2[i].normal.x - prv_Vertices[j].normal.x)) < epsilon &&
+				(abs(vertex2[i].normal.y - prv_Vertices[j].normal.y)) < epsilon &&
+				(abs(vertex2[i].normal.z - prv_Vertices[j].normal.z)) < epsilon &&
+
+				(abs(vertex2[i].position.x - prv_Vertices[j].position.x)) < epsilon &&
+				(abs(vertex2[i].position.y - prv_Vertices[j].position.y)) < epsilon)
+			{
+				prv_Indices.push_back(j);
+				break;
+			}
+
+		}
+	}
+
+
+	LOG("\nvertex count AFTER compaction: " << prv_Vertices.size())
+		LOG("\nSize reduction: " << ((float)(prv_Indices.size() - prv_Vertices.size()) / (float)(prv_Indices.size())) * 100.00f << "%")
+		LOG("\nor " << prv_Vertices.size() / (float)prv_Indices.size() << " of the expanded size")
 }
 
 void Mesh::GetTextureFilename(FbxNode* child_node, const char* return_value)
@@ -487,37 +534,3 @@ void Mesh::GetTextureFilename(FbxNode* child_node, const char* return_value)
 	}
 }
 
-void Mesh::ImportFbx(const char* fbx_filename)
-{
-	// Change the following filename to a suitable filename value.
-	const char* lFilename = fbx_filename;
-
-	// Initialize the SDK manager. This object handles all our memory management.
-	FbxManager* lSdkManager = FbxManager::Create();
-
-	// Create the IO settings object.
-	FbxIOSettings *ios = FbxIOSettings::Create(lSdkManager, IOSROOT);
-	lSdkManager->SetIOSettings(ios);
-
-	// Create an importer using the SDK manager.
-	FbxImporter* lImporter = FbxImporter::Create(lSdkManager, "");
-
-	// Use the first argument as the filename for the importer.
-	if (!lImporter->Initialize(lFilename, -1, lSdkManager->GetIOSettings())) {
-		printf("Call to FbxImporter::Initialize() failed.\n");
-		printf("Error returned: %s\n\n", lImporter->GetStatus().GetErrorString());
-		exit(-1);
-	}
-
-	// Create a new scene so that it can be populated by the imported file.
-	FbxScene* lScene = FbxScene::Create(lSdkManager, "myScene");
-
-	// Import the contents of the file into the scene.
-	lImporter->Import(lScene);
-
-	// The file is imported; so get rid of the importer.
-	lImporter->Destroy();
-
-	// Process the scene and build DirectX Arrays
-	ProcessFbxMesh(lScene->GetRootNode());
-}

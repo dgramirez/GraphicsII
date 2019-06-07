@@ -40,8 +40,8 @@ bool VkObj_Context::CreatePipelines()
 {
 #pragma region Check and copy shader files
 
-	std::vector<char> shader_vertex_file = vk_read_shader_file("src/shaders/vert.spv");
-	std::vector<char> shader_fragment_file = vk_read_shader_file("src/shaders/frag.spv");
+	std::vector<char> shader_vertex_file = vk_read_shader_file("shaders/Spir-V/vertBasicTexture.spv");
+	std::vector<char> shader_fragment_file = vk_read_shader_file("shaders/Spir-V/fragBasicTexture.spv");
 
 	if (shader_vertex_file.empty() || shader_fragment_file.empty())
 	{

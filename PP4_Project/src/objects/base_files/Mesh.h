@@ -63,6 +63,7 @@ private:
 	void GetTextureFilename(FbxNode* child_node, const char* return_value);
 	void CreateVertexBuffer();
 	void CreateIndexBuffer();
+	void SetupTangent();
 };
 
 #endif

@@ -80,14 +80,14 @@ typedef void(*UniformFctn)(const VkObj_Context &context, Object &obj, Camera &ca
 
 #define RAND_NORMAL glm::vec3(rand()/float(RAND_MAX),rand()/float(RAND_MAX),rand()/float(RAND_MAX))
 
-#define V_COLOR_BLACK	{0.0f, 0.0f, 0.0f, 1.0f}
-#define V_COLOR_RED		{1.0f, 0.0f, 0.0f, 1.0f}
-#define V_COLOR_GREEN	{0.0f, 1.0f, 0.0f, 1.0f}
-#define V_COLOR_BLUE	{0.0f, 0.0f, 1.0f, 1.0f}
-#define V_COLOR_MAGENTA	{1.0f, 0.0f, 1.0f, 1.0f}
-#define V_COLOR_CYAN	{0.0f, 1.0f, 1.0f, 1.0f}
-#define V_COLOR_YELLOW	{1.0f, 1.0f, 0.0f, 1.0f}
-#define V_COLOR_WHITE	{1.0f, 1.0f, 1.0f, 1.0f}
+#define V_COLOR_BLACK	{ 0.0f, 0.0f, 0.0f }
+#define V_COLOR_RED		{ 1.0f, 0.0f, 0.0f }
+#define V_COLOR_GREEN	{ 0.0f, 1.0f, 0.0f }
+#define V_COLOR_BLUE	{ 0.0f, 0.0f, 1.0f }
+#define V_COLOR_MAGENTA	{ 1.0f, 0.0f, 1.0f }
+#define V_COLOR_CYAN	{ 0.0f, 1.0f, 1.0f }
+#define V_COLOR_YELLOW	{ 1.0f, 1.0f, 0.0f }
+#define V_COLOR_WHITE	{ 1.0f, 1.0f, 1.0f }
 
 #define VKDEFINE_HOST_VISIBLE_MEMORY 64
 #define VKDEFINE_DEVICE_LOCAL_MEMORY 128
@@ -136,6 +136,10 @@ typedef void(*UniformFctn)(const VkObj_Context &context, Object &obj, Camera &ca
 #define TEXTURE_TYPE_STBI 0
 #define TEXTURE_TYPE_HEAP 1
 #define TEXTURE_TYPE_DOTH 2
+
+#define SHADER_BASIC_COLOR 0
+#define SHADER_BASIC_TEXTURE 1
+#define SHADER_EARTH 2
 
 #define SKYBOX 0
 #define SUN 1

@@ -3,8 +3,6 @@
 
 #include "Defines.h"
 
-#define USE_PYRAMID true
-
 #define POSITION 0
 #define COLOR 1
 #define UV 2
@@ -13,8 +11,8 @@
 
 struct Vertex
 {
-	glm::vec4 position;
-	glm::vec4 color;
+	glm::vec3 position;
+	glm::vec3 color;
 	glm::vec2 uv;
 	glm::vec3 normal;
 	glm::vec3 tangent;
@@ -36,12 +34,12 @@ struct Vertex
 
 		attribute_description[POSITION].binding = 0;
 		attribute_description[POSITION].location = 0;
-		attribute_description[POSITION].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		attribute_description[POSITION].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attribute_description[POSITION].offset = offsetof(Vertex, position);
 
 		attribute_description[COLOR].binding = 0;
 		attribute_description[COLOR].location = 1;
-		attribute_description[COLOR].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		attribute_description[COLOR].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attribute_description[COLOR].offset = offsetof(Vertex, color);
 
 		attribute_description[UV].binding = 0;
