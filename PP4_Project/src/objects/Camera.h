@@ -1,7 +1,6 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "../Defines.h"
 #include "../VulkanObj/VkObj_Context.h"
 #include "../InputController.h"
 #include "base_files/Object.h"

@@ -2,9 +2,14 @@
 #define OBJECT_H
 
 #include "../../Maths.h"
-#include "../Camera.h"
 #include "Texture.h"
 #include "Mesh.h"
+
+class VkObj_Context;
+class Object;
+class Camera;
+
+typedef void(*UniformFctn)(const VkObj_Context &context, Object &obj, Camera &camera);
 
 class Camera;
 

@@ -1,6 +1,8 @@
 #ifndef VKOBJ_SHARED_H
 #define VKOBJ_SHARED_H
 
+#define MAX_FRAMES 2
+
 #include "pch.h"
 #include "../Defines.h"
 
@@ -15,6 +17,12 @@ struct VkStruct_SwapchainSupportDetails {
 	VkSurfaceCapabilitiesKHR capabilities;
 	std::vector<VkSurfaceFormatKHR> formats;
 	std::vector<VkPresentModeKHR> presentModes;
+};
+
+struct VkObj_SemaphoresAndFences {
+	std::vector<VkSemaphore> image_available_semaphores;
+	std::vector<VkSemaphore> render_finished_semaphores;
+	std::vector<VkFence> fences;
 };
 
 VkStruct_QueueFamilyIndices vk_find_queue_family(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface);
@@ -47,5 +55,8 @@ bool vk_create_image(const VkPhysicalDevice &physical_device, const VkDevice &de
 
 bool vk_create_mipmaps(const VkDevice &device, const VkCommandPool &command_pool, const VkQueue &graphics_queue,
 	const VkImage &texture_image, const uint32_t &texture_width, const uint32_t &texture_height, const uint32_t &mip_levels);
+
+bool vk_sync_semaphore_and_fences(const VkDevice &device, std::vector<VkSemaphore> &image_available_semaphore, std::vector<VkSemaphore> &render_finished_semaphore, std::vector<VkFence> &fences);
+bool vk_create_semaphore(const VkDevice &device, std::vector<VkSemaphore> &image_available_semaphore, std::vector<VkSemaphore> &render_finished_semaphore);
 
 #endif

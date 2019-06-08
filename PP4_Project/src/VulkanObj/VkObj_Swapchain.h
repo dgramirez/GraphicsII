@@ -5,19 +5,6 @@
 #include "VkObj_WindowSetup.h"
 #include "VkObj_Devices.h"
 
-struct VkObj_Swapchains
-{
-	VkSwapchainKHR swapchain;
-	std::vector<VkImage> images;
-	std::vector<VkImageView> views;
-	std::vector<VkFramebuffer> frame_buffers;
-	VkFormat format;
-	union
-	{
-		VkExtent3D extent3D;
-		struct { VkExtent2D extent2D; uint32_t depth; };
-	};
-};
 
 class VkObj_Swapchain
 {

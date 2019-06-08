@@ -2,6 +2,7 @@
 #include "Texture.h"
 #include "../../VulkanObj/VkObj_Shared.h"
 #include "stb_image.h"
+#define RAND_NORMAL glm::vec3(rand()/float(RAND_MAX),rand()/float(RAND_MAX),rand()/float(RAND_MAX))
 
 Texture::Texture(const int32_t &width, const int32_t &height, void *pixels, const uint32_t &mip_levels, const uint32_t &texture_type)
 	: prv_Width(width), prv_Height(height), prv_Data(pixels), prv_MipLevels(mip_levels), prv_TextureType(texture_type), prv_Image(nullptr), prv_Sampler(nullptr) { }
