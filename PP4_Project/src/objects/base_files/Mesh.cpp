@@ -66,6 +66,7 @@ void Mesh::cleanup()
 	if (index_memory)	{ vkFreeMemory(myContext.device.logical, index_memory, nullptr);	 index_memory  = nullptr; }
 	if (vertex_buffer)	{ vkDestroyBuffer(myContext.device.logical, vertex_buffer, nullptr); vertex_buffer = nullptr; }
 	if (vertex_memory)	{ vkFreeMemory(myContext.device.logical, vertex_memory, nullptr);	 vertex_memory = nullptr; }
+	if (prv_TextureFilename) { delete prv_TextureFilename; prv_TextureFilename = nullptr;  }
 }
 
 //  _____           _                   _

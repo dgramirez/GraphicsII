@@ -16,7 +16,7 @@ Window::Window(unsigned int width, unsigned int height, const char* title)
 
 Window::~Window()
 {
-	Cleanup();
+
 }
 
 void Window::run()
@@ -26,10 +26,9 @@ void Window::run()
 	Cleanup();
 }
 
-void Window::setup_object_list(const std::vector<Object*> &initial_objects)
+void Window::setup_object_list(std::vector<Object*> *initial_objects)
 {
-	for (uint32_t i = 0; i < CAST(uint32_t, initial_objects.size()); ++i)
-		Vobj->add_to_object_list(initial_objects[i]);
+	Vobj->add_to_object_list(initial_objects);
 }
 
 void Window::Init()
@@ -83,7 +82,7 @@ void Window::MainLoop()
 
 void Window::Cleanup()
 {
-	if (Vobj)	Vobj->cleanup();
+	if (Vobj)	delete Vobj;
 
 	if (window) {
 		SDL_DestroyWindow(window);

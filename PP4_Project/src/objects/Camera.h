@@ -10,7 +10,7 @@ class Camera
 public:
 	Camera() = default;
 	void init(glm::mat4 translation, glm::mat4 rotation, bool infinite_perspective = true, float zoom = 45.0f, float _near = 0.1, float _far = 50.0f);
-	void set_object_list(std::vector<Object*> &object_list);
+	void set_object_list(std::vector<Object*> *object_list);
 	void set_planet_lookup(const uint32_t &x);
 	void update(const SDL_Event &e);
 
@@ -42,7 +42,7 @@ private:
 	glm::mat4 prv_View;
 	glm::mat4 prv_ViewInv;
 	glm::mat4 prv_Perspective;
-	std::vector<Object*> pObjectList;
+	std::vector<Object*> *pObjectList;
 	uint32_t planet_lookup;
 
 	void Update_FunctionButtons(const SDL_Event &e);

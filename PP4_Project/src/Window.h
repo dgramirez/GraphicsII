@@ -25,7 +25,7 @@ public:
 	__declspec(property(get = get_height, put = set_height)) int win_height;
 	
 	void run();
-	void setup_object_list(const std::vector<Object*> &initial_objects);
+	void setup_object_list(std::vector<Object*> *initial_objects);
 
 private:
 	//Private Variables, SDL

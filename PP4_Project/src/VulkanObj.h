@@ -18,7 +18,7 @@ public:
 	void idle_device();
 	void reset_swapchain();
 	void setup_object_list(uint32_t size);
-	void add_to_object_list(Object* object);
+	void add_to_object_list(std::vector<Object*> *object);
 	void update(const SDL_Event &e);
 	void update_window_title();
 
@@ -32,7 +32,7 @@ private:
 
 
 	uint32_t prv_Frame = 0;
-	std::vector<Object*> prv_ObjectList;
+	std::vector<Object*> *prv_ObjectList;
 
 	void CleanupSwapchain();
 };

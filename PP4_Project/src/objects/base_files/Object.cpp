@@ -24,6 +24,7 @@ Object::Object(const char* fbx_filename, const char *texture_folderlocation, flo
 	char *fp = new char[len + 1];
 	strcpy_s(fp, len + 1, texture_filepath);
 	pTexture = new Texture(fp);
+	delete[] fp;
 }
 
 Object::Object(const OBJ_VERT* object_vertices, const unsigned int &vertices_size, const unsigned int* object_indices, const unsigned int & indices_size, Texture* _t)
@@ -66,6 +67,9 @@ void Object::reset()
 	uint32_t swapchain_size = (uint32_t)myContext.swapchain.frame_buffers.size();
 	for (uint32_t i = 0; i < swapchain_size; ++i)
 	{
+		if (uniform_buffer.empty())
+			break;
+
 		vkDestroyBuffer(myContext.device.logical, uniform_buffer[i], nullptr);
 		vkFreeMemory(myContext.device.logical, uniform_memory[i], nullptr);
 	}
@@ -77,14 +81,14 @@ void Object::cleanup()
 {
 	if (pTexture)
 	{
-		pTexture->cleanup();
 		delete pTexture;
+		pTexture = nullptr;
 	}
 
 	if (pMesh)
 	{
-		pMesh->cleanup();
 		delete pMesh;
+		pMesh = nullptr;
 	}
 
 	reset();

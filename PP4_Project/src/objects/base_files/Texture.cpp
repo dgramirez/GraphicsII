@@ -18,7 +18,6 @@ Texture::Texture(const char* filename)
 
 Texture::~Texture()
 {
-	//Call Cleanup Manually
 	cleanup();
 }
 
@@ -53,10 +52,27 @@ void Texture::cleanup()
 		prv_Data = nullptr;
 	}
 
-	if (prv_Sampler)		{vkDestroySampler(myContext.device.logical, prv_Sampler, nullptr);	   prv_Sampler = nullptr;}
-	if (prv_ImageView)		{vkDestroyImageView(myContext.device.logical, prv_ImageView, nullptr); prv_ImageView = nullptr;}
-	if (prv_Image)			{vkDestroyImage(myContext.device.logical, prv_Image, nullptr);		   prv_Image = nullptr;}
-	if (prv_ImageMemory)	{vkFreeMemory(myContext.device.logical, prv_ImageMemory, nullptr);	   prv_ImageMemory = nullptr;}
+	if (prv_Sampler)
+	{
+		vkDestroySampler(myContext.device.logical, prv_Sampler, nullptr);	  
+		prv_Sampler = nullptr;
+	}
+
+	if (prv_ImageView)
+	{
+		vkDestroyImageView(myContext.device.logical, prv_ImageView, nullptr);
+		prv_ImageView = nullptr;
+	}
+	if (prv_Image)
+	{
+		vkDestroyImage(myContext.device.logical, prv_Image, nullptr);
+		prv_Image = nullptr;
+	}
+	if (prv_ImageMemory)
+	{
+		vkFreeMemory(myContext.device.logical, prv_ImageMemory, nullptr);
+		prv_ImageMemory = nullptr;
+	}
 }
 
 void Texture::CreateImage()
