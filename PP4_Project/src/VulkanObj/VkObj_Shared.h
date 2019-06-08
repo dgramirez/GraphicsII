@@ -1,6 +1,7 @@
 #ifndef VKOBJ_SHARED_H
 #define VKOBJ_SHARED_H
 
+#include "pch.h"
 #include "../Defines.h"
 
 struct VkStruct_QueueFamilyIndices {
@@ -14,17 +15,6 @@ struct VkStruct_SwapchainSupportDetails {
 	VkSurfaceCapabilitiesKHR capabilities;
 	std::vector<VkSurfaceFormatKHR> formats;
 	std::vector<VkPresentModeKHR> presentModes;
-};
-
-struct vkStruct_Buffer {
-	VkBuffer me;
-	VkDeviceMemory memory;
-};
-
-struct vkStruct_Images {
-	VkImage me;
-	VkImageView view;
-	VkDeviceMemory memory;
 };
 
 VkStruct_QueueFamilyIndices vk_find_queue_family(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface);

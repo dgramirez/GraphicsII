@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "VkObj_Devices.h"
 #include "VkObj_Swapchain.h"
 

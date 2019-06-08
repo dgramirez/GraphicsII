@@ -1,15 +1,8 @@
 #ifndef VULKAN_OBJ2_H
 #define VULKAN_OBJ2_H
 
-#include "VulkanObj/VkObj_WindowSetup.h"
-#include "VulkanObj/VkObj_Devices.h"
-#include "VulkanObj/VkObj_Swapchain.h"
-#include "VulkanObj/VkObj_RenderGraphicsPipeline.h"
-#include "VulkanObj/VkObj_Texture.h"
-#include "VulkanObj/VkObj_Buffers.h"
-#include "VulkanObj/VkObj_Command.h"
-#include "VulkanObj/VkObj_SemaphoresAndFences.h"
 #include "VulkanObj/VkObj_Context.h"
+#include "VulkanObj/VkObj_SemaphoresAndFences.h"
 #include "objects/base_files/Object.h"
 #include "objects/Camera.h"
 

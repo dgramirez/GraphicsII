@@ -4,7 +4,6 @@
 #include "VkObj_WindowSetup.h" 
 #include "VkObj_Devices.h" 
 #include "VkObj_Swapchain.h"
-#include "VkObj_Uniform.h"
 
 class VkObj_Context
 {

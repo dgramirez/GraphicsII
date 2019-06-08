@@ -1,10 +1,10 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include "../Defines.h"
+#include "../../Maths.h"
+#include "../Camera.h"
 #include "Texture.h"
 #include "Mesh.h"
-#include "../Camera.h"
 
 class Camera;
 

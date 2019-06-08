@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "VkObj_Swapchain.h"
 
 uint32_t VkObj_Swapchain::swapchain_size = 0;

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Camera.h"
 
 void Camera::init(glm::mat4 translation, glm::mat4 rotation, bool infinite_perspective /*= true*/, float fov /*= 45.0f*/, float _near /*= 0.1*/, float _far /*= 50.0f*/)

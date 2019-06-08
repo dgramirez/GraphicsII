@@ -1,8 +1,7 @@
 #ifndef ASSETS_H
 #define ASSETS_H
 
-#include "../Defines.h"
-#include "../VulkanObj/VkObj_Context.h"
+#include "../../VulkanObj/VkObj_Context.h"
 
 class Texture
 {
@@ -52,6 +51,7 @@ private:
 	VkComponentSwizzle prv_B;
 	VkComponentSwizzle prv_A;
 	VkSampler prv_Sampler;
+
 };
 
 #endif

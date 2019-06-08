@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "VkObj_Shared.h"
 
 VkStruct_SwapchainSupportDetails vk_query_swapchain_support(const VkPhysicalDevice& physical_device, const VkSurfaceKHR& surface)

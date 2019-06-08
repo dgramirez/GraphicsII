@@ -1,10 +1,9 @@
 #ifndef OBJECT_MESH_H
 #define OBJECT_MESH_H
 
-#include "../Defines.h"
-#include "../Maths.h"
-#include "../VulkanObj/VkObj_Shared.h"
-#include "../VulkanObj/VkObj_Context.h"
+#include "../../Maths.h"
+#include "../../VulkanObj/VkObj_Shared.h"
+#include "../../VulkanObj/VkObj_Context.h"
 #include "Texture.h"
 
 #ifndef __OBJ_VERT__

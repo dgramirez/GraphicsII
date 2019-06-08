@@ -1,5 +1,6 @@
+#include "pch.h"
+#include "../Maths.h"
 #include "VkObj_Context.h"
-#include "../Object.h"
 
 VkObj_Context myContext;
 

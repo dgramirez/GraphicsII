@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Window.h"
 #include "objects/base_files/Object.h"
 #include "objects/Camera.h"

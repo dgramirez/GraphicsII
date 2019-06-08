@@ -1,14 +1,8 @@
+#include "pch.h"
 #include "Texture.h"
-#include "../Defines.h"
-#include "VkObj_Shared.h"
+#include "../../VulkanObj/VkObj_Shared.h"
+#include "stb_image.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_ONLY_PNG
-#define STB_ONLY_JPG
-#define STB_ONLY_BMP
-#include "../../vendor/stb_image/stb_image.h"
-
-#pragma region TEXTURE_CLASS
 Texture::Texture(const int32_t &width, const int32_t &height, void *pixels, const uint32_t &mip_levels, const uint32_t &texture_type)
 	: prv_Width(width), prv_Height(height), prv_Data(pixels), prv_MipLevels(mip_levels), prv_TextureType(texture_type), prv_Image(nullptr), prv_Sampler(nullptr) { }
 
@@ -149,5 +143,3 @@ void Texture::CreateDefaultSampler()
 
 	vkCreateSampler(myContext.device.logical, &sampler_create_info, nullptr, &prv_Sampler);
 }
-
-#pragma endregion

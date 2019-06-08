@@ -3,11 +3,22 @@
 
 #include "Defines.h"
 
+#pragma region Unique_Defines
+#define V_COLOR_BLACK	{ 0.0f, 0.0f, 0.0f }
+#define V_COLOR_RED		{ 1.0f, 0.0f, 0.0f }
+#define V_COLOR_GREEN	{ 0.0f, 1.0f, 0.0f }
+#define V_COLOR_BLUE	{ 0.0f, 0.0f, 1.0f }
+#define V_COLOR_MAGENTA	{ 1.0f, 0.0f, 1.0f }
+#define V_COLOR_CYAN	{ 0.0f, 1.0f, 1.0f }
+#define V_COLOR_YELLOW	{ 1.0f, 1.0f, 0.0f }
+#define V_COLOR_WHITE	{ 1.0f, 1.0f, 1.0f }
+
 #define POSITION 0
 #define COLOR 1
 #define UV 2
 #define NORMAL 3
 #define TANGENT 4
+#pragma endregion
 
 struct Vertex
 {

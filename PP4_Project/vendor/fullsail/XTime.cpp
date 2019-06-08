@@ -1,8 +1,8 @@
-#include "XTime.h"
+#include "pch.h"
 #include <math.h>
 
 //MODIFICATION: Added Global Time Variable for all files to use
-XTime time;
+XTime myTime;
 
 XTime::XTime(unsigned char samples, double smoothFactor)
 {

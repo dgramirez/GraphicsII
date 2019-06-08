@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "VkObj_SemaphoresAndFences.h"
 
 bool vk_sync_semaphore_and_fences(const VkDevice &device, std::vector<VkSemaphore> &image_available_semaphore, std::vector<VkSemaphore> &render_finished_semaphore, std::vector<VkFence> &fences)
