@@ -43,6 +43,9 @@ public:
 	Mesh* get_mesh() { return pMesh; }
 	__declspec(property(get = get_mesh)) Mesh *mesh;
 
+	float get_scale() { return prv_Scale; }
+	__declspec(property(get = get_scale)) float scale;
+
 	glm::mat4 get_model_matrix() { return prv_ModelMatrix; }
 	glm::mat4 get_model_matrix_previous() { return prv_ModelMatrixPrevious; }
 	void set_model_matrix(const glm::mat4 &matrix) { prv_ModelMatrixPrevious = prv_ModelMatrix; prv_ModelMatrix = matrix; }
@@ -56,10 +59,7 @@ private:
 	glm::mat4 prv_ModelMatrix;
 
 	uint32_t uniform_size_bytes;
-
-//	std::vector<VkCommandBuffer> command_buffer;
-
-
+	float prv_Scale;
 };
 
 #endif

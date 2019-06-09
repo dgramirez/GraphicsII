@@ -56,6 +56,8 @@ private:
 	void Update_CommandButtons(const SDL_Event &e);
 	void Update_CameraMovement(const SDL_Event &e);
 
+	void LookAtPlanet();
+
 	bool  prv_InfinitePerspective;
 	float prv_Fov;
 	const glm::vec2 prv_FovMinMax = { glm::radians(45.0f) , glm::radians(75.0f) };
@@ -64,6 +66,7 @@ private:
 	float prv_Viewspd;
 	bool f1_released = false;
 	bool f2_released = false;
+	bool t_released = false;
 };
 
 #endif

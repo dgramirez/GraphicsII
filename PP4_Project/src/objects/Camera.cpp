@@ -109,6 +109,20 @@ void Camera::Update_FunctionButtons(const SDL_Event &e)
 			set_planet_lookup(planet_lookup + 1);
 			f2_released = true;
 		}
+
+		if (key == SDLK_t && !t_released)
+		{
+			Object* obj = pObjectList->at(prv_PlanetLookup);
+			glm::mat4 planet_model_matrix = obj->model_matrix;
+
+			LookAtPlanet();
+			float spacing = SIZE_SPHERE / obj->scale;
+			prv_View[3] = planet_model_matrix[3];
+			prv_View = glm::translate(prv_View, glm::vec3(0.0f, 0.0f, 10.0f * spacing));
+			prv_ViewInv = glm::inverse(prv_View);
+
+			t_released = true;
+		}
 	}
 
 	if (e.type == SDL_KEYDOWN)
@@ -117,6 +131,8 @@ void Camera::Update_FunctionButtons(const SDL_Event &e)
 			f1_released = false;
 		if (key == SDLK_F2 && f2_released)
 			f2_released = false;
+		if (key == SDLK_t && t_released)
+			t_released = false;
 
 		if (e.key.keysym.sym == SDLK_EQUALS)
 			prv_Viewspd += 0.25f;
@@ -186,15 +202,7 @@ void Camera::Update_CommandButtons(const SDL_Event &e)
 	if (InputController::Lctrl)
 	{
 		if (InputController::findpluto)
-		{
-			Object* obj = pObjectList->at(prv_PlanetLookup);
-			glm::mat4 planet_model_matrix = obj->model_matrix;
-			glm::vec3 eye = { prv_View[3].x, prv_View[3].y, prv_View[3].z };
-			glm::vec3 center = { planet_model_matrix[3].x, planet_model_matrix[3].y, planet_model_matrix[3].z };
-			glm::vec3 up = { 0.0f, -1.0f, 0.0f };
-			prv_ViewInv = glm::lookAt(eye, center, up);
-			prv_View = inverse(prv_ViewInv);
-		}
+			LookAtPlanet();
 	}
 	if (InputController::Lalt)
 	{
@@ -222,6 +230,7 @@ void Camera::Update_CommandButtons(const SDL_Event &e)
 				prv_Perspective = glm::perspective(prv_Fov, myContext.swapchain.swapchain_aspect, prv_Nearplane, prv_Farplane);
 		}
 	}
+
 }
 
 void Camera::Update_CameraMovement(const SDL_Event &e)
@@ -291,4 +300,15 @@ void Camera::Update_CameraMovement(const SDL_Event &e)
 		prv_View = glm::translate(prv_View, glm::vec3(0.0f, -movspd, 0.0f));
 		prv_ViewInv = glm::inverse(prv_View);
 	}
+}
+
+void Camera::LookAtPlanet()
+{
+	Object* obj = pObjectList->at(prv_PlanetLookup);
+	glm::mat4 planet_model_matrix = obj->model_matrix;
+	glm::vec3 eye = { prv_View[3].x, prv_View[3].y, prv_View[3].z };
+	glm::vec3 center = { planet_model_matrix[3].x, planet_model_matrix[3].y, planet_model_matrix[3].z };
+	glm::vec3 up = { 0.0f, -1.0f, 0.0f };
+	prv_ViewInv = glm::lookAt(eye, center, up);
+	prv_View = inverse(prv_ViewInv);
 }

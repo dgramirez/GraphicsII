@@ -11,10 +11,12 @@ Object::Object(const std::vector<Vertex>& vertices, const std::vector<uint32_t> 
 {
 	pMesh = new Mesh(vertices, indices);
 	pTexture = _t;
+	prv_Scale = 1.0f;
 }
 
 Object::Object(const char* fbx_filename, const char *texture_folderlocation, float _scale /*= 1.0f*/)
 {
+	prv_Scale = _scale;
 	pMesh = new Mesh(fbx_filename, _scale);
 	char texture_filepath[255];
 	strcpy(texture_filepath, texture_folderlocation);
@@ -31,6 +33,7 @@ Object::Object(const OBJ_VERT* object_vertices, const unsigned int &vertices_siz
 {
 	pMesh = new Mesh(object_vertices, vertices_size, object_indices, indices_size);
 	pTexture = _t;
+	prv_Scale = 1.0f;
 }
 
 Object::~Object()
