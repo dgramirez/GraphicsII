@@ -73,11 +73,23 @@ struct Vertex
 
 };
 
-struct Mvp_object
+struct Uniform_MVP
 {
 	glm::mat4 model;
 	glm::mat4 view;
 	glm::mat4 projection;
+};
+
+struct Uniform_Object
+{
+	glm::mat4 model;
+	glm::mat4 view;
+	glm::mat4 projection;
+	glm::mat4 model_transposed_inversed;
+
+	glm::vec3 light_color = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 sun_pos = glm::vec3(0.0f, 0.0f, 0.0f);
+	float ambient_strength = 1.0f;
 };
 
 struct Color

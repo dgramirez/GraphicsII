@@ -6,6 +6,15 @@
 #include "pch.h"
 #include "../Defines.h"
 
+struct VkStruct_Pipeline {
+	const char* vertex_shader_name;
+	const char* fragment_shader_name;
+	VkDescriptorPool descriptor_pool;
+	VkDescriptorSetLayout descriptor_set_layout;
+	VkPipelineLayout pipeline_layout;
+	VkPipeline pipeline;
+};
+
 struct VkStruct_QueueFamilyIndices {
 	std::optional<uint32_t> graphics;		//Graphics Queue
 	std::optional<uint32_t> present;		//Present Queue
@@ -58,5 +67,8 @@ bool vk_create_mipmaps(const VkDevice &device, const VkCommandPool &command_pool
 
 bool vk_sync_semaphore_and_fences(const VkDevice &device, std::vector<VkSemaphore> &image_available_semaphore, std::vector<VkSemaphore> &render_finished_semaphore, std::vector<VkFence> &fences);
 bool vk_create_semaphore(const VkDevice &device, std::vector<VkSemaphore> &image_available_semaphore, std::vector<VkSemaphore> &render_finished_semaphore);
+
+std::vector<char> vk_read_shader_file(const std::string& filename);
+VkShaderModule vk_create_shader_module(const VkDevice &device, const std::vector<char>& shader);
 
 #endif

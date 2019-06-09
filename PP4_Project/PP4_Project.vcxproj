@@ -240,6 +240,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\VulkanObj\VkObj_RenderPipeline.cpp" />
     <ClCompile Include="src\VulkanObj\VkObj_Shared.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">pch.h</PrecompiledHeaderFile>
@@ -300,6 +301,7 @@
     <ClInclude Include="src\texture_h\celestial.h" />
     <ClInclude Include="src\texture_h\eyeball.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Context.h" />
+    <ClInclude Include="src\VulkanObj\VkObj_RenderPipeline.h" />
     <ClInclude Include="src\VulkanObj\VkObj_WindowSetup.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Devices.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Shared.h" />

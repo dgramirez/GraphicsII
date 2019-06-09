@@ -45,7 +45,7 @@
 #include "objects/base_files/Object.h"
 class Camera;
 class VkObj_Context;
-struct Mvp_object;
+struct Uniform_Object;
 
 #pragma region non-planets
 Object* create_pyramid();
@@ -60,7 +60,7 @@ Object* create_sphere(const char* fbxfilepath, const char* texturelocation, Text
 void AxeRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void PyramidRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 
-void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, Object &obj, Camera &camera, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days);
+void PlanetaryRotation(float aspect_ratio, Uniform_Object &mvp, Object &obj, Camera &camera, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days);
 void SunRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void MercuryRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void VenusRotation(const VkObj_Context &context, Object &obj, Camera &camera);
@@ -73,6 +73,7 @@ void NeptuneRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void PlutoRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void EarthMoonRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void skybox_uniform(const VkObj_Context &context, Object &obj, Camera &camera);
-void write_to_buffer(const VkDevice &device, const uint32_t &current_image, std::vector<VkDeviceMemory> &uniform_memory, const Mvp_object &mvp);
+void write_to_buffer(const VkDevice &device, const uint32_t &current_image, std::vector<VkDeviceMemory> &uniform_memory, const Uniform_Object &mvp);
+void write_to_buffer(const VkDevice &device, const uint32_t &current_image, std::vector<VkDeviceMemory> &uniform_memory, const Uniform_MVP &mvp);
 
 #endif

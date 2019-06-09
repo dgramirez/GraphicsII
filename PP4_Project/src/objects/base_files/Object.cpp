@@ -44,15 +44,14 @@ Object::~Object()
 // |  ___/  | | | | | '_ \  | | | |  / __|
 // | |      | |_| | | |_) | | | | | | (__
 // |_|       \__,_| |_.__/  |_| |_|  \___|
-void Object::init(const uint32_t &sizeof_ubuffer, VkPipelineLayout &graphics_pipeline_layout, VkPipeline &graphic_pipeline)
+void Object::init(const uint32_t &sizeof_ubuffer, const uint32_t &pipe_index)
 {
 	prv_ModelMatrixPrevious = glm::mat4(1.0f);
 	pMesh->init();
 	pTexture->init();
 
+	pipeline_index = pipe_index;
 	uniform_size_bytes = sizeof_ubuffer;
-	pipeline = &graphic_pipeline;
-	pipeline_layout = &graphics_pipeline_layout;
 	create_uniform_buffer();
 	create_descriptor_set();
 }
@@ -102,7 +101,7 @@ void Object::cleanup()
 // |_|      |_|    |_|   \_/    \__,_|  \__|  \___|
 void Object::create_uniform_buffer()
 {
-	VkDeviceSize buffer_size = sizeof(Mvp_object);
+	VkDeviceSize buffer_size = uniform_size_bytes;
 	uint32_t swapchain_size = (uint32_t)myContext.swapchain.frame_buffers.size();
 
 	uniform_buffer.resize(swapchain_size);
@@ -118,15 +117,15 @@ void Object::create_uniform_buffer()
 void Object::create_descriptor_set()
 {
 	uint32_t swapchain_size = (uint32_t)myContext.swapchain.frame_buffers.size();
-	std::vector<VkDescriptorSetLayout> descriptor_set_layout_vector(swapchain_size, myContext.descriptor_set_layout);
+	std::vector<VkDescriptorSetLayout> descriptor_set_layout_vector(swapchain_size, myContext.pipelines.pipelines[pipeline_index].descriptor_set_layout);
 
 	VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {};
 	descriptor_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	descriptor_set_allocate_info.descriptorSetCount = swapchain_size;
-	descriptor_set_allocate_info.descriptorPool = myContext.descriptor_pool;
+	descriptor_set_allocate_info.descriptorPool = myContext.pipelines.pipelines[pipeline_index].descriptor_pool;
 	descriptor_set_allocate_info.pSetLayouts = descriptor_set_layout_vector.data();
 
-	descriptor_set.resize(swapchain_size); //Was Based on Swapchain Size
+	descriptor_set.resize(swapchain_size);
 	vkAllocateDescriptorSets(myContext.device.logical, &descriptor_set_allocate_info, descriptor_set.data());
 
 	for (uint32_t i = 0; i < swapchain_size; ++i)

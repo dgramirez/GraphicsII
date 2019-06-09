@@ -22,7 +22,7 @@ public:
 	Object(const OBJ_VERT* object_vertices, const unsigned int &vertices_size, const unsigned int* object_indices, const unsigned int & indices_size, Texture* _t = nullptr);
 	~Object();
 
-	void init(const uint32_t &sizeof_ubuffer, VkPipelineLayout &graphics_pipeline_layout, VkPipeline &graphic_pipeline);
+	void init(const uint32_t &sizeof_ubuffer, const uint32_t &pipe_index);
 	void swap_color_format(const VkComponentSwizzle &r, const VkComponentSwizzle &g, const VkComponentSwizzle &b, const VkComponentSwizzle &a);
 	void reset();
 	void cleanup();
@@ -34,8 +34,7 @@ public:
 	std::vector<VkBuffer> uniform_buffer;	   
 	std::vector<VkDeviceMemory> uniform_memory;
 
-	VkPipelineLayout *pipeline_layout;
-	VkPipeline *pipeline;
+	uint32_t pipeline_index;
 	std::vector<VkDescriptorSet> descriptor_set; 
 
 	Texture* get_texture() { return pTexture; }

@@ -625,3 +625,40 @@ bool vk_create_semaphore(const VkDevice &device, std::vector<VkSemaphore> &image
 
 	return true;
 }
+
+std::vector<char> vk_read_shader_file(const std::string& filename)
+{
+	std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+	if (!file.is_open())
+	{
+		LOG("FAILED TO GET FILENAME");
+		return std::vector<char>();
+	}
+
+	unsigned int file_size = (unsigned int)file.tellg();
+	std::vector<char> content(file_size);
+
+	file.seekg(0);
+	file.read(content.data(), file_size);
+
+	file.close();
+
+	return content;
+}
+
+VkShaderModule vk_create_shader_module(const VkDevice &device, const std::vector<char>& shader)
+{
+	VkShaderModuleCreateInfo create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	create_info.codeSize = shader.size();
+	create_info.pCode = (const uint32_t*)shader.data();
+
+	VkShaderModule shader_module;
+	VkResult r = vkCreateShaderModule(device, &create_info, nullptr, &shader_module);
+	if (r) {
+		LOG("Failed to create Shader Module! Error Code: " << r);
+	}
+
+	return shader_module;
+}

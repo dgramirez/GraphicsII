@@ -7,11 +7,11 @@
 Object* create_pyramid()
 {
 	std::vector<Vertex> pyramid_vertex = {
-		{ { 0.0f, -0.5f,  0.0f }, V_COLOR_RED	, {0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Top point
-		{ { 0.5f,  0.5f,  0.5f }, V_COLOR_GREEN , {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 1
-		{ {-0.5f,  0.5f,  0.5f }, V_COLOR_BLUE  , {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 2
-		{ { 0.5f,  0.5f, -0.5f }, V_COLOR_CYAN  , {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 3
-		{ {-0.5f,  0.5f, -0.5f }, V_COLOR_YELLOW, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} }	//Bottom Vertex 4;
+		{ { 0.0f, -0.5f,  0.0f }, V_COLOR_RED	, {0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Top point
+		{ { 0.5f,  0.5f,  0.5f }, V_COLOR_GREEN , {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 1
+		{ {-0.5f,  0.5f,  0.5f }, V_COLOR_BLUE  , {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 2
+		{ { 0.5f,  0.5f, -0.5f }, V_COLOR_CYAN  , {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 3
+		{ {-0.5f,  0.5f, -0.5f }, V_COLOR_YELLOW, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} }	//Bottom Vertex 4;
 	};
 
 	const std::vector<uint32_t> pyramid_index = {
@@ -116,7 +116,7 @@ Object* create_sphere(const char* fbxfilepath, const char* texturelocation, Text
 
 void AxeRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
+	Uniform_MVP mvp;
 
 	mvp.model = obj.model_matrix;
 	mvp.view = camera.view_inverse;
@@ -128,7 +128,7 @@ void AxeRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 }
 void PyramidRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
+	Uniform_MVP mvp;
 
 	mvp.model = obj.model_matrix * glm::rotate(glm::mat4(1.0f), (float)myTime.Delta() * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	mvp.view = camera.view_inverse;
@@ -141,66 +141,95 @@ void PyramidRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 
 void SunRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
-	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 27.0f, 0.0f);
+	Uniform_MVP mvp;
+
+	float earth_rotation_time = (float)myTime.Delta() * glm::radians(72.0f); //1 Second = 72 Degrees Rotation. 5 Seconds = 360 Degrees Rotation. 1 Earth Day = 5 Seconds Simulation
+	float planet_rotation = 0.0f;
+	float sun_rotation = 0.0f;
+
+	planet_rotation = earth_rotation_time * 0.37037f;
+	sun_rotation = 0;
+
+	if (InputController::stop_rot)
+	{
+		planet_rotation *= 365.0f;
+		sun_rotation *= 365.0f;
+	}
+
+	//Rotation around the Sun (Origin)
+	mvp.model = glm::rotate(glm::mat4(1.0f), -sun_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	//Translation for model
+	mvp.model *= obj.model_matrix;
+
+	//Rotation on itself
+	mvp.model *= glm::rotate(glm::mat4(1.0f), -planet_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	//Transposed-Inversed Model
+	obj.model_matrix = mvp.model;
+
+	mvp.view = camera.view_inverse;
+	mvp.projection = camera.perspective;
+	mvp.projection[1][1] = -mvp.projection[1][1];
+
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void MercuryRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
+	Uniform_Object mvp;
 	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 59.0f, 87.97f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void VenusRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
+	Uniform_Object mvp;
 	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 243.0f, 224.7f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void EarthRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
+	Uniform_Object mvp;
 	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 1.0f, 365.25f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void MarsRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
+	Uniform_Object mvp;
 	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 1.02749125f, 365.25f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void JupiterRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
+	Uniform_Object mvp;
 	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 0.4125f, 4330.6f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void SaturnRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
+	Uniform_Object mvp;
 	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 0.444f, 10755.7f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void UranusRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
+	Uniform_Object mvp;
 	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 0.71805f, 30687.0f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void NeptuneRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
+	Uniform_Object mvp;
 	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 0.67125f, 59757.8f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 void PlutoRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
+	Uniform_Object mvp;
 	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 6.39f, 90520.0f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 
-void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, Object &obj, Camera &camera, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days)
+void PlanetaryRotation(float aspect_ratio, Uniform_Object &mvp, Object &obj, Camera &camera, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days)
 {
 	float earth_rotation_time = (float)myTime.Delta() * glm::radians(72.0f); //1 Second = 72 Degrees Rotation. 5 Seconds = 360 Degrees Rotation. 1 Earth Day = 5 Seconds Simulation
 	float planet_rotation = 0.0f;
@@ -222,7 +251,6 @@ void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, Object &obj, Camera 
 		sun_rotation *= 365.0f;
 	}
 
-
 	//Rotation around the Sun (Origin)
 	mvp.model = glm::rotate(glm::mat4(1.0f), -sun_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -232,16 +260,20 @@ void PlanetaryRotation(float aspect_ratio, Mvp_object &mvp, Object &obj, Camera 
 	//Rotation on itself
 	mvp.model *= glm::rotate(glm::mat4(1.0f), -planet_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 
+	//Transposed-Inversed Model
+	mvp.model_transposed_inversed = glm::transpose(glm::inverse(mvp.model));
 	obj.model_matrix = mvp.model;
 
 	mvp.view = camera.view_inverse;
 	mvp.projection = camera.perspective;
 	mvp.projection[1][1] = -mvp.projection[1][1];
+	mvp.light_color = glm::vec3(1.0f, 1.0f, 0.0f);
+	mvp.ambient_strength = 0.25f;
 }
 
 void skybox_uniform(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Mvp_object mvp;
+	Uniform_MVP mvp;
 	mvp.model = glm::mat4(1.0f);
 	mvp.view = camera.view_inverse;
 	mvp.view[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -251,10 +283,18 @@ void skybox_uniform(const VkObj_Context &context, Object &obj, Camera &camera)
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }
 
-void write_to_buffer(const VkDevice &device, const uint32_t &current_image, std::vector<VkDeviceMemory> &uniform_memory, const Mvp_object &mvp)
+void write_to_buffer(const VkDevice &device, const uint32_t &current_image, std::vector<VkDeviceMemory> &uniform_memory, const Uniform_Object &mvp)
 {
 	void* data;
-	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Mvp_object), 0, &data);
-	memcpy(data, &mvp, sizeof(Mvp_object));
+	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Uniform_Object), 0, &data);
+	memcpy(data, &mvp, sizeof(Uniform_Object));
+	vkUnmapMemory(device, uniform_memory[current_image]);
+}
+
+void write_to_buffer(const VkDevice &device, const uint32_t &current_image, std::vector<VkDeviceMemory> &uniform_memory, const Uniform_MVP &mvp)
+{
+	void* data;
+	vkMapMemory(device, uniform_memory[current_image], 0, sizeof(Uniform_MVP), 0, &data);
+	memcpy(data, &mvp, sizeof(Uniform_MVP));
 	vkUnmapMemory(device, uniform_memory[current_image]);
 }

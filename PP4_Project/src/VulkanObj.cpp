@@ -8,11 +8,19 @@ VulkanObj::~VulkanObj() { cleanup(); }
 bool VulkanObj::init(const char* title, SDL_Window* window, unsigned short win_width, unsigned short win_height)
 {
 	myContext.init(window);
+
 	
-	for (uint32_t i = 0; i < prv_ObjectList->size(); ++i)
+	prv_ObjectList->at(SKYBOX)->init(sizeof(Uniform_MVP), PIPELINE_TEXTURE);
+
+	prv_ObjectList->at(SUN)->init(sizeof(Uniform_MVP), PIPELINE_TEXTURE);
+
+	for (uint32_t i = MERCURY; i <= PLUTO; ++i)
 	{
-		prv_ObjectList->at(i)->init(sizeof(Mvp_object), myContext.pipeline_layout[0], myContext.pipelines[0]);
-		prv_ObjectList->at(i)->create_descriptor_set();
+		prv_ObjectList->at(i)->init(sizeof(Uniform_Object), PIPELINE_PHONG);
+	}
+	for (uint32_t i = PLUTO + 1; i < prv_ObjectList->size(); ++i)
+	{
+		prv_ObjectList->at(i)->init(sizeof(Uniform_MVP), PIPELINE_TEXTURE);
 	}
 
 	//Create Semaphores
@@ -65,7 +73,7 @@ bool VulkanObj::init(const char* title, SDL_Window* window, unsigned short win_w
 
 	camera.init(glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, -5.0f, 5.0f)), glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
 	camera.set_object_list(prv_ObjectList);
-	camera.set_planet_lookup(MERCURY);
+	camera.set_planet_lookup(PLUTO);
 	return true;
 }
 
@@ -81,8 +89,7 @@ void VulkanObj::reset_swapchain()
 	CleanupSwapchain();
 
 	myContext.swapchain.init(myContext.window, myContext.device, myContext.command_pool);
-	myContext.CreatePipelines();
-	myContext.CreateDescriptorPool();
+	myContext.pipelines.reset_pipeline();
 
 	for (uint32_t i = 0; i < prv_ObjectList->size(); ++i)
 	{
@@ -253,15 +260,8 @@ void VulkanObj::CleanupSwapchain()
 	for (uint32_t i = 0; i < prv_ObjectList->size(); ++i)
 		prv_ObjectList->at(i)->reset();
 	
-	while (!myContext.pipelines.empty())
-	{
-		uint32_t last = (uint32_t)myContext.pipelines.size() - 1;
-		vkDestroyPipelineLayout(myContext.device.logical, myContext.pipeline_layout[last], nullptr);
-		vkDestroyPipeline(myContext.device.logical, myContext.pipelines[last], nullptr);
+	myContext.pipelines.clean_pipeline();
 
-		myContext.pipeline_layout.pop_back();
-		myContext.pipelines.pop_back();
-	}
 	if (myContext.swapchain.render_pass)	vkDestroyRenderPass(myContext.device.logical, myContext.swapchain.render_pass, nullptr);
 
  	for (unsigned int i = 0; i < myContext.swapchain.images.size(); ++i)
@@ -269,9 +269,6 @@ void VulkanObj::CleanupSwapchain()
  
  	if (myContext.swapchain.me)
 		vkDestroySwapchainKHR(myContext.device.logical, myContext.swapchain.me, nullptr);
-
-	if (myContext.descriptor_pool)
-		vkDestroyDescriptorPool(myContext.device.logical, myContext.descriptor_pool, nullptr);
 }
 
 void VulkanObj::cleanup()
@@ -370,10 +367,11 @@ void VulkanObj::draw()
 	{
 		std::array<VkBuffer, 1> vertex_buffer = { prv_ObjectList->at(i)->mesh->vertex_buffer };
 		VkDeviceSize offset[] = { 0 };
+		uint32_t pipeline_idx = prv_ObjectList->at(i)->pipeline_index;
 
 		prv_ObjectList->at(i)->update_uniform_buffer(camera);
-		vkCmdBindPipeline(myContext.swapchain.command_buffer[myContext.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList->at(i)->pipeline);
-		vkCmdBindDescriptorSets(myContext.swapchain.command_buffer[myContext.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList->at(i)->pipeline_layout, 0, 1, &prv_ObjectList->at(i)->descriptor_set[myContext.swapchain.image_index], 0, nullptr);
+		vkCmdBindPipeline(myContext.swapchain.command_buffer[myContext.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, myContext.pipelines.pipelines[pipeline_idx].pipeline);
+		vkCmdBindDescriptorSets(myContext.swapchain.command_buffer[myContext.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, myContext.pipelines.pipelines[pipeline_idx].pipeline_layout, 0, 1, &prv_ObjectList->at(i)->descriptor_set[myContext.swapchain.image_index], 0, nullptr);
 		vkCmdBindVertexBuffers(myContext.swapchain.command_buffer[myContext.swapchain.image_index], 0, 1, vertex_buffer.data(), offset);
 		vkCmdBindIndexBuffer(myContext.swapchain.command_buffer[myContext.swapchain.image_index], prv_ObjectList->at(i)->mesh->index_buffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(myContext.swapchain.command_buffer[myContext.swapchain.image_index], CAST(uint32_t, prv_ObjectList->at(i)->mesh->indices.size()), 1, 0, 0, 0);
@@ -392,10 +390,11 @@ void VulkanObj::draw()
 	{
 		std::array<VkBuffer, 1> vertex_buffer = { prv_ObjectList->at(i)->mesh->vertex_buffer };
 		VkDeviceSize offset[] = { 0 };
+		uint32_t pipeline_idx = prv_ObjectList->at(i)->pipeline_index;
 
 		prv_ObjectList->at(i)->update_uniform_buffer(camera);
-		vkCmdBindPipeline(myContext.swapchain.command_buffer[myContext.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList->at(i)->pipeline);
-		vkCmdBindDescriptorSets(myContext.swapchain.command_buffer[myContext.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, *prv_ObjectList->at(i)->pipeline_layout, 0, 1, &prv_ObjectList->at(i)->descriptor_set[myContext.swapchain.image_index], 0, nullptr);
+		vkCmdBindPipeline(myContext.swapchain.command_buffer[myContext.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, myContext.pipelines.pipelines[pipeline_idx].pipeline);
+		vkCmdBindDescriptorSets(myContext.swapchain.command_buffer[myContext.swapchain.image_index], VK_PIPELINE_BIND_POINT_GRAPHICS, myContext.pipelines.pipelines[pipeline_idx].pipeline_layout, 0, 1, &prv_ObjectList->at(i)->descriptor_set[myContext.swapchain.image_index], 0, nullptr);
 		vkCmdBindVertexBuffers(myContext.swapchain.command_buffer[myContext.swapchain.image_index], 0, 1, vertex_buffer.data(), offset);
 		vkCmdBindIndexBuffer(myContext.swapchain.command_buffer[myContext.swapchain.image_index], prv_ObjectList->at(i)->mesh->index_buffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(myContext.swapchain.command_buffer[myContext.swapchain.image_index], CAST(uint32_t, prv_ObjectList->at(i)->mesh->indices.size()), 1, 0, 0, 0);
