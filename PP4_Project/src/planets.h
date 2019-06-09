@@ -13,6 +13,9 @@
 #define URANUS 8
 #define NEPTUNE 9
 #define PLUTO 10
+#define EYES 11
+#define AXE 12
+#define GRID 13
 
 #define SIZE_SPHERE			79.1f
 #define SIZE_SUN			SIZE_SPHERE / 139.2f

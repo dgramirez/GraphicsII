@@ -2,21 +2,28 @@
 #include "Camera.h"
 #include "../planets.h"
 
-void Camera::init(glm::mat4 translation, glm::mat4 rotation, bool infinite_perspective /*= true*/, float fov /*= 45.0f*/, float _near /*= 0.1*/, float _far /*= 50.0f*/)
+void Camera::init(glm::mat4 translation, bool infinite_perspective, float rotation, float fov, float _near , float _far)
 {
-	prv_View = glm::mat4(1.0f);
+	prv_View = translation * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f + rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 	prv_ViewInv = glm::inverse(prv_View);
 
-	fov = fov;
+	prv_Fov = glm::radians(fov);
 	prv_Nearplane = _near;
 	prv_Farplane = _far;
 	prv_Viewspd = 1.0f;
 	prv_InfinitePerspective = infinite_perspective;
 
 	if (prv_InfinitePerspective)
-		prv_Perspective = glm::infinitePerspective(fov, myContext.swapchain.swapchain_aspect, prv_Nearplane);
+	{
+		prv_Farplane = HUGE_VALF;
+		prv_Perspective = glm::infinitePerspective(prv_Fov, myContext.swapchain.swapchain_aspect, prv_Nearplane);
+	}
 	else
-		prv_Perspective = glm::perspective(fov, myContext.swapchain.swapchain_aspect, prv_Nearplane, prv_Farplane);
+	{
+		prv_Farplane = _far;
+		prv_Perspective = glm::perspective(prv_Fov, myContext.swapchain.swapchain_aspect, prv_Nearplane, prv_Farplane);
+	}
+
 }
 
 void Camera::set_object_list(std::vector<Object*> *object_list)
@@ -27,11 +34,42 @@ void Camera::set_object_list(std::vector<Object*> *object_list)
 void Camera::set_planet_lookup(const uint32_t &x)
 {
 	if (x > PLUTO)
-		planet_lookup = PLUTO;
+		prv_PlanetLookup = MERCURY;
 	else if (x < MERCURY)
-		planet_lookup = MERCURY;
+		prv_PlanetLookup = PLUTO;
 	else
-		planet_lookup = x;
+		prv_PlanetLookup = x;
+
+	switch (prv_PlanetLookup)
+	{
+	case MERCURY:
+		prv_PlanetName = "Mercury";
+		break;
+	case VENUS:
+		prv_PlanetName = "Venus";
+		break;
+	case EARTH:
+		prv_PlanetName = "Earth";
+		break;
+	case MARS:
+		prv_PlanetName = "Mars";
+		break;
+	case JUPITER:
+		prv_PlanetName = "Jupiter";
+		break;
+	case SATURN:
+		prv_PlanetName = "Saturn";
+		break;
+	case URANUS:
+		prv_PlanetName = "Uranus";
+		break;
+	case NEPTUNE:
+		prv_PlanetName = "Neptune";
+		break;
+	case PLUTO:
+		prv_PlanetName = "Pluto";
+		break;
+	}
 }
 
 void Camera::update(const SDL_Event &e)
@@ -43,31 +81,47 @@ void Camera::update(const SDL_Event &e)
 
 void Camera::Update_FunctionButtons(const SDL_Event &e)
 {
+	SDL_Keycode key = e.key.keysym.sym;
+
+	if (e.type == SDL_KEYUP)
+	{
+		if (key == SDLK_F1 && !f1_released)
+		{
+			prv_InfinitePerspective = !prv_InfinitePerspective;
+			prv_Nearplane = 0.1f;
+
+			if (prv_InfinitePerspective)
+			{
+				prv_Farplane = HUGE_VALF;
+				prv_Perspective = glm::infinitePerspective(prv_Fov, myContext.swapchain.swapchain_aspect, prv_Nearplane);
+			}
+			else
+			{
+				prv_Farplane = 50.0f;
+				prv_Perspective = glm::perspective(prv_Fov, myContext.swapchain.swapchain_aspect, prv_Nearplane, prv_Farplane);
+			}
+
+			f1_released = true;
+		}
+
+		if (key == SDLK_F2 && !f2_released)
+		{
+			set_planet_lookup(planet_lookup + 1);
+			f2_released = true;
+		}
+	}
+
 	if (e.type == SDL_KEYDOWN)
 	{
-		SDL_Keycode key = e.key.keysym.sym;
+		if (key == SDLK_F1 && f1_released)
+			f1_released = false;
+		if (key == SDLK_F2 && f2_released)
+			f2_released = false;
 
-		if (key == SDLK_F1)
-		{
-			prv_InfinitePerspective = true;
-			prv_Nearplane = 0.1f;
-			prv_Perspective = glm::infinitePerspective(prv_Fov, myContext.swapchain.swapchain_aspect, prv_Nearplane);
-		}
-
-		if (key == SDLK_F2)
-		{
-			prv_InfinitePerspective = false;
-			prv_Nearplane = 0.1f;
-			prv_Farplane = 100.0f;
-			prv_Perspective = glm::perspective(prv_Fov, myContext.swapchain.swapchain_aspect, prv_Nearplane, prv_Farplane);
-		}
-
-		if (e.key.keysym.sym == SDLK_KP_PLUS)
-		{
+		if (e.key.keysym.sym == SDLK_EQUALS)
 			prv_Viewspd += 0.25f;
-		}
 
-		if (e.key.keysym.sym == SDLK_KP_MINUS)
+		if (e.key.keysym.sym == SDLK_MINUS)
 		{
 			prv_Viewspd -= 0.25f;
 			if (prv_Viewspd < 0.25f)
@@ -133,11 +187,11 @@ void Camera::Update_CommandButtons(const SDL_Event &e)
 	{
 		if (InputController::findpluto)
 		{
-			Object* obj = pObjectList->at(planet_lookup);
+			Object* obj = pObjectList->at(prv_PlanetLookup);
 			glm::mat4 planet_model_matrix = obj->model_matrix;
 			glm::vec3 eye = { prv_View[3].x, prv_View[3].y, prv_View[3].z };
 			glm::vec3 center = { planet_model_matrix[3].x, planet_model_matrix[3].y, planet_model_matrix[3].z };
-			glm::vec3 up = { 0.0f, 0.0f, 1.0f };
+			glm::vec3 up = { 0.0f, -1.0f, 0.0f };
 			prv_ViewInv = glm::lookAt(eye, center, up);
 			prv_View = inverse(prv_ViewInv);
 		}
@@ -147,8 +201,8 @@ void Camera::Update_CommandButtons(const SDL_Event &e)
 		if (InputController::zCommand)
 		{
 			prv_Fov -= glm::radians(5.0f * (float)myTime.Delta());
-			if (prv_Fov < 45.0f)
-				prv_Fov = 45.0f;
+			if (prv_Fov < prv_FovMinMax.x)
+				prv_Fov = prv_FovMinMax.x;
 
 			if (prv_InfinitePerspective)
 				prv_Perspective = glm::infinitePerspective(prv_Fov, myContext.swapchain.swapchain_aspect, prv_Nearplane);
@@ -159,8 +213,8 @@ void Camera::Update_CommandButtons(const SDL_Event &e)
 		if (InputController::xCommand)
 		{
 			prv_Fov += glm::radians(5.0f * (float)myTime.Delta());
-			if (prv_Fov > 175.0f)
-				prv_Fov = 175.0f;
+			if (prv_Fov > prv_FovMinMax.y)
+				prv_Fov = prv_FovMinMax.y;
 
 			if (prv_InfinitePerspective)
 				prv_Perspective = glm::infinitePerspective(prv_Fov, myContext.swapchain.swapchain_aspect, prv_Nearplane);

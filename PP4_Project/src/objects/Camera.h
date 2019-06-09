@@ -9,7 +9,7 @@ class Camera
 {
 public:
 	Camera() = default;
-	void init(glm::mat4 translation, glm::mat4 rotation, bool infinite_perspective = true, float zoom = 45.0f, float _near = 0.1, float _far = 50.0f);
+	void init(glm::mat4 translation, bool infinite_perspective = true, float rotation = 0.0f, float zoom = 45.0f, float _near = 0.1, float _far = 50.0f);
 	void set_object_list(std::vector<Object*> *object_list);
 	void set_planet_lookup(const uint32_t &x);
 	void update(const SDL_Event &e);
@@ -38,12 +38,19 @@ public:
 	float get_viewspd() { return prv_Viewspd; }
 	__declspec(property(get = get_viewspd)) float viewspd;
 
+	uint32_t get_planet_lookup() { return prv_PlanetLookup; }
+	__declspec(property(get = get_planet_lookup, put = set_planet_lookup)) uint32_t planet_lookup;
+
+	const char* get_planet_name() { return prv_PlanetName; }
+	__declspec(property(get = get_planet_name)) const char* planet_name;
+
 private:
 	glm::mat4 prv_View;
 	glm::mat4 prv_ViewInv;
 	glm::mat4 prv_Perspective;
 	std::vector<Object*> *pObjectList;
-	uint32_t planet_lookup;
+	uint32_t prv_PlanetLookup;
+	const char* prv_PlanetName;
 
 	void Update_FunctionButtons(const SDL_Event &e);
 	void Update_CommandButtons(const SDL_Event &e);
@@ -51,9 +58,12 @@ private:
 
 	bool  prv_InfinitePerspective;
 	float prv_Fov;
+	const glm::vec2 prv_FovMinMax = { glm::radians(45.0f) , glm::radians(75.0f) };
 	float prv_Nearplane;
 	float prv_Farplane;
 	float prv_Viewspd;
+	bool f1_released = false;
+	bool f2_released = false;
 };
 
 #endif

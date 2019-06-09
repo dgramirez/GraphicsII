@@ -81,6 +81,7 @@ bool VkObj_DeviceProperties::CreateLogicalDevice()
 	//Setup device features (Any Additional Features SHOULD BE CHECKED in DeviceCompatibility Function)
 	VkPhysicalDeviceFeatures device_features = {};
 	device_features.samplerAnisotropy = true;
+	device_features.sampleRateShading = VK_TRUE;
 
 	//Setup Logical device create info
 	VkDeviceCreateInfo create_info = {};

@@ -86,10 +86,8 @@ struct Uniform_Object
 	glm::mat4 view;
 	glm::mat4 projection;
 	glm::mat4 model_transposed_inversed;
-
-	glm::vec3 light_color = glm::vec3(1.0f, 1.0f, 1.0f);
-	glm::vec3 sun_pos = glm::vec3(0.0f, 0.0f, 0.0f);
-	float ambient_strength = 1.0f;
+	glm::vec4 light_color = glm::vec4(1.0f, 1.0f, 1.0f, 0.25f); //xyz = color, w = ambient strength
+	glm::vec4 sun_pos = glm::vec4(0.0f, 0.0f, 0.0f, 0.75f); //xyz = position, w = specular strength
 };
 
 struct Color

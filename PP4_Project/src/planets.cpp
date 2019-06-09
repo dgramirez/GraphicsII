@@ -56,14 +56,6 @@ Object* create_eyes()
 }
 Object* create_grid()
 {
-	std::vector<Vertex> pyramid_vertex = {
-	{ { 0.0f, -0.5f,  0.0f }, V_COLOR_RED	, {0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Top point
-	{ { 0.5f,  0.5f,  0.5f }, V_COLOR_GREEN , {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 1
-	{ {-0.5f,  0.5f,  0.5f }, V_COLOR_BLUE  , {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 2
-	{ { 0.5f,  0.5f, -0.5f }, V_COLOR_CYAN  , {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },	//Bottom Vertex 3
-	{ {-0.5f,  0.5f, -0.5f }, V_COLOR_YELLOW, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} }	//Bottom Vertex 4;
-	};
-
 	std::vector<Vertex> grid_vertices;
 	std::vector<uint32_t> grid_indices;
 	uint32_t index = 0;
@@ -267,8 +259,7 @@ void PlanetaryRotation(float aspect_ratio, Uniform_Object &mvp, Object &obj, Cam
 	mvp.view = camera.view_inverse;
 	mvp.projection = camera.perspective;
 	mvp.projection[1][1] = -mvp.projection[1][1];
-	mvp.light_color = glm::vec3(1.0f, 1.0f, 0.0f);
-	mvp.ambient_strength = 0.25f;
+	mvp.light_color = glm::vec4(1.0f, 1.0f, 1.0f, 0.25f);
 }
 
 void skybox_uniform(const VkObj_Context &context, Object &obj, Camera &camera)
