@@ -12,6 +12,8 @@ void VkObj_RenderPipeline::create_pipeline(const char *vertex_shader, const char
 	VkStruct_Pipeline new_pipeline;
 	new_pipeline.vertex_shader_name = vertex_shader;
 	new_pipeline.fragment_shader_name = fragment_shader;
+	new_pipeline.depth_enabled = enable_depth;
+	new_pipeline.culling_enabled = enable_culling;
 	CreateDescriptorPool(new_pipeline.descriptor_pool);
 	CreateDescriptorSetLayout(new_pipeline.descriptor_set_layout);
 	CreateGraphicsPipeline(vertex_shader, fragment_shader, new_pipeline.descriptor_set_layout, new_pipeline.pipeline_layout, new_pipeline.pipeline, enable_depth, enable_culling);
