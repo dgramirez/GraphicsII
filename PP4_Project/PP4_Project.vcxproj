@@ -300,6 +300,7 @@
     <ClInclude Include="src\texture_h\axeTexture.h" />
     <ClInclude Include="src\texture_h\celestial.h" />
     <ClInclude Include="src\texture_h\eyeball.h" />
+    <ClInclude Include="src\texture_h\fighter.h" />
     <ClInclude Include="src\VulkanObj\VkObj_Context.h" />
     <ClInclude Include="src\VulkanObj\VkObj_RenderPipeline.h" />
     <ClInclude Include="src\VulkanObj\VkObj_WindowSetup.h" />

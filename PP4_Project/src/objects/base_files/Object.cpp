@@ -14,19 +14,25 @@ Object::Object(const std::vector<Vertex>& vertices, const std::vector<uint32_t> 
 	prv_Scale = 1.0f;
 }
 
-Object::Object(const char* fbx_filename, const char *texture_folderlocation, float _scale /*= 1.0f*/)
+Object::Object(const char* fbx_filename, const char *texture_folderlocation, float _scale, Texture* _t)
 {
 	prv_Scale = _scale;
 	pMesh = new Mesh(fbx_filename, _scale);
-	char texture_filepath[255];
-	strcpy(texture_filepath, texture_folderlocation);
-	strcat(texture_filepath, pMesh->texture_filename);
 
-	uint32_t len = (uint32_t)strlen(texture_filepath);
-	char *fp = new char[len + 1];
-	strcpy_s(fp, len + 1, texture_filepath);
-	pTexture = new Texture(fp);
-	delete[] fp;
+	if (!_t)
+	{
+		char texture_filepath[255];
+		strcpy(texture_filepath, texture_folderlocation);
+		strcat(texture_filepath, pMesh->texture_filename);
+
+		uint32_t len = (uint32_t)strlen(texture_filepath);
+		char *fp = new char[len + 1];
+		strcpy_s(fp, len + 1, texture_filepath);
+		pTexture = new Texture(fp);
+		delete[] fp;
+	}
+	else
+		pTexture = _t;
 }
 
 Object::Object(const OBJ_VERT* object_vertices, const unsigned int &vertices_size, const unsigned int* object_indices, const unsigned int & indices_size, Texture* _t)

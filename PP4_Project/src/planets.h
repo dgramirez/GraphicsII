@@ -16,6 +16,7 @@
 #define EYES 11
 #define AXE 12
 #define GRID 13
+#define PYRAMID 14
 
 #define SIZE_SPHERE			79.1f
 #define SIZE_SUN			SIZE_SPHERE / 139.2f
@@ -52,8 +53,8 @@ struct Uniform_Object;
 
 #pragma region non-planets
 Object* create_pyramid();
-Object* create_axe();
-Object* create_eyes();
+Object* create_normal_ship();
+Object* create_fighter_ship();
 Object* create_grid();
 #pragma endregion
 

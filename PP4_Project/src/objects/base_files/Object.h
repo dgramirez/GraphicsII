@@ -18,7 +18,7 @@ class Object
 public:
 	Object() = default;
 	Object(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices, Texture* _t = nullptr);
-	Object(const char* fbx_filename, const char *texture_folderlocation, float _scale = 1.0f);
+	Object(const char* fbx_filename, const char *texture_folderlocation = nullptr, float _scale = 1.0f, Texture* _t = nullptr);
 	Object(const OBJ_VERT* object_vertices, const unsigned int &vertices_size, const unsigned int* object_indices, const unsigned int & indices_size, Texture* _t = nullptr);
 	~Object();
 

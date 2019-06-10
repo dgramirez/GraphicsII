@@ -13,9 +13,9 @@ int main(int argc, char* args[])
 
 	Window* myWindow = new Window(800, 600, "My New Window");
 
-//	Object *pyramid = create_pyramid();
-	Object *eyes = create_eyes();
-	Object *axe = create_axe();
+	Object *pyramid = create_pyramid();
+	Object *eyes = create_fighter_ship();
+	Object *axe = create_normal_ship();
 	Object *grid = create_grid();
 //	Object terrain = create_terrain();
 	Object *Skybox = new Object(".\\assets\\solarsystem\\SpaceSkybox.fbx", ".\\assets\\solarsystem\\texture\\", 0.1f);
@@ -67,6 +67,7 @@ int main(int argc, char* args[])
 	Object_List->push_back(eyes);
 	Object_List->push_back(axe);
 	Object_List->push_back(grid);
+	Object_List->push_back(pyramid);
 
 	myWindow->setup_object_list(Object_List);
 

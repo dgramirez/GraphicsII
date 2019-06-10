@@ -2,7 +2,7 @@
 #include "objects/Camera.h"
 #include "texture_h/celestial.h"
 #include "texture_h/axeTexture.h"
-#include "texture_h/eyeball.h"
+#include "texture_h/fighter.h"
 
 Object* create_pyramid()
 {
@@ -29,30 +29,30 @@ Object* create_pyramid()
 
 	pyramid->texture->swizzle(VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_R);
 
-	pyramid->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	pyramid->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, -1.0f, 0.0f));
 	pyramid->uniform_function = PyramidRotation;
 
 	return pyramid;
 }
-Object* create_axe()
+Object* create_normal_ship()
 {
-	Object *axe = new Object("Axe.fbx", "", 10.0f);
-	axe->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, -1.0f));
-	axe->uniform_function = AxeRotation;
-	return axe;
+	Object *Ship = new Object("assets\\Trident-A10.FBX", ".\\assets\\misc\\", 500.0f);
+	Ship->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-3.0f, -2.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	Ship->uniform_function = AxeRotation;
+	return Ship;
 }
-Object* create_eyes()
+Object* create_fighter_ship()
 {
-	Texture* myEyeTexture = new Texture("assets\\misc\\Eye_D.jpg");
+	Texture* myFighterTexture = new Texture("assets\\misc\\fighter_texture.jpg");
 
-	uint32_t verts = sizeof(eyeball_data) / sizeof(_OBJ_VERT_);
-	uint32_t inds = sizeof(eyeball_indicies) / sizeof(unsigned int);
+	uint32_t verts = sizeof(fighter_data) / sizeof(_OBJ_VERT_);
+	uint32_t inds = sizeof(fighter_indicies) / sizeof(unsigned int);
 
-	Object *myEyes = new Object(eyeball_data, verts, eyeball_indicies, inds, myEyeTexture);
-	myEyes->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-5.0f, 0.0f, -3.0f));
-	myEyes->uniform_function = PyramidRotation;
+	Object *myFighter = new Object(fighter_data, verts, fighter_indicies, inds, myFighterTexture);
+	myFighter->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(165.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	myFighter->uniform_function = AxeRotation;
 
-	return myEyes;
+	return myFighter;
 }
 Object* create_grid()
 {
@@ -112,11 +112,12 @@ void AxeRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 
 	mvp.model = obj.model_matrix;
 	mvp.view = camera.view_inverse;
-	//	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 20.0f);
 	mvp.projection = camera.perspective;
 	mvp.projection[1][1] = -mvp.projection[1][1];
 
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
+
+	obj.model_matrix = mvp.model;
 }
 void PyramidRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
@@ -124,9 +125,10 @@ void PyramidRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 
 	mvp.model = obj.model_matrix * glm::rotate(glm::mat4(1.0f), (float)myTime.Delta() * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	mvp.view = camera.view_inverse;
-	//	mvp.projection = glm::perspective(glm::radians(45.0f), swapchain_extent.width / (float)swapchain_extent.height, 0.1f, 20.0f);
 	mvp.projection = camera.perspective;
 	mvp.projection[1][1] = -mvp.projection[1][1];
+
+	obj.model_matrix = mvp.model;
 
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 }

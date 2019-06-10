@@ -481,6 +481,9 @@ void Mesh::GetTextureFilename(FbxNode* child_node, const char* return_value)
 						if (str[length] == '\\')
 							break;
 
+						if (str[length] == '\0' && i != 0)
+							break;
+
 						filename[i++] = str[length];
 					}
 					//  					filename[1] = 's';
