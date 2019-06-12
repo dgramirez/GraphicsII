@@ -15,12 +15,13 @@ bool VulkanObj::init(const char* title, SDL_Window* window, unsigned short win_w
 	prv_ObjectList->at(SUN)->init(sizeof(Uniform_MVP), PIPELINE_TEXTURE);
 
 	for (uint32_t i = MERCURY; i <= PLUTO; ++i)
-		prv_ObjectList->at(i)->init(sizeof(Uniform_Object), PIPELINE_PHONG);
+		prv_ObjectList->at(i)->init(sizeof(Uniform_Planets), PIPELINE_PLANETS);
 
-	prv_ObjectList->at(EYES)->init(sizeof(Uniform_MVP), PIPELINE_TEXTURE);
-	prv_ObjectList->at(AXE)->init(sizeof(Uniform_MVP), PIPELINE_TEXTURE);
+	prv_ObjectList->at(HFILE_SHIP)->init(sizeof(UBO_Ships), PIPELINE_PHONG);
+	prv_ObjectList->at(MODEL_SHIP)->init(sizeof(UBO_Ships), PIPELINE_PHONG);
 	prv_ObjectList->at(GRID)->init(sizeof(Uniform_MVP), PIPELINE_GRID);
 	prv_ObjectList->at(PYRAMID)->init(sizeof(Uniform_MVP), PIPELINE_GRID);
+	prv_ObjectList->at(SQUARE)->init(sizeof(UBO_Ships), PIPELINE_PHONG);
 
 	//Create Semaphores
 #if TRANSITION
@@ -117,7 +118,8 @@ void VulkanObj::update_window_title()
 {
 	char buffer[255];
 	ZeroMemory(buffer, 255);
-	sprintf_s(buffer, sizeof(buffer), "Fov: %f | Near: %f | Far: %f | MovSpd: %f | Planet: %s", camera.fov, camera.nearplane, camera.farplane, camera.viewspd, camera.planet_name);
+	sprintf_s(buffer, sizeof(buffer), "Fov: %f | Near: %f | Far: %f | MovSpd: %f | Planet: %s | Attenuation: %f | x: %f | y: %f | z: %f", 
+										camera.fov, camera.nearplane, camera.farplane, camera.viewspd, camera.planet_name, camera.attenuation, camera.view[3].x, camera.view[3].y, camera.view[3].z);
 
 	uint32_t length = (uint32_t)strlen(buffer);
 	char* title = new char[length + 1];

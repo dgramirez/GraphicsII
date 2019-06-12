@@ -7,9 +7,10 @@
 #include <vector>
 
 #define PIPELINE_TEXTURE 0
-#define PIPELINE_PHONG 1
+#define PIPELINE_PLANETS 1
 #define PIPELINE_GRID 2
 #define PIPELINE_SKYBOX 3
+#define PIPELINE_PHONG 4
 
 class VkObj_RenderPipeline
 {

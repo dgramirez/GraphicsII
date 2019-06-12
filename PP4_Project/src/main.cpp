@@ -11,13 +11,13 @@ int main(int argc, char* args[])
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 //	_CrtSetBreakAlloc(209);
 
-	Window* myWindow = new Window(800, 600, "My New Window");
+	Window* myWindow = new Window(1280, 720, "My New Window");
 
 	Object *pyramid = create_pyramid();
-	Object *eyes = create_fighter_ship();
-	Object *axe = create_normal_ship();
+	Object *fighter_ship = create_fighter_ship();
+	Object *normal_ship = create_normal_ship();
 	Object *grid = create_grid();
-//	Object terrain = create_terrain();
+	Object *square = create_square();
 	Object *Skybox = new Object(".\\assets\\solarsystem\\SpaceSkybox.fbx", ".\\assets\\solarsystem\\texture\\", 0.1f);
 	Skybox->uniform_function = skybox_uniform;
 
@@ -64,10 +64,11 @@ int main(int argc, char* args[])
 	Object_List->at(PLUTO)->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(DISTANCE_PLUTO, 0.0f, 0.0f));
 	Object_List->at(PLUTO)->uniform_function = PlutoRotation;
 
-	Object_List->push_back(eyes);
-	Object_List->push_back(axe);
+	Object_List->push_back(fighter_ship);
+	Object_List->push_back(normal_ship);
 	Object_List->push_back(grid);
 	Object_List->push_back(pyramid);
+	Object_List->push_back(square);
 
 	myWindow->setup_object_list(Object_List);
 

@@ -66,9 +66,10 @@ bool VkObj_Context::init(SDL_Window *win)
 	//Create the pipelines
 	pipelines.init(device, swapchain);
 	pipelines.create_pipeline("shaders/Spir-V/vertBasic.spv", "shaders/Spir-V/fragBasic.spv");					//PIPELINE_TEXTURE
-	pipelines.create_pipeline("shaders/Spir-V/vertBasicTexture.spv", "shaders/Spir-V/fragBasicTexture.spv");	//PIPELINE_PHONG
+	pipelines.create_pipeline("shaders/Spir-V/vertBasicTexture.spv", "shaders/Spir-V/fragBasicTexture.spv");	//PIPELINE_PLANETS
 	pipelines.create_pipeline("shaders/Spir-V/vertBasic.spv", "shaders/Spir-V/fragBasic.spv", true, false);		//PIPELINE_GRID
 	pipelines.create_pipeline("shaders/Spir-V/vertBasic.spv", "shaders/Spir-V/fragBasic.spv", false);			//PIPELINE_SKYBOX
+	pipelines.create_pipeline("shaders/Spir-V/vertShips.spv", "shaders/Spir-V/fragShips.spv");					//PIPELINE_PHONG
 
 	return true;
 }

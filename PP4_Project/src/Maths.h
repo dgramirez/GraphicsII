@@ -80,14 +80,23 @@ struct Uniform_MVP
 	glm::mat4 projection;
 };
 
-struct Uniform_Object
+struct Uniform_Planets
 {
-	glm::mat4 model;
-	glm::mat4 view;
-	glm::mat4 projection;
-	glm::mat4 model_transposed_inversed;
+	Uniform_MVP mvp;
+	glm::mat4 TI_model;
 	glm::vec4 light_color = glm::vec4(1.0f, 1.0f, 1.0f, 0.25f); //xyz = color, w = ambient strength
 	glm::vec4 sun_pos = glm::vec4(0.0f, 0.0f, 0.0f, 0.75f); //xyz = position, w = specular strength
+};
+
+struct UBO_Ships
+{						
+	Uniform_MVP mvp;
+	glm::mat4 TI_modelview;
+	glm::vec4 light1_pos = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);		//xyz = position1
+	glm::vec4 light1_color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);		//xyz = color1
+	glm::vec4 light2_pos = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);		//xyz = position2
+	glm::vec4 light2_color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);		//xyz = color2
+	glm::vec4 strengths = glm::vec4(0.25f, 0.75f, 0.1f, 1.0f);		//x=ambient, y=diffuse, z=attenuation
 };
 
 struct Color

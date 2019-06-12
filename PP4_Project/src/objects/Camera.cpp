@@ -12,6 +12,7 @@ void Camera::init(glm::mat4 translation, bool infinite_perspective, float rotati
 	prv_Farplane = _far;
 	prv_Viewspd = 1.0f;
 	prv_InfinitePerspective = infinite_perspective;
+	prv_Attenuation = 0.01f;
 
 	if (prv_InfinitePerspective)
 	{
@@ -144,6 +145,15 @@ void Camera::Update_FunctionButtons(const SDL_Event &e)
 				prv_Viewspd = 0.25f;
 		}
 
+		if (e.key.keysym.sym == SDLK_KP_PLUS)
+			prv_Attenuation += 0.01f;
+
+		if (e.key.keysym.sym == SDLK_KP_MINUS)
+		{
+			prv_Attenuation -= 0.01f;
+			if (prv_Attenuation < 0.01f)
+				prv_Attenuation = 0.01f;
+		}
 	}
 }
 

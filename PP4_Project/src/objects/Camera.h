@@ -38,6 +38,9 @@ public:
 	float get_viewspd() { return prv_Viewspd; }
 	__declspec(property(get = get_viewspd)) float viewspd;
 
+	float get_attenuation() { return prv_Attenuation; }
+	__declspec(property(get = get_attenuation)) float attenuation;
+
 	uint32_t get_planet_lookup() { return prv_PlanetLookup; }
 	__declspec(property(get = get_planet_lookup, put = set_planet_lookup)) uint32_t planet_lookup;
 
@@ -64,6 +67,7 @@ private:
 	float prv_Nearplane;
 	float prv_Farplane;
 	float prv_Viewspd;
+	float prv_Attenuation;
 	bool f1_released = false;
 	bool f2_released = false;
 	bool t_released = false;
