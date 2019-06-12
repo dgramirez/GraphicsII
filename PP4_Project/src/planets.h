@@ -18,6 +18,7 @@
 #define GRID 13
 #define PYRAMID 14
 #define SQUARE 15
+#define FLAG 16
 
 #define SIZE_SPHERE			79.1f
 #define SIZE_SUN			SIZE_SPHERE / 139.2f
@@ -56,8 +57,9 @@ struct Uniform_Planets;
 Object* create_pyramid();
 Object* create_normal_ship();
 Object* create_fighter_ship();
-Object* create_square();
+Object* create_square(const char* texture, float x1, float x2, float y1, float y2);
 Object* create_grid();
+Object* create_flag();
 #pragma endregion
 
 
@@ -81,6 +83,7 @@ void NeptuneRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void PlutoRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void EarthMoonRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void skybox_uniform(const VkObj_Context &context, Object &obj, Camera &camera);
+void flag_uniform(const VkObj_Context &context, Object &obj, Camera &camera);
 //void write_to_buffer(const VkDevice &device, const uint32_t &current_image, std::vector<VkDeviceMemory> &uniform_memory, const Uniform_Planets &ubo);
 //void write_to_buffer(const VkDevice &device, const uint32_t &current_image, std::vector<VkDeviceMemory> &uniform_memory, const Uniform_MVP &mvp);
 

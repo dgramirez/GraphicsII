@@ -70,6 +70,7 @@ bool VkObj_Context::init(SDL_Window *win)
 	pipelines.create_pipeline("shaders/Spir-V/vertBasic.spv", "shaders/Spir-V/fragBasic.spv", true, false);		//PIPELINE_GRID
 	pipelines.create_pipeline("shaders/Spir-V/vertBasic.spv", "shaders/Spir-V/fragBasic.spv", false);			//PIPELINE_SKYBOX
 	pipelines.create_pipeline("shaders/Spir-V/vertShips.spv", "shaders/Spir-V/fragShips.spv");					//PIPELINE_PHONG
+	pipelines.create_pipeline("shaders/Spir-V/vertFlag.spv", "shaders/Spir-V/fragFlag.spv", true, false);		//PIPELINE_FLAG
 
 	return true;
 }

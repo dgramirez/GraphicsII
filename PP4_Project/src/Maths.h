@@ -99,6 +99,12 @@ struct UBO_Ships
 	glm::vec4 strengths = glm::vec4(0.25f, 0.75f, 0.1f, 1.0f);		//x=ambient, y=diffuse, z=attenuation
 };
 
+struct UBO_Flag
+{
+	Uniform_MVP mvp;
+	glm::vec4 info = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+};
+
 struct Color
 {
 	union

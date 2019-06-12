@@ -6,6 +6,7 @@
 #include "texture_h/fighter.h"
 
 glm::vec4 myLightPos = glm::vec4(4.0f, 0.0f, 0.0f, 1.0f);
+float myT = 0.0f;
 
 Object* create_pyramid()
 {
@@ -101,14 +102,14 @@ Object* create_grid()
 
 	return Grid;
 }
-Object* create_square()
+Object* create_square(const char* texture, float x1, float x2, float y1, float y2)
 {
 	std::vector<Vertex> square_vertices =
 	{
-		{ { -GRID_LENGTH, 0.0f,  GRID_LENGTH }, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },
-		{ {  GRID_LENGTH, 0.0f,  GRID_LENGTH }, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },
-		{ { -GRID_LENGTH, 0.0f, -GRID_LENGTH }, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },
-		{ {  GRID_LENGTH, 0.0f, -GRID_LENGTH }, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} }
+		{ { x1, 0.0f, y1 }, V_COLOR_WHITE , {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },
+		{ { x1, 0.0f, y2 }, V_COLOR_WHITE , {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },
+		{ { x2, 0.0f, y1 }, V_COLOR_WHITE , {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} },
+		{ { x2, 0.0f, y2 }, V_COLOR_WHITE , {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f} }
 	};
 
 	std::vector<uint32_t> square_indices = 
@@ -117,7 +118,7 @@ Object* create_square()
 		1, 3, 2
 	};
 
-	Texture *square_texture = new Texture(".\\assets\\misc\\white_pixel.png");
+	Texture *square_texture = new Texture(texture);
 	Object *Square = new Object(square_vertices, square_indices, square_texture);
 
 	Square->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -131,6 +132,13 @@ Object* create_sphere(const char* fbxfilepath, const char* texturelocation, Text
 	mySphere->model_matrix = model_matrix;
 
 	return mySphere;
+}
+Object* create_flag()
+{
+	Object *Flag = new Object("assets\\Flag.fbx", ".\\assets\\misc\\", 1.0f);
+	Flag->model_matrix = glm::mat4(1.0f);
+	Flag->uniform_function = flag_uniform;
+	return Flag;
 }
 
 void UniformMVP_Basic(const VkObj_Context &context, Object &obj, Camera &camera)
@@ -328,4 +336,19 @@ void skybox_uniform(const VkObj_Context &context, Object &obj, Camera &camera)
 	mvp.projection[1][1] = -mvp.projection[1][1];
 
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
+}
+
+void flag_uniform(const VkObj_Context &context, Object &obj, Camera &camera)
+{
+	myT += myTime.SmoothDelta() * 3.0f;
+	UBO_Flag ubo;
+
+	ubo.mvp.model = obj.model_matrix;
+	ubo.mvp.view = camera.view_inverse;
+	ubo.mvp.projection = camera.perspective;
+	ubo.mvp.projection[1][1] = -ubo.mvp.projection[1][1];
+	ubo.info = glm::vec4(myT, 0.0f, 0.0f, 0.0f);
+	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, ubo);
+
+	obj.model_matrix = ubo.mvp.model;
 }

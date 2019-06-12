@@ -17,7 +17,10 @@ int main(int argc, char* args[])
 	Object *fighter_ship = create_fighter_ship();
 	Object *normal_ship = create_normal_ship();
 	Object *grid = create_grid();
-	Object *square = create_square();
+	Object *square = create_square(".\\assets\\misc\\white_pixel.png", -GRID_LENGTH, GRID_LENGTH, -GRID_LENGTH, GRID_LENGTH);
+	Object *flag = create_flag();
+	flag->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -7.0f, -10.0f)) ;
+	flag->uniform_function = flag_uniform;
 	Object *Skybox = new Object(".\\assets\\solarsystem\\SpaceSkybox.fbx", ".\\assets\\solarsystem\\texture\\", 0.1f);
 	Skybox->uniform_function = skybox_uniform;
 
@@ -69,6 +72,7 @@ int main(int argc, char* args[])
 	Object_List->push_back(grid);
 	Object_List->push_back(pyramid);
 	Object_List->push_back(square);
+	Object_List->push_back(flag);
 
 	myWindow->setup_object_list(Object_List);
 

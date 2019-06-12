@@ -22,6 +22,7 @@ bool VulkanObj::init(const char* title, SDL_Window* window, unsigned short win_w
 	prv_ObjectList->at(GRID)->init(sizeof(Uniform_MVP), PIPELINE_GRID);
 	prv_ObjectList->at(PYRAMID)->init(sizeof(Uniform_MVP), PIPELINE_GRID);
 	prv_ObjectList->at(SQUARE)->init(sizeof(UBO_Ships), PIPELINE_PHONG);
+	prv_ObjectList->at(FLAG)->init(sizeof(UBO_Ships), PIPELINE_FLAG);
 
 	//Create Semaphores
 #if TRANSITION

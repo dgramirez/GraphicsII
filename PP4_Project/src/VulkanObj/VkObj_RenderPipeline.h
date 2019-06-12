@@ -11,6 +11,7 @@
 #define PIPELINE_GRID 2
 #define PIPELINE_SKYBOX 3
 #define PIPELINE_PHONG 4
+#define PIPELINE_FLAG 5
 
 class VkObj_RenderPipeline
 {
