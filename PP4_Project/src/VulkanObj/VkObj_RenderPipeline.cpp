@@ -8,16 +8,17 @@ void VkObj_RenderPipeline::init(VkObj_DeviceProperties &device, VkObj_Swapchain 
 	pSwapchain = &swapchain;
 }
 
-void VkObj_RenderPipeline::create_pipeline(const char *vertex_shader, const char *fragment_shader, bool enable_depth, bool enable_culling)
+void VkObj_RenderPipeline::create_pipeline(const char *vertex_shader, const char *fragment_shader, bool enable_depth, VkCompareOp depth_op, bool enable_culling)
 {
 	VkStruct_Pipeline new_pipeline;
 	new_pipeline.vertex_shader_name = vertex_shader;
 	new_pipeline.fragment_shader_name = fragment_shader;
 	new_pipeline.depth_enabled = enable_depth;
 	new_pipeline.culling_enabled = enable_culling;
+	new_pipeline.depth_op = depth_op;
 	CreateDescriptorPool(new_pipeline.descriptor_pool);
 	CreateDescriptorSetLayout(new_pipeline.descriptor_set_layout);
-	CreateGraphicsPipeline(vertex_shader, fragment_shader, new_pipeline.descriptor_set_layout, new_pipeline.pipeline_layout, new_pipeline.pipeline, enable_depth, enable_culling);
+	CreateGraphicsPipeline(vertex_shader, fragment_shader, new_pipeline.descriptor_set_layout, new_pipeline.pipeline_layout, new_pipeline.pipeline, enable_depth, depth_op, enable_culling);
 	pipelines.push_back(new_pipeline);
 }
 
@@ -50,7 +51,7 @@ void VkObj_RenderPipeline::reset_pipeline()
 		CreateGraphicsPipeline(
 			pipelines[i].vertex_shader_name, pipelines[i].fragment_shader_name, 
 			pipelines[i].descriptor_set_layout, pipelines[i].pipeline_layout, pipelines[i].pipeline, 
-			pipelines[i].depth_enabled, pipelines[i].culling_enabled
+			pipelines[i].depth_enabled, pipelines[i].depth_op, pipelines[i].culling_enabled
 		);
 	}
 
@@ -98,7 +99,7 @@ void VkObj_RenderPipeline::CreateDescriptorSetLayout(VkDescriptorSetLayout &desc
 	vkCreateDescriptorSetLayout(pDevice->logical, &create_info, nullptr, &descriptor_set_layout);
 }
 
-void VkObj_RenderPipeline::CreateGraphicsPipeline(const char *vertex_shader, const char *fragment_shader, VkDescriptorSetLayout &descriptor_set_layout, VkPipelineLayout &pipeline_layout, VkPipeline &pipeline, bool enable_depth, bool enable_culling)
+void VkObj_RenderPipeline::CreateGraphicsPipeline(const char *vertex_shader, const char *fragment_shader, VkDescriptorSetLayout &descriptor_set_layout, VkPipelineLayout &pipeline_layout, VkPipeline &pipeline, bool enable_depth, VkCompareOp depth_op, bool enable_culling)
 {
 #pragma region Check and copy shader files
 
@@ -216,7 +217,7 @@ void VkObj_RenderPipeline::CreateGraphicsPipeline(const char *vertex_shader, con
 	{
 		depth_stencil_create_info.depthTestEnable = true;
 		depth_stencil_create_info.depthWriteEnable = true;
-		depth_stencil_create_info.depthCompareOp = VK_COMPARE_OP_LESS;
+		depth_stencil_create_info.depthCompareOp = depth_op;
 		depth_stencil_create_info.depthBoundsTestEnable = false;
 		depth_stencil_create_info.minDepthBounds = 0.0f;
 		depth_stencil_create_info.maxDepthBounds = 1.0f;

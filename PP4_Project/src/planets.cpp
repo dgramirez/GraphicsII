@@ -133,6 +133,13 @@ Object* create_sphere(const char* fbxfilepath, const char* texturelocation, Text
 
 	return mySphere;
 }
+Object* create_ball()
+{
+	Object *Ship = new Object("assets\\Circle.fbx", ".\\assets\\misc\\", 1.0f);
+	Ship->model_matrix = glm::mat4(1.0f);
+	Ship->uniform_function = BallMVP_Basic;
+	return Ship;
+}
 Object* create_flag()
 {
 	Object *Flag = new Object("assets\\Flag.fbx", ".\\assets\\misc\\", 1.0f);
@@ -148,6 +155,18 @@ void UniformMVP_Basic(const VkObj_Context &context, Object &obj, Camera &camera)
 	mvp.model = obj.model_matrix;
 	mvp.view = camera.view_inverse;
 	mvp.projection = camera.perspective;
+	mvp.projection[1][1] = -mvp.projection[1][1];
+	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
+
+	obj.model_matrix = mvp.model;
+}
+void BallMVP_Basic(const VkObj_Context &context, Object &obj, Camera &camera)
+{
+	Uniform_MVP mvp;
+
+	mvp.model = obj.model_matrix;
+	mvp.view = camera.view_inverse;
+	mvp.projection = glm::mat4(1.0f);
 	mvp.projection[1][1] = -mvp.projection[1][1];
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
 
@@ -340,7 +359,7 @@ void skybox_uniform(const VkObj_Context &context, Object &obj, Camera &camera)
 
 void flag_uniform(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	myT += myTime.SmoothDelta() * 3.0f;
+	myT += (float)myTime.SmoothDelta() * 3.0f;
 	UBO_Flag ubo;
 
 	ubo.mvp.model = obj.model_matrix;

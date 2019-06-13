@@ -5,11 +5,25 @@
 #define RAND_NORMAL glm::vec3(rand()/float(RAND_MAX),rand()/float(RAND_MAX),rand()/float(RAND_MAX))
 
 Texture::Texture(const int32_t &width, const int32_t &height, void *pixels, const uint32_t &mip_levels, const uint32_t &texture_type)
-	: prv_Width(width), prv_Height(height), prv_Data(pixels), prv_MipLevels(mip_levels), prv_TextureType(texture_type), prv_Image(nullptr), prv_Sampler(nullptr) { }
+	: prv_Width(width), prv_Height(height), prv_MipLevels(mip_levels), prv_TextureType(texture_type), prv_Image(nullptr), prv_Sampler(nullptr)
+{
+	const uint32_t *color_data = (unsigned int *)pixels;
+	prv_Color.resize(width * height);
+	for (uint32_t i = 0; i < prv_Color.size(); ++i)
+		prv_Color[i] = color_data[i];
+}
 
 Texture::Texture(const char* filename)
 {
-	prv_Data = stbi_load(filename, &prv_Width, &prv_Height, nullptr, 4);
+	void *stbi_data = stbi_load(filename, &prv_Width, &prv_Height, nullptr, 4);
+	uint32_t *color_data = (uint32_t *)stbi_data;
+	prv_Color.resize(prv_Width * prv_Height);
+	for (uint32_t i = 0; i < prv_Color.size(); ++i)
+	{
+		prv_Color[i] = color_data[i];
+	}
+	stbi_image_free(stbi_data);
+
 	prv_MipLevels = (int32_t)std::log2(min(prv_Width, prv_Height)) + 1;
 	prv_TextureType = TEXTURE_TYPE_STBI;
 	prv_Sampler = nullptr;
@@ -40,18 +54,6 @@ void Texture::set_sampler(const VkSamplerCreateInfo &sampler_create_info)
 
 void Texture::cleanup()
 {
-	if (prv_Data) {
-		switch (prv_TextureType) {
-		case TEXTURE_TYPE_STBI:
-			stbi_image_free(prv_Data);
-			break;
-		case TEXTURE_TYPE_HEAP:
-			delete[] prv_Data;
-			break;
-		}
-		prv_Data = nullptr;
-	}
-
 	if (prv_Sampler)
 	{
 		vkDestroySampler(myContext.device.logical, prv_Sampler, nullptr);	  
@@ -78,7 +80,7 @@ void Texture::cleanup()
 void Texture::CreateImage()
 {
 	//Get the image size for the texture
-	VkDeviceSize image_size = prv_Width * prv_Height * sizeof(unsigned int);
+	VkDeviceSize image_size = prv_Color.size() * sizeof(uint32_t);
 
 	//Get the staging bugger and memory needed to allocate
 	VkBuffer staging_buffer;
@@ -91,7 +93,7 @@ void Texture::CreateImage()
 	//Allocate the data into the buffer
 	void* allocate_data = nullptr;
 	vkMapMemory(myContext.device.logical, staging_buffer_memory, 0, image_size, 0, &allocate_data);
-	memcpy(allocate_data, prv_Data, (unsigned int)image_size);
+	memcpy(allocate_data, prv_Color.data(), (unsigned int)image_size);
 	vkUnmapMemory(myContext.device.logical, staging_buffer_memory);
 
 	VkExtent3D extent = { (uint32_t)prv_Width, (uint32_t)prv_Height, 1 };

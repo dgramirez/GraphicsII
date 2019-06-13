@@ -126,12 +126,56 @@ void Mesh::SetupTangent()
 	uint32_t indices_size = CAST(uint32_t,prv_Indices.size());
 	for (uint32_t i = 0; i < indices_size; i += 3)
 	{
+		//Store vertex position
 		glm::vec3 vert0 = prv_Vertices[i].position;
 		glm::vec3 vert1 = prv_Vertices[i + 1].position;
 		glm::vec3 vert2 = prv_Vertices[i + 2].position;
 
-		glm::vec3 edge0 = vert1 - vert0;
-		glm::vec3 edge1 = vert2 - vert0;
+		//Create 2 Edges with Vertices
+		glm::vec3 vEdge0 = vert1 - vert0;
+		glm::vec3 vEdge1 = vert2 - vert0;
+
+		//Store texcoord info
+		glm::vec2 tex0 = prv_Vertices[i].uv;
+		glm::vec2 tex1 = prv_Vertices[i + 1].uv;
+		glm::vec2 tex2 = prv_Vertices[i + 2].uv;
+
+		//Create 2 Edges with Texcoords
+		glm::vec2 tEdge0 = tex1 - tex0;
+		glm::vec2 tEdge1 = tex2 - tex0;
+
+		//Find Ratio between the texCoords
+		float ratio = 1.0f / (tEdge0.x * tEdge1.y - tEdge1.x * tEdge0.y);
+		
+		//Create two vectors
+		glm::vec3 uDirection = glm::vec3(
+			(tEdge1.y * vEdge0.x - tEdge0.y * vEdge1.x) * ratio,
+			(tEdge1.y * vEdge0.y - tEdge0.y * vEdge1.y) * ratio,
+			(tEdge1.y * vEdge0.z - tEdge0.y * vEdge1.z) * ratio
+		);
+		glm::vec3 vDirection = glm::vec3(
+			(tEdge0.x * vEdge1.x - tEdge1.y * vEdge0.x) * ratio,
+			(tEdge0.x * vEdge1.y - tEdge1.y * vEdge0.y) * ratio,
+			(tEdge0.x * vEdge1.z - tEdge1.y * vEdge0.z) * ratio
+		);
+
+		//Find Tangent
+		glm::vec3 norm_uDirection = glm::normalize(uDirection);
+		float uDir_DotResult = glm::dot(norm_uDirection, uDirection);
+		glm::vec3 tangent_Vec3 = (uDirection - norm_uDirection) * uDir_DotResult;
+
+		//Find Handedness
+		glm::vec3 norm_vDirection = glm::normalize(vDirection);
+		glm::vec3 vDir_Cross = glm::cross(norm_vDirection, uDirection);
+		glm::vec3 handedness = vDirection;
+		float vDir_DotResult = glm::dot(vDir_Cross, handedness);
+
+		glm::vec4 tangent = glm::vec4(tangent_Vec3.x, tangent_Vec3.y, tangent_Vec3.z, 0.0f);
+		tangent.w = (vDir_DotResult < 0.0f ? -1.0f : 1.0f);
+
+		prv_Vertices[i].tangent = tangent;
+		prv_Vertices[i+1].tangent = tangent;
+		prv_Vertices[i+2].tangent = tangent;
 	}
 }
 

@@ -58,6 +58,7 @@ private:
 	void Update_FunctionButtons(const SDL_Event &e);
 	void Update_CommandButtons(const SDL_Event &e);
 	void Update_CameraMovement(const SDL_Event &e);
+	void Normalize_View_Matrix();
 
 	void LookAtPlanet();
 
@@ -71,6 +72,7 @@ private:
 	bool f1_released = false;
 	bool f2_released = false;
 	bool t_released = false;
+	bool normalize_view = false;
 };
 
 #endif

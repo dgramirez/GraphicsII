@@ -78,6 +78,9 @@ void Camera::update(const SDL_Event &e)
 	Update_FunctionButtons(e);
 	Update_CommandButtons(e);
 	Update_CameraMovement(e);
+
+	if (normalize_view)
+		Normalize_View_Matrix();
 }
 
 void Camera::Update_FunctionButtons(const SDL_Event &e)
@@ -251,32 +254,32 @@ void Camera::Update_CameraMovement(const SDL_Event &e)
 	if (InputController::r_negYaw)
 	{
 		prv_View = glm::rotate(prv_View, rotspeed, glm::vec3(0, 1, 0));
-		prv_ViewInv = glm::inverse(prv_View);
+		normalize_view = true;
 	}
 	if (InputController::r_posYaw)
 	{
 		prv_View = glm::rotate(prv_View, -rotspeed, glm::vec3(0, 1, 0));
-		prv_ViewInv = glm::inverse(prv_View);
+		normalize_view = true;
 	}
 	if (InputController::r_posPitch)
 	{
 		prv_View = glm::rotate(prv_View, rotspeed, glm::vec3(1, 0, 0));
-		prv_ViewInv = glm::inverse(prv_View);
+		normalize_view = true;
 	}
 	if (InputController::r_negPitch)
 	{
 		prv_View = glm::rotate(prv_View, -rotspeed, glm::vec3(1, 0, 0));
-		prv_ViewInv = glm::inverse(prv_View);
+		normalize_view = true;
 	}
 	if (InputController::r_negRoll)
 	{
 		prv_View = glm::rotate(prv_View, rotspeed, glm::vec3(0, 0, 1));
-		prv_ViewInv = glm::inverse(prv_View);
+		normalize_view = true;
 	}
 	if (InputController::r_posRoll)
 	{
 		prv_View = glm::rotate(prv_View, -rotspeed, glm::vec3(0, 0, 1));
-		prv_ViewInv = glm::inverse(prv_View);
+		normalize_view = true;
 	}
 
 
@@ -312,6 +315,27 @@ void Camera::Update_CameraMovement(const SDL_Event &e)
 	}
 }
 
+void Camera::Normalize_View_Matrix()
+{
+	glm::vec3 curY = glm::vec3(prv_View[1].x, prv_View[1].y, prv_View[1].z);
+	glm::vec3 curZ = glm::vec3(prv_View[2].x, prv_View[2].y, prv_View[2].z);
+	glm::vec3 worldY = glm::vec3(0.0f, -1.0f, 0.0f);
+
+	glm::vec3 newX = glm::cross(worldY, curZ);
+	glm::vec3 newY = glm::cross(curZ, newX);
+
+	newX = glm::normalize(newX);
+	newY = glm::normalize(newY);
+	curZ = glm::normalize(curZ);
+
+	prv_View[0] = glm::vec4(newX.x, newX.y, newX.z, 0.0f);
+	prv_View[1] = glm::vec4(newY.x, newY.y, newY.z, 0.0f);
+	prv_View[2] = glm::vec4(curZ.x, curZ.y, curZ.z, 0.0f);
+
+	prv_ViewInv = inverse(prv_View);
+	normalize_view = false;
+}
+
 void Camera::LookAtPlanet()
 {
 	Object* obj = pObjectList->at(prv_PlanetLookup);
@@ -321,4 +345,6 @@ void Camera::LookAtPlanet()
 	glm::vec3 up = { 0.0f, -1.0f, 0.0f };
 	prv_ViewInv = glm::lookAt(eye, center, up);
 	prv_View = inverse(prv_ViewInv);
+
+	normalize_view = false;
 }

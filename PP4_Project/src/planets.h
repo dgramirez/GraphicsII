@@ -19,6 +19,7 @@
 #define PYRAMID 14
 #define SQUARE 15
 #define FLAG 16
+#define BALL 17
 
 #define SIZE_SPHERE			79.1f
 #define SIZE_SUN			SIZE_SPHERE / 139.2f
@@ -60,12 +61,14 @@ Object* create_fighter_ship();
 Object* create_square(const char* texture, float x1, float x2, float y1, float y2);
 Object* create_grid();
 Object* create_flag();
+Object* create_ball();
 #pragma endregion
 
 
 Object* create_sphere(const char* fbxfilepath, const char* texturelocation, Texture* texturedoth = nullptr, const float &scale_down = 10.0f, const glm::mat4 &model_matrix = glm::mat4(1.0f));
 
 void UniformMVP_Basic(const VkObj_Context &context, Object &obj, Camera &camera);
+void BallMVP_Basic(const VkObj_Context &context, Object &obj, Camera &camera);
 
 void AxeRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void PyramidRotation(const VkObj_Context &context, Object &obj, Camera &camera);

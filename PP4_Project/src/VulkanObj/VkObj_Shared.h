@@ -11,6 +11,7 @@ struct VkStruct_Pipeline {
 	const char* fragment_shader_name;
 	bool culling_enabled;
 	bool depth_enabled;
+	VkCompareOp depth_op;
 	VkDescriptorPool descriptor_pool;
 	VkDescriptorSetLayout descriptor_set_layout;
 	VkPipelineLayout pipeline_layout;

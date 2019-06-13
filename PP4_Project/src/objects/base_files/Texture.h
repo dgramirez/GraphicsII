@@ -13,7 +13,7 @@ public:
 
 	const uint32_t get_width() const { return prv_Width; }
 	const uint32_t get_height() const { return prv_Height; }
-	const void* get_data() const { return prv_Data; }
+	const uint32_t* get_data() const { return prv_Color.data(); }
 	const uint32_t get_mip_levels() const { return prv_MipLevels; }
 	const uint32_t get_texture_type() const { return prv_TextureType; }
 	const VkImage get_image() const { return prv_Image; }
@@ -23,7 +23,7 @@ public:
 
 	__declspec(property(get = get_width)) uint32_t width;
 	__declspec(property(get = get_height)) uint32_t height;
-	__declspec(property(get = get_data)) const void *data;
+	__declspec(property(get = get_data)) const uint32_t *data;
 	__declspec(property(get = get_mip_levels)) const uint32_t mip_levels;
 	__declspec(property(get = get_texture_type)) uint32_t texture_type;
 	__declspec(property(get = get_image)) VkImage image;
@@ -40,7 +40,7 @@ private:
 	void CreateImageView();
 	void CreateDefaultSampler();
 
-	void *prv_Data;
+	std::vector<uint32_t> prv_Color;
 	int32_t prv_Width, prv_Height, prv_MipLevels;
 	uint32_t prv_TextureType;
 	VkImage prv_Image;
