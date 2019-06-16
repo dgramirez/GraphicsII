@@ -1,5 +1,5 @@
 @echo off
-SET shdr=Flag
+SET shdr=Shader
 @echo on
 
 C:\Users\Tiny\source\repos\PP4_Project\PP4_Project\vendor\1.1.101.0\Bin\glslangValidator.exe -V vert%shdr%.vert

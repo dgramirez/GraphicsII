@@ -14,10 +14,11 @@
 #define V_COLOR_WHITE	{ 1.0f, 1.0f, 1.0f }
 
 #define POSITION 0
-#define COLOR 1
-#define UV 2
-#define NORMAL 3
-#define TANGENT 4
+#define COLOR	 1
+#define UV		 2
+#define NORMAL	 3
+#define TANGENT	 4
+#define BINORMAL 5
 #pragma endregion
 
 struct Vertex
@@ -27,6 +28,7 @@ struct Vertex
 	glm::vec2 uv;
 	glm::vec3 normal;
 	glm::vec3 tangent;
+	glm::vec3 binormal;
 
 	static VkVertexInputBindingDescription get_binding_description()
 	{
@@ -39,9 +41,9 @@ struct Vertex
 		return vertex_input_binding_description;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 5> get_attribute_description()
+	static std::array<VkVertexInputAttributeDescription, 6> get_attribute_description()
 	{
-		std::array<VkVertexInputAttributeDescription, 5> attribute_description = {};
+		std::array<VkVertexInputAttributeDescription, 6> attribute_description = {};
 
 		attribute_description[POSITION].binding = 0;
 		attribute_description[POSITION].location = 0;
@@ -68,9 +70,24 @@ struct Vertex
 		attribute_description[TANGENT].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attribute_description[TANGENT].offset = offsetof(Vertex, tangent);
 
+		attribute_description[BINORMAL].binding = 0;
+		attribute_description[BINORMAL].location = 5;
+		attribute_description[BINORMAL].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attribute_description[BINORMAL].offset = offsetof(Vertex, binormal);
+
 		return attribute_description;
 	}
 
+};
+
+struct FMD_Vertex
+{
+	glm::vec4 position;
+	glm::vec4 color;
+	glm::vec4 normal;
+	glm::vec4 tangent;
+	glm::vec4 binormal;
+	glm::vec2 uv;
 };
 
 struct Uniform_MVP
@@ -96,7 +113,11 @@ struct UBO_Ships
 	glm::vec4 light1_color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);		//xyz = color1
 	glm::vec4 light2_pos = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);		//xyz = position2
 	glm::vec4 light2_color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);		//xyz = color2
-	glm::vec4 strengths = glm::vec4(0.25f, 0.75f, 0.1f, 1.0f);		//x=ambient, y=diffuse, z=attenuation
+	glm::vec4 light3_pos = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 light3_dir = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 light3_color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	glm::vec4 strengths = glm::vec4(0.25f, 0.75f, 0.1f, 1.0f);		//x=ambient, y=diffuse, z=attenuation, w=spotlight_ratio
+	glm::vec4 cone_strength = glm::vec4(0.01f, 0.1f, 0.0f, 0.0f);
 };
 
 struct UBO_Flag

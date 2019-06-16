@@ -42,6 +42,12 @@ Object::Object(const OBJ_VERT* object_vertices, const unsigned int &vertices_siz
 	prv_Scale = 1.0f;
 }
 
+Object::Object(const char* fmd_filename, const char *texture_filename)
+{
+	pMesh = new Mesh(fmd_filename);
+	pTexture = new Texture(texture_filename);
+}
+
 Object::~Object()
 {
 	cleanup();

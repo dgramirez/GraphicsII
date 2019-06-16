@@ -1,6 +1,7 @@
 #ifndef OBJECT_MESH_H
 #define OBJECT_MESH_H
 
+#include <fstream>
 #include "../../Maths.h"
 #include "../../VulkanObj/VkObj_Shared.h"
 #include "../../VulkanObj/VkObj_Context.h"
@@ -21,7 +22,8 @@ class Mesh
 public:
 	Mesh() = default;
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices);
-	Mesh(const char* fbx_filename, float _scale = 1.0f);
+	Mesh(const char* fbx_filename, float _scale);
+	Mesh(const char* FMD_filename);
 	Mesh(const OBJ_VERT *object_vertices, const unsigned int &vertices_size, const unsigned int *object_indices, const unsigned int &indices_size);
 	~Mesh();
 
@@ -62,7 +64,9 @@ private:
 	void GetTextureFilename(FbxNode* child_node, const char* return_value);
 	void CreateVertexBuffer();
 	void CreateIndexBuffer();
+	void SetTangents(FbxArray<FbxVector4>& tangents, const FbxMesh* mesh);
 	void SetupTangent();
+	void ImportFMD(const char *filename);
 };
 
 #endif

@@ -172,17 +172,17 @@ void Window::SDL_EventKeyDown(SDL_Event &e)
 		prv_Fullscreen = !prv_Fullscreen;
 	}
 
-	if (key == SDLK_LEFT || key == SDLK_KP_4)
+	if (key == SDLK_LEFT)
 		InputController::r_negYaw = true;
-	if (key == SDLK_RIGHT || key == SDLK_KP_6)
+	if (key == SDLK_RIGHT)
 		InputController::r_posYaw = true;
-	if (key == SDLK_UP || key == SDLK_KP_8)
+	if (key == SDLK_UP)
 		InputController::r_posPitch = true;
-	if (key == SDLK_DOWN || key == SDLK_KP_2)
+	if (key == SDLK_DOWN)
 		InputController::r_negPitch = true;
-	if (key == SDLK_RCTRL || key == SDLK_KP_7)
+	if (key == SDLK_RCTRL)
 		InputController::r_negRoll = true;
-	if (key == SDLK_KP_0 || key == SDLK_KP_9)
+	if (key == SDLK_KP_0)
 		InputController::r_posRoll = true;
 
 	if (key == SDLK_w)

@@ -5,9 +5,6 @@
 #include "texture_h/axeTexture.h"
 #include "texture_h/fighter.h"
 
-glm::vec4 myLightPos = glm::vec4(4.0f, 0.0f, 0.0f, 1.0f);
-float myT = 0.0f;
-
 Object* create_pyramid()
 {
 	std::vector<Vertex> pyramid_vertex = {
@@ -40,7 +37,7 @@ Object* create_pyramid()
 }
 Object* create_normal_ship()
 {
-	Object *Ship = new Object("assets\\Trident-A10.FBX", ".\\assets\\misc\\", 500.0f);
+	Object *Ship = new Object("assets\\Trident-A10.fmd", ".\\assets\\misc\\Trident_UV_Dekol_Color.png");
 	Ship->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-3.0f, -2.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	Ship->uniform_function = AxeRotation;
 	return Ship;
@@ -126,23 +123,23 @@ Object* create_square(const char* texture, float x1, float x2, float y1, float y
 
 	return Square;
 }
-Object* create_sphere(const char* fbxfilepath, const char* texturelocation, Texture* texturedoth, const float &scale_down, const glm::mat4 &model_matrix)
+Object* create_sphere(const char* fbmfilepath, const char* texturelocation, Texture* texturedoth, const float &scale_down, const glm::mat4 &model_matrix)
 {
-	Object *mySphere = new Object(fbxfilepath, texturelocation, scale_down);
+	Object *mySphere = new Object(fbmfilepath, texturelocation);
 	mySphere->model_matrix = model_matrix;
 
 	return mySphere;
 }
 Object* create_ball()
 {
-	Object *Ship = new Object("assets\\Circle.fbx", ".\\assets\\misc\\", 1.0f);
+	Object *Ship = new Object("assets\\Circle.fmd", ".\\assets\\misc\\white_pixel.png");
 	Ship->model_matrix = glm::mat4(1.0f);
 	Ship->uniform_function = BallMVP_Basic;
 	return Ship;
 }
 Object* create_flag()
 {
-	Object *Flag = new Object("assets\\Flag.fbx", ".\\assets\\misc\\", 1.0f);
+	Object *Flag = new Object("assets\\Flag.fmd", ".\\assets\\misc\\japanese_flag.png");
 	Flag->model_matrix = glm::mat4(1.0f);
 	Flag->uniform_function = flag_uniform;
 	return Flag;
@@ -182,20 +179,25 @@ void AxeRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 	ubo.mvp.projection = camera.perspective;
 	ubo.mvp.projection[1][1] = -ubo.mvp.projection[1][1];
 
-	ubo.TI_modelview = glm::transpose(glm::inverse(ubo.mvp.view * ubo.mvp.model));
+	ubo.TI_modelview = glm::transpose(glm::inverse(ubo.mvp.model));
 
 	glm::mat4 rot = glm::rotate(glm::mat4(1.0f), glm::radians(30.0f) * (float)myTime.SmoothDelta(), glm::vec3(0.0f, 1.0f, 0.0f));
-	ubo.light1_pos = rot * myLightPos;
-	ubo.light1_color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-	ubo.strengths = glm::vec4(0.25f, 0.75f, camera.attenuation, 1.0f);
+	ubo.light1_pos = rot * camera.point_light;
+	ubo.light1_color = camera.point_light_color;
 
-	ubo.light2_pos = glm::vec4(-5.0f, -1.0f, 0.0f, 1.0f);
-	ubo.light2_color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	ubo.light2_pos = camera.dir_light;
+	ubo.light2_color = camera.dir_light_color;
+
+	ubo.light3_pos = camera.spot_light;
+	ubo.light3_dir = camera.spot_light_dir;
+	ubo.light3_color = camera.spot_light_color;
+
+	ubo.strengths = glm::vec4(0.25f, 0.75f, camera.attenuation, 0.25f);
+	ubo.cone_strength = camera.spot_light_strengths;
 
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, ubo);
 
 	obj.model_matrix = ubo.mvp.model;
-	myLightPos = ubo.light1_pos;
 }
 void PyramidRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
@@ -359,14 +361,13 @@ void skybox_uniform(const VkObj_Context &context, Object &obj, Camera &camera)
 
 void flag_uniform(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	myT += (float)myTime.SmoothDelta() * 3.0f;
 	UBO_Flag ubo;
 
 	ubo.mvp.model = obj.model_matrix;
 	ubo.mvp.view = camera.view_inverse;
 	ubo.mvp.projection = camera.perspective;
 	ubo.mvp.projection[1][1] = -ubo.mvp.projection[1][1];
-	ubo.info = glm::vec4(myT, 0.0f, 0.0f, 0.0f);
+	ubo.info = glm::vec4((float)myTime.SmoothDelta() * 3.0f, 0.0f, 0.0f, 0.0f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, ubo);
 
 	obj.model_matrix = ubo.mvp.model;

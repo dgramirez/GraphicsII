@@ -47,6 +47,30 @@ public:
 	const char* get_planet_name() { return prv_PlanetName; }
 	__declspec(property(get = get_planet_name)) const char* planet_name;
 
+	glm::vec4 get_dirlight() { return prv_DirLight; }
+	__declspec(property(get = get_dirlight)) glm::vec4 dir_light;
+
+	glm::vec4 get_dirlightcolor() { return prv_DirLightColor; }
+	__declspec(property(get = get_dirlightcolor)) glm::vec4 dir_light_color;
+
+	glm::vec4 get_pointlight() { return prv_PointLight; }
+	__declspec(property(get = get_pointlight)) glm::vec4 point_light;
+
+	glm::vec4 get_pointlightcolor() { return prv_PointLightColor; }
+	__declspec(property(get = get_pointlightcolor)) glm::vec4 point_light_color;
+
+	glm::vec4 get_spotlight() { return prv_SpotLight; }
+	__declspec(property(get = get_spotlight)) glm::vec4 spot_light;
+
+	glm::vec4 get_spotlightcolor() { return prv_SpotLightColor; }
+	__declspec(property(get = get_spotlightcolor)) glm::vec4 spot_light_color;
+
+	glm::vec4 get_spotlight_dir() { return prv_SpotLightDir; }
+	__declspec(property(get = get_spotlight_dir)) glm::vec4 spot_light_dir;
+
+	glm::vec4 get_spotlight_strength() { return prv_SpotLightStrengths; }
+	__declspec(property(get = get_spotlight_strength)) glm::vec4 spot_light_strengths;
+
 private:
 	glm::mat4 prv_View;
 	glm::mat4 prv_ViewInv;
@@ -54,6 +78,21 @@ private:
 	std::vector<Object*> *pObjectList;
 	uint32_t prv_PlanetLookup;
 	const char* prv_PlanetName;
+
+	glm::vec4 prv_PointLight;
+	glm::vec4 prv_PointLightColor;
+
+	glm::vec4 prv_DirLight;
+	glm::vec4 prv_DirLightColor;
+	
+	glm::vec4 prv_SpotLight;
+	glm::vec4 prv_SpotLightDir;
+	glm::vec4 prv_SpotLightColor;
+	glm::vec4 prv_SpotLightStrengths;
+	
+	
+	const float prv_DirLightDistance = 10.0f;
+	float prv_DirLightY;
 
 	void Update_FunctionButtons(const SDL_Event &e);
 	void Update_CommandButtons(const SDL_Event &e);

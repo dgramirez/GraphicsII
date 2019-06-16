@@ -43,6 +43,11 @@ Mesh::Mesh(const OBJ_VERT* object_vertices, const unsigned int &vertices_size, c
 		prv_Indices[i] = object_indices[i];
 }
 
+Mesh::Mesh(const char* FMD_filename)
+{
+	ImportFMD(FMD_filename);
+}
+
 Mesh::~Mesh()
 {
 	cleanup();
@@ -179,6 +184,75 @@ void Mesh::SetupTangent()
 	}
 }
 
+void Mesh::ImportFMD(const char *filename)
+{
+	std::ifstream file;
+	file.open(filename, std::ios::binary);
+
+	uint32_t isize = 0;
+	uint32_t* indices = nullptr;
+
+	uint32_t vsize = 0;
+	FMD_Vertex* vertices = nullptr;
+
+	if (file.is_open())
+	{
+		uint32_t bytesize = 0;
+		uint32_t offset = 0;
+
+		//Read the size of the indices
+		offset += bytesize;
+		file.seekg(offset);
+		bytesize = sizeof(uint32_t);
+		file.read((char*)&isize, bytesize);
+
+		//Read the Indices Array
+		offset += bytesize;
+		file.seekg(offset);
+		bytesize = sizeof(uint32_t) * isize;
+		indices = new uint32_t[isize];
+		file.read((char*)&indices[0], bytesize);
+
+		//Read the size of the vertices
+		offset += bytesize;
+		file.seekg(offset);
+		bytesize = sizeof(uint32_t);
+		file.read((char*)&vsize, bytesize);
+
+		//Read the Vertices Array
+		offset += bytesize;
+		file.seekg(offset);
+		bytesize = vsize * sizeof(FMD_Vertex);
+		vertices = new FMD_Vertex[vsize];
+		file.read((char*)&vertices[0], bytesize);
+
+		file.close();
+	}
+	else
+	{
+		LOG("Failed to open: " << filename)
+		return;
+	}
+
+	
+	prv_Vertices.resize(vsize);
+	prv_Indices.resize(isize);
+	for (uint32_t i = 0; i < vsize; ++i)
+	{
+		prv_Vertices[i].position = glm::vec3(vertices[i].position.x, vertices[i].position.y, vertices[i].position.z);
+		prv_Vertices[i].normal	= glm::vec3(vertices[i].normal.x, vertices[i].normal.y, vertices[i].normal.z);
+		prv_Vertices[i].uv		= glm::vec2(vertices[i].uv.x, vertices[i].uv.y);
+		prv_Vertices[i].tangent	= glm::vec3(vertices[i].tangent.x, vertices[i].tangent.y, vertices[i].tangent.z);
+		prv_Vertices[i].binormal = glm::vec3(vertices[i].binormal.x, vertices[i].binormal.y, vertices[i].binormal.z);
+		prv_Vertices[i].color	= glm::vec3(vertices[i].color.x, vertices[i].color.y, vertices[i].color.z);
+	}
+	for (uint32_t i = 0; i < isize; ++i)
+		prv_Indices[i] = indices[i];
+
+	delete[] indices;
+	delete[] vertices;
+}
+
 // .----------------.  .----------------.  .----------------.        .----------------.  .----------------.  .----------------.
 //| .--------------. || .--------------. || .--------------. |      | .--------------. || .--------------. || .--------------. |
 //| |  _________   | || |   ______     | || |  ____  ____  | |      | |    _______   | || |  ________    | || |  ___  ____   | |
@@ -238,6 +312,7 @@ void Mesh::ProcessFbxMesh(FbxNode* node)
 			FbxMesh *mesh = childNode->GetMesh();
 			FbxArray<FbxVector4> normalsVec;
 			FbxArray<FbxVector2> TexUV;
+			FbxArray<FbxVector4> Tangents;
 
 			if (mesh != NULL)
 			{
@@ -258,6 +333,8 @@ void Mesh::ProcessFbxMesh(FbxNode* node)
 				// Get UV from mesh
 				SetUVs(TexUV, mesh);
 
+				// Get Tangent Data
+				SetTangents(Tangents, mesh);
 
 				// Get Normal count from mesh
 				mesh->GetPolygonVertexNormals(normalsVec);
@@ -324,7 +401,6 @@ void Mesh::SetUVs(FbxArray<FbxVector2>& uv, const FbxMesh* mesh)
 	//get all UV set names
 	FbxStringList lUVSetNameList;
 	mesh->GetUVSetNames(lUVSetNameList);
-
 	//iterating over all uv sets
 	for (int lUVSetIndex = 0; lUVSetIndex < lUVSetNameList.GetCount(); lUVSetIndex++)
 	{
@@ -343,7 +419,7 @@ void Mesh::SetUVs(FbxArray<FbxVector2>& uv, const FbxMesh* mesh)
 				continue;
 
 			// only support mapping mode eByPolygonVertex and eByControlPoint
-			if (//lUVElement->GetMappingMode() != FbxGeometryElement::eByControlPoint &&
+			if (lUVElement->GetMappingMode() != FbxGeometryElement::eByControlPoint &&
 				lUVElement->GetMappingMode() != FbxGeometryElement::eByPolygonVertex)
 				return;
 
@@ -410,6 +486,36 @@ void Mesh::SetUVs(FbxArray<FbxVector2>& uv, const FbxMesh* mesh)
 	}
 }
 
+void Mesh::SetTangents(FbxArray<FbxVector4>& tangents, const FbxMesh* mesh)
+{
+	if (mesh->GetElementTangentCount() < 1)
+	{
+		LOG("No Tangents!");
+		return;
+	}
+
+	const FbxGeometryElementTangent* vertexTangent = mesh->GetElementTangent(0);
+
+	auto map_mode = vertexTangent->GetMappingMode();
+	if (map_mode != 0 || map_mode != 1)
+	{
+		LOG("Wrong Map Mode");
+		return;
+	}
+
+	auto ref_mode = vertexTangent->GetReferenceMode();
+	if (ref_mode == 0)
+	{
+
+	}
+	else if (ref_mode == 1)
+	{
+
+	}
+
+	return;
+}
+
 void Mesh::Compactify(const std::vector<Vertex>& vertex2)
 {
 	/*Compactify*/
@@ -437,8 +543,8 @@ void Mesh::Compactify(const std::vector<Vertex>& vertex2)
 				(abs(vertex2[i].normal.y - prv_Vertices[j].normal.y)) < epsilon &&
 				(abs(vertex2[i].normal.z - prv_Vertices[j].normal.z)) < epsilon &&
 
-				(abs(vertex2[i].position.x - prv_Vertices[j].position.x)) < epsilon &&
-				(abs(vertex2[i].position.y - prv_Vertices[j].position.y)) < epsilon)
+				(abs(vertex2[i].uv.x - prv_Vertices[j].uv.x)) < epsilon &&
+				(abs(vertex2[i].uv.y - prv_Vertices[j].uv.y)) < epsilon)
 			{
 				prv_Indices.push_back(j);
 				break;

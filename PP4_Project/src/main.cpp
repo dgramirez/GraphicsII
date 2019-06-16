@@ -22,21 +22,21 @@ int main(int argc, char* args[])
 	flag->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -7.0f, -10.0f)) ;
 	flag->uniform_function = flag_uniform;
 	Object *circle = create_ball();
-	Object *Skybox = new Object(".\\assets\\solarsystem\\SpaceSkybox.fbx", ".\\assets\\solarsystem\\texture\\", 0.1f);
+	Object *Skybox = new Object(".\\assets\\solarsystem\\SpaceSkybox.fmd", ".\\assets\\solarsystem\\texture\\SpaceCubeMap.png");
 	Skybox->uniform_function = skybox_uniform;
 
 	std::vector<Object*> *Object_List = new std::vector<Object*>(0);
 	Object_List->push_back(Skybox);
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Sun.fbx",		".\\assets\\solarsystem\\texture\\", nullptr, SIZE_SUN));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Mercury.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_MERCURY));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Venus.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_VENUS));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Earth.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_EARTH));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Mars.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_MARS));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Jupiter.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_JUPITER));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Saturn.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_SATURN));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Uranus.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_URANUS));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Neptune.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_NEPTUNE));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Pluto.fbx",	".\\assets\\solarsystem\\texture\\", nullptr, SIZE_PLUTO));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Sun.fmd",		".\\assets\\solarsystem\\texture\\sunmap.png"));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Mercury.fmd",	".\\assets\\solarsystem\\texture\\mercurymap.png"));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Venus.fmd",	".\\assets\\solarsystem\\texture\\venusmap.png"));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Earth.fmd",	".\\assets\\solarsystem\\texture\\earthmap1k.png"));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Mars.fmd",	".\\assets\\solarsystem\\texture\\marsmap1k.png"));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Jupiter.fmd",	".\\assets\\solarsystem\\texture\\jupitermap.png"));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Saturn.fmd",	".\\assets\\solarsystem\\texture\\saturnmap.png"));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Uranus.fmd",	".\\assets\\solarsystem\\texture\\uranusmap.png"));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Neptune.fmd",	".\\assets\\solarsystem\\texture\\neptunemap.png"));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Pluto.fmd",	".\\assets\\solarsystem\\texture\\plutomap1k.png"));
 
 	Object_List->at(SUN)->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(DISTANCE_SUN, 0.0f, 0.0f));
 	Object_List->at(SUN)->uniform_function = SunRotation;

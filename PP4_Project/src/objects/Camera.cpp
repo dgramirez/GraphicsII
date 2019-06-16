@@ -14,6 +14,17 @@ void Camera::init(glm::mat4 translation, bool infinite_perspective, float rotati
 	prv_InfinitePerspective = infinite_perspective;
 	prv_Attenuation = 0.01f;
 
+	prv_PointLight = glm::vec4(4.0f, 0.0f, 0.0f, 1.0f);
+	prv_PointLightColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	prv_DirLight = glm::vec4(-4.0f, -1.0f, 0.0f, 1.0f);
+	prv_DirLightColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+
+	prv_SpotLight = glm::vec4(0.0f, -2.0f, 0.0f, 1.0f);
+	prv_SpotLightDir = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	prv_SpotLightColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	prv_SpotLightStrengths = glm::vec4(0.10f, 0.01f, 0.0f, 0.0f);
+
 	if (prv_InfinitePerspective)
 	{
 		prv_Farplane = HUGE_VALF;
@@ -75,12 +86,20 @@ void Camera::set_planet_lookup(const uint32_t &x)
 
 void Camera::update(const SDL_Event &e)
 {
+	//Input
 	Update_FunctionButtons(e);
 	Update_CommandButtons(e);
 	Update_CameraMovement(e);
 
 	if (normalize_view)
 		Normalize_View_Matrix();
+
+	//Others
+	glm::mat4 rot = glm::rotate(glm::mat4(1.0f), glm::radians(30.0f) * (float)myTime.SmoothDelta(), glm::vec3(0.0f, 1.0f, 0.0f));
+	prv_PointLight = rot * prv_PointLight;
+	glm::mat4 rot2 = glm::rotate(glm::mat4(1.0f), glm::radians(-60.0f) * (float)myTime.SmoothDelta(), glm::vec3(0.0f, 1.0f, 0.0f));
+	prv_DirLight = rot2 * prv_DirLight;
+
 }
 
 void Camera::Update_FunctionButtons(const SDL_Event &e)
@@ -148,14 +167,48 @@ void Camera::Update_FunctionButtons(const SDL_Event &e)
 				prv_Viewspd = 0.25f;
 		}
 
-		if (e.key.keysym.sym == SDLK_KP_PLUS)
+		if (e.key.keysym.sym == SDLK_KP_PLUS && key != SDLK_RCTRL)
 			prv_Attenuation += 0.01f;
 
-		if (e.key.keysym.sym == SDLK_KP_MINUS)
+		if (e.key.keysym.sym == SDLK_KP_MINUS && key != SDLK_RCTRL)
 		{
 			prv_Attenuation -= 0.01f;
 			if (prv_Attenuation < 0.01f)
 				prv_Attenuation = 0.01f;
+		}
+
+		if (key == SDLK_RCTRL)
+		{
+			if (e.key.keysym.sym == SDLK_KP_PLUS)
+			{
+				prv_SpotLightStrengths.x += 0.01f;
+				// 			if (prv_SpotLightStrengths.x >= prv_SpotLightStrengths.y)
+				// 				prv_SpotLightStrengths.x = prv_SpotLightStrengths.y - 0.01f;
+			}
+
+			if (e.key.keysym.sym == SDLK_KP_MINUS)
+			{
+				prv_SpotLightStrengths.x -= 0.01f;
+				// 			if (prv_SpotLightStrengths.x < 0.01f)
+				// 				prv_SpotLightStrengths.x = 0.01f;
+			}
+		}
+
+		if (key == SDLK_RSHIFT)
+		{
+			if (e.key.keysym.sym == SDLK_KP_PLUS)
+			{
+				prv_SpotLightStrengths.y += 0.01f;
+				// 			if (prv_SpotLightStrengths.y < prv_SpotLightStrengths.x)
+				// 				prv_SpotLightStrengths.y = prv_SpotLightStrengths.x + 0.1f;
+			}
+
+			if (e.key.keysym.sym == SDLK_KP_MINUS)
+			{
+				prv_SpotLightStrengths.y -= 0.01f;
+				if (prv_SpotLightStrengths.y < 0.01f)
+					prv_SpotLightStrengths.y = 0.01f;
+			}
 		}
 	}
 }
