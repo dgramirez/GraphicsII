@@ -71,7 +71,8 @@ bool VkObj_Context::init(SDL_Window *win)
 	pipelines.create_pipeline("shaders/Spir-V/vertBasic.spv", "shaders/Spir-V/fragBasic.spv", false);								//PIPELINE_SKYBOX
 	pipelines.create_pipeline("shaders/Spir-V/vertShips.spv", "shaders/Spir-V/fragShips.spv");										//PIPELINE_PHONG
 	pipelines.create_pipeline("shaders/Spir-V/vertFlag.spv", "shaders/Spir-V/fragFlag.spv", true, VK_COMPARE_OP_LESS, false);		//PIPELINE_FLAG
-	pipelines.create_pipeline("shaders/Spir-V/vertBasic.spv", "shaders/Spir-V/fragBasic.spv", true, VK_COMPARE_OP_LESS, false);		//PIPELINE_BALL
+	pipelines.create_pipeline("shaders/Spir-V/vertBasic.spv", "shaders/Spir-V/fragBasic.spv", true, VK_COMPARE_OP_LESS, false);		//PIPELINE_HYD
+	pipelines.create_pipeline_normalmaps("shaders/Spir-V/NormalMapped.vert.spv", "shaders/Spir-V/NormalMapped.frag.spv");			//PIPELINE_EARTH_NORMAL
 
 	return true;
 }

@@ -19,16 +19,20 @@ public:
 	Object() = default;
 	Object(const std::vector<Vertex>& vertices, const std::vector<uint32_t> indices, Texture* _t = nullptr);
 	Object(const char* fbx_filename, const char *texture_folderlocation, float _scale, Texture* _t = nullptr);
-	Object(const char* fmd_filename, const char *texture_filename);
+	Object(const char* fmd_filename, const char *texture_filename, const char *normalmap_filename = nullptr);
 	Object(const OBJ_VERT* object_vertices, const unsigned int &vertices_size, const unsigned int* object_indices, const unsigned int & indices_size, Texture* _t = nullptr);
 	~Object();
 
 	void init(const uint32_t &sizeof_ubuffer, const uint32_t &pipe_index);
-	void swap_color_format(const VkComponentSwizzle &r, const VkComponentSwizzle &g, const VkComponentSwizzle &b, const VkComponentSwizzle &a);
 	void reset();
 	void cleanup();
+	
 	void create_uniform_buffer();
 	void create_descriptor_set();
+
+	void create_descriptor_set_nm();
+
+	void swap_color_format(const VkComponentSwizzle &r, const VkComponentSwizzle &g, const VkComponentSwizzle &b, const VkComponentSwizzle &a);
 	void update_uniform_buffer(Camera &camera);
 	UniformFctn uniform_function;
 
@@ -40,6 +44,9 @@ public:
 
 	Texture* get_texture() { return pTexture; }
 	__declspec(property(get = get_texture)) Texture *texture;
+
+	Texture* get_normalmap() { return pNormalMap; }
+	__declspec(property(get = get_normalmap)) Texture *normal_map;
 
 	Mesh* get_mesh() { return pMesh; }
 	__declspec(property(get = get_mesh)) Mesh *mesh;
@@ -56,6 +63,7 @@ public:
 private:
 	Mesh *pMesh;
 	Texture *pTexture;
+	Texture *pNormalMap;
 	glm::mat4 prv_ModelMatrixPrevious;
 	glm::mat4 prv_ModelMatrix;
 

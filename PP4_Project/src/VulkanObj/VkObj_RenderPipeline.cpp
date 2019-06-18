@@ -22,6 +22,20 @@ void VkObj_RenderPipeline::create_pipeline(const char *vertex_shader, const char
 	pipelines.push_back(new_pipeline);
 }
 
+void VkObj_RenderPipeline::create_pipeline_normalmaps(const char *vertex_shader, const char *fragment_shader, bool enable_depth /*= true*/, VkCompareOp depth_op /*= VK_COMPARE_OP_LESS*/, bool enable_culling /*= true*/)
+{
+	VkStruct_Pipeline new_pipeline;
+	new_pipeline.vertex_shader_name = vertex_shader;
+	new_pipeline.fragment_shader_name = fragment_shader;
+	new_pipeline.depth_enabled = enable_depth;
+	new_pipeline.culling_enabled = enable_culling;
+	new_pipeline.depth_op = depth_op;
+	CreateDescriptorPool_NM(new_pipeline.descriptor_pool);
+	CreateDescriptorSetLayout_NM(new_pipeline.descriptor_set_layout);
+	CreateGraphicsPipeline(vertex_shader, fragment_shader, new_pipeline.descriptor_set_layout, new_pipeline.pipeline_layout, new_pipeline.pipeline, enable_depth, depth_op, enable_culling);
+	pipelines.push_back(new_pipeline);
+}
+
 void VkObj_RenderPipeline::shutdown()
 {
 	for (uint32_t i = 0; i < pipelines.size(); ++i)
@@ -44,13 +58,24 @@ void VkObj_RenderPipeline::clean_pipeline()
 
 void VkObj_RenderPipeline::reset_pipeline()
 {
-	for (uint32_t i = 0; i < pipelines.size(); ++i)
+	for (uint32_t i = 0; i < PIPELINE_PLANET_NORMALMAPPED; ++i)
 	{
 		CreateDescriptorPool(pipelines[i].descriptor_pool);
 		CreateDescriptorSetLayout(pipelines[i].descriptor_set_layout);
 		CreateGraphicsPipeline(
-			pipelines[i].vertex_shader_name, pipelines[i].fragment_shader_name, 
-			pipelines[i].descriptor_set_layout, pipelines[i].pipeline_layout, pipelines[i].pipeline, 
+			pipelines[i].vertex_shader_name, pipelines[i].fragment_shader_name,
+			pipelines[i].descriptor_set_layout, pipelines[i].pipeline_layout, pipelines[i].pipeline,
+			pipelines[i].depth_enabled, pipelines[i].depth_op, pipelines[i].culling_enabled
+		);
+	}
+
+	for (uint32_t i = PIPELINE_PLANET_NORMALMAPPED; i <= PIPELINE_PLANET_NORMALMAPPED; ++i)
+	{
+		CreateDescriptorPool_NM(pipelines[i].descriptor_pool);
+		CreateDescriptorSetLayout_NM(pipelines[i].descriptor_set_layout);
+		CreateGraphicsPipeline(
+			pipelines[i].vertex_shader_name, pipelines[i].fragment_shader_name,
+			pipelines[i].descriptor_set_layout, pipelines[i].pipeline_layout, pipelines[i].pipeline,
 			pipelines[i].depth_enabled, pipelines[i].depth_op, pipelines[i].culling_enabled
 		);
 	}
@@ -311,4 +336,55 @@ void VkObj_RenderPipeline::CreateGraphicsPipeline(const char *vertex_shader, con
 	//Destroy Module
 	vkDestroyShaderModule(pDevice->logical, shader_vertex_module, nullptr);
 	vkDestroyShaderModule(pDevice->logical, shader_fragment_module, nullptr);
+}
+
+void VkObj_RenderPipeline::CreateDescriptorPool_NM(VkDescriptorPool &descriptor_pool)
+{
+	std::array<VkDescriptorPoolSize, 3> descriptor_pool_size = {};
+	descriptor_pool_size[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptor_pool_size[0].descriptorCount = 0xFF;
+	descriptor_pool_size[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	descriptor_pool_size[1].descriptorCount = 0xFF;
+	descriptor_pool_size[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	descriptor_pool_size[2].descriptorCount = 0xFF;
+
+	VkDescriptorPoolCreateInfo create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	create_info.poolSizeCount = CAST(uint32_t, descriptor_pool_size.size());
+	create_info.pPoolSizes = descriptor_pool_size.data();
+	create_info.maxSets = 0xFF * 3;
+
+	vkCreateDescriptorPool(pDevice->logical, &create_info, nullptr, &descriptor_pool);
+}
+
+void VkObj_RenderPipeline::CreateDescriptorSetLayout_NM(VkDescriptorSetLayout &descriptor_set_layout)
+{
+	VkDescriptorSetLayoutBinding mvp_layout_binding = {};
+	mvp_layout_binding.binding = 0;
+	mvp_layout_binding.descriptorCount = 1;
+	mvp_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	mvp_layout_binding.pImmutableSamplers = nullptr;
+	mvp_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+	VkDescriptorSetLayoutBinding sampler_layout_binding = {};
+	sampler_layout_binding.binding = 1;
+	sampler_layout_binding.descriptorCount = 1;
+	sampler_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	sampler_layout_binding.pImmutableSamplers = nullptr;
+	sampler_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	VkDescriptorSetLayoutBinding normal_sampler_layout_binding = {};
+	normal_sampler_layout_binding.binding = 2;
+	normal_sampler_layout_binding.descriptorCount = 1;
+	normal_sampler_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	normal_sampler_layout_binding.pImmutableSamplers = nullptr;
+	normal_sampler_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	std::array<VkDescriptorSetLayoutBinding, 3> bindings = { mvp_layout_binding, sampler_layout_binding, normal_sampler_layout_binding };
+	VkDescriptorSetLayoutCreateInfo create_info = {};
+	create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	create_info.bindingCount = CAST(uint32_t, bindings.size());
+	create_info.pBindings = bindings.data();
+
+	vkCreateDescriptorSetLayout(pDevice->logical, &create_info, nullptr, &descriptor_set_layout);
 }

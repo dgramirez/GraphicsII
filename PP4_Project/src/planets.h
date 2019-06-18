@@ -65,7 +65,7 @@ Object* create_ball();
 #pragma endregion
 
 
-Object* create_sphere(const char* fbxfilepath, const char* texturelocation, Texture* texturedoth = nullptr, const float &scale_down = 10.0f, const glm::mat4 &model_matrix = glm::mat4(1.0f));
+Object* create_sphere(const char* fbxfilepath, const char* texturelocation, const char *normal_filepath = nullptr);
 
 void UniformMVP_Basic(const VkObj_Context &context, Object &obj, Camera &camera);
 void BallMVP_Basic(const VkObj_Context &context, Object &obj, Camera &camera);

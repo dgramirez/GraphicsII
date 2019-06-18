@@ -27,16 +27,16 @@ int main(int argc, char* args[])
 
 	std::vector<Object*> *Object_List = new std::vector<Object*>(0);
 	Object_List->push_back(Skybox);
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Sun.fmd",		".\\assets\\solarsystem\\texture\\sunmap.png"));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Mercury.fmd",	".\\assets\\solarsystem\\texture\\mercurymap.png"));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Venus.fmd",	".\\assets\\solarsystem\\texture\\venusmap.png"));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Earth.fmd",	".\\assets\\solarsystem\\texture\\earthmap1k.png"));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Mars.fmd",	".\\assets\\solarsystem\\texture\\marsmap1k.png"));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Jupiter.fmd",	".\\assets\\solarsystem\\texture\\jupitermap.png"));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Saturn.fmd",	".\\assets\\solarsystem\\texture\\saturnmap.png"));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Uranus.fmd",	".\\assets\\solarsystem\\texture\\uranusmap.png"));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Neptune.fmd",	".\\assets\\solarsystem\\texture\\neptunemap.png"));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Pluto.fmd",	".\\assets\\solarsystem\\texture\\plutomap1k.png"));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Sun.fmd",		".\\assets\\solarsystem\\texture\\sunmap.png"		));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Mercury.fmd",	".\\assets\\solarsystem\\texture\\mercurymap.png",	".\\assets\\solarsystem\\texture\\MercuryNormalMap.png"	));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Venus.fmd",	".\\assets\\solarsystem\\texture\\venusmap.png",	".\\assets\\solarsystem\\texture\\VenusNormalMap.png"	));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Earth.fmd",	".\\assets\\solarsystem\\texture\\earthmap1k.png",	".\\assets\\solarsystem\\texture\\EarthNormalMap.png"	));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Mars.fmd",	".\\assets\\solarsystem\\texture\\marsmap1k.png",	".\\assets\\solarsystem\\texture\\mars_1k_normal.png"	));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Jupiter.fmd",	".\\assets\\solarsystem\\texture\\jupitermap.png"	));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Saturn.fmd",	".\\assets\\solarsystem\\texture\\saturnmap.png"	));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Uranus.fmd",	".\\assets\\solarsystem\\texture\\uranusmap.png"	));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Neptune.fmd",	".\\assets\\solarsystem\\texture\\neptunemap.png"	));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Pluto.fmd",	".\\assets\\solarsystem\\texture\\plutomap1k.png", ".\\assets\\solarsystem\\texture\\PlutoNormalMap.png"));
 
 	Object_List->at(SUN)->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(DISTANCE_SUN, 0.0f, 0.0f));
 	Object_List->at(SUN)->uniform_function = SunRotation;

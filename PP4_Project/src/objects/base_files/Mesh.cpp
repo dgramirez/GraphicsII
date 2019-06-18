@@ -195,6 +195,7 @@ void Mesh::ImportFMD(const char *filename)
 	uint32_t vsize = 0;
 	FMD_Vertex* vertices = nullptr;
 
+	LOG("Opening " << filename)
 	if (file.is_open())
 	{
 		uint32_t bytesize = 0;
@@ -234,7 +235,8 @@ void Mesh::ImportFMD(const char *filename)
 		return;
 	}
 
-	
+	LOG("Vertex Size: " << vsize)
+	LOG("Index Size: " << isize)
 	prv_Vertices.resize(vsize);
 	prv_Indices.resize(isize);
 	for (uint32_t i = 0; i < vsize; ++i)
@@ -251,6 +253,7 @@ void Mesh::ImportFMD(const char *filename)
 
 	delete[] indices;
 	delete[] vertices;
+	LOG("Finished " << filename << std::endl)
 }
 
 // .----------------.  .----------------.  .----------------.        .----------------.  .----------------.  .----------------.

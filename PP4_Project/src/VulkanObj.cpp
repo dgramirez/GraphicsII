@@ -15,7 +15,13 @@ bool VulkanObj::init(const char* title, SDL_Window* window, unsigned short win_w
 	prv_ObjectList->at(SUN)->init(sizeof(Uniform_MVP), PIPELINE_TEXTURE);
 
 	for (uint32_t i = MERCURY; i <= PLUTO; ++i)
-		prv_ObjectList->at(i)->init(sizeof(Uniform_Planets), PIPELINE_PLANETS);
+	{
+		if (prv_ObjectList->at(i)->normal_map)
+			prv_ObjectList->at(i)->init(sizeof(Uniform_Planets), PIPELINE_PLANET_NORMALMAPPED);
+		else
+			prv_ObjectList->at(i)->init(sizeof(Uniform_Planets), PIPELINE_PLANETS);
+
+	}
 
 	prv_ObjectList->at(HFILE_SHIP)->init(sizeof(UBO_Ships), PIPELINE_PHONG);
 	prv_ObjectList->at(MODEL_SHIP)->init(sizeof(UBO_Ships), PIPELINE_PHONG);

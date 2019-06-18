@@ -12,7 +12,7 @@ void Camera::init(glm::mat4 translation, bool infinite_perspective, float rotati
 	prv_Farplane = _far;
 	prv_Viewspd = 1.0f;
 	prv_InfinitePerspective = infinite_perspective;
-	prv_Attenuation = 0.01f;
+	prv_Attenuation = 0.1f;
 
 	prv_PointLight = glm::vec4(4.0f, 0.0f, 0.0f, 1.0f);
 	prv_PointLightColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -20,10 +20,10 @@ void Camera::init(glm::mat4 translation, bool infinite_perspective, float rotati
 	prv_DirLight = glm::vec4(-4.0f, -1.0f, 0.0f, 1.0f);
 	prv_DirLightColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
-	prv_SpotLight = glm::vec4(0.0f, -2.0f, 0.0f, 1.0f);
-	prv_SpotLightDir = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	prv_SpotLight = glm::vec4(-6.0f, -4.0f, 0.0f, 1.0f);
+	prv_SpotLightDir = glm::vec4(0.5f, 0.5f, 0.0f, 1.0f);
 	prv_SpotLightColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-	prv_SpotLightStrengths = glm::vec4(0.10f, 0.01f, 0.0f, 0.0f);
+	prv_SpotLightStrengths = glm::vec4(0.5f, 0.49f, 0.0f, 0.0f);
 
 	if (prv_InfinitePerspective)
 	{
@@ -99,6 +99,11 @@ void Camera::update(const SDL_Event &e)
 	prv_PointLight = rot * prv_PointLight;
 	glm::mat4 rot2 = glm::rotate(glm::mat4(1.0f), glm::radians(-60.0f) * (float)myTime.SmoothDelta(), glm::vec3(0.0f, 1.0f, 0.0f));
 	prv_DirLight = rot2 * prv_DirLight;
+
+	glm::mat4 rot3 = glm::rotate(glm::mat4(1.0f), glm::radians(30.0f) * (float)myTime.SmoothDelta(), glm::vec3(0.0f, 1.0f, 0.0f));
+	prv_SpotLight = rot3 * prv_SpotLight;
+	glm::mat4 rot4 = glm::rotate(glm::mat4(1.0f), glm::radians(60.0f) * (float)myTime.SmoothDelta(), glm::vec3(0.0f, -1.0f, 0.0f));
+	prv_SpotLightDir = rot4 * prv_SpotLightDir;
 
 }
 

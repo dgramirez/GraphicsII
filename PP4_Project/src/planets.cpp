@@ -5,6 +5,8 @@
 #include "texture_h/axeTexture.h"
 #include "texture_h/fighter.h"
 
+float flagtime = 0.0f;
+
 Object* create_pyramid()
 {
 	std::vector<Vertex> pyramid_vertex = {
@@ -44,14 +46,18 @@ Object* create_normal_ship()
 }
 Object* create_fighter_ship()
 {
+	LOG("Creating Fighter Plane")
 	Texture* myFighterTexture = new Texture("assets\\misc\\fighter_texture.jpg");
 
 	uint32_t verts = sizeof(fighter_data) / sizeof(_OBJ_VERT_);
 	uint32_t inds = sizeof(fighter_indicies) / sizeof(unsigned int);
+	LOG("Fighter Plane Vertices: " << verts)
+	LOG("Fighter Plane Indices: " << inds)
 
 	Object *myFighter = new Object(fighter_data, verts, fighter_indicies, inds, myFighterTexture);
 	myFighter->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(165.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	myFighter->uniform_function = AxeRotation;
+	LOG("Fighter Plane Finished" << std::endl)
 
 	return myFighter;
 }
@@ -60,6 +66,8 @@ Object* create_grid()
 	std::vector<Vertex> grid_vertices;
 	std::vector<uint32_t> grid_indices;
 	uint32_t index = 0;
+
+	LOG("Creating Grid")
 	for (float i = -GRID_LENGTH; i <= GRID_LENGTH; i += GRID_SUBLENGTH)
 	{
 		//Setup 
@@ -90,6 +98,8 @@ Object* create_grid()
 		grid_indices.push_back(index + 4);
 		index += 8;
 	}
+	LOG("Grid Vertices: " << grid_vertices.size())
+	LOG("Grid Indices: " << grid_indices.size())
 
 	Texture *grid_texture = new Texture(".\\assets\\misc\\white_pixel.png");
 	Object *Grid = new Object(grid_vertices, grid_indices, grid_texture);
@@ -97,6 +107,7 @@ Object* create_grid()
 	Grid->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	Grid->uniform_function = UniformMVP_Basic;
 
+	LOG("Finished Grid" << std::endl)
 	return Grid;
 }
 Object* create_square(const char* texture, float x1, float x2, float y1, float y2)
@@ -123,11 +134,9 @@ Object* create_square(const char* texture, float x1, float x2, float y1, float y
 
 	return Square;
 }
-Object* create_sphere(const char* fbmfilepath, const char* texturelocation, Texture* texturedoth, const float &scale_down, const glm::mat4 &model_matrix)
+Object* create_sphere(const char* fbmfilepath, const char* texturelocation, const char *normal_filepath)
 {
-	Object *mySphere = new Object(fbmfilepath, texturelocation);
-	mySphere->model_matrix = model_matrix;
-
+	Object *mySphere = new Object(fbmfilepath, texturelocation, normal_filepath);
 	return mySphere;
 }
 Object* create_ball()
@@ -250,9 +259,22 @@ void SunRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 }
 void MercuryRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
-	Uniform_Planets mvp;
-	PlanetaryRotation(context.swapchain.swapchain_aspect, mvp, obj, camera, 59.0f, 87.97f);
-	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, mvp);
+	Uniform_Planets ubo;
+//	PlanetaryRotation(context.swapchain.swapchain_aspect, ubo, obj, camera, 59.0f, 87.97f);
+
+	//Rotation around the Sun (Origin)
+	ubo.mvp.model = obj.model_matrix;
+	
+	//Transposed-Inversed Model
+	ubo.TI_model = glm::transpose(glm::inverse(ubo.mvp.model));
+	obj.model_matrix = ubo.mvp.model;
+
+	ubo.mvp.view = camera.view_inverse;
+	ubo.mvp.projection = camera.perspective;
+	ubo.mvp.projection[1][1] = -ubo.mvp.projection[1][1];
+	ubo.light_color = glm::vec4(1.0f, 1.0f, 1.0f, 0.25f);
+
+	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, ubo);
 }
 void VenusRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
@@ -361,13 +383,15 @@ void skybox_uniform(const VkObj_Context &context, Object &obj, Camera &camera)
 
 void flag_uniform(const VkObj_Context &context, Object &obj, Camera &camera)
 {
+	flagtime += (float)myTime.SmoothDelta() * 3.0f;
+
 	UBO_Flag ubo;
 
 	ubo.mvp.model = obj.model_matrix;
 	ubo.mvp.view = camera.view_inverse;
 	ubo.mvp.projection = camera.perspective;
 	ubo.mvp.projection[1][1] = -ubo.mvp.projection[1][1];
-	ubo.info = glm::vec4((float)myTime.SmoothDelta() * 3.0f, 0.0f, 0.0f, 0.0f);
+	ubo.info = glm::vec4(flagtime, 0.0f, 0.0f, 0.0f);
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.uniform_memory, ubo);
 
 	obj.model_matrix = ubo.mvp.model;

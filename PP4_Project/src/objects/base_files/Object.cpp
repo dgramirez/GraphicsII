@@ -42,10 +42,14 @@ Object::Object(const OBJ_VERT* object_vertices, const unsigned int &vertices_siz
 	prv_Scale = 1.0f;
 }
 
-Object::Object(const char* fmd_filename, const char *texture_filename)
+Object::Object(const char* fmd_filename, const char *texture_filename, const char *normalmap_filename)
 {
 	pMesh = new Mesh(fmd_filename);
 	pTexture = new Texture(texture_filename);
+	if (normalmap_filename)
+		pNormalMap = new Texture(normalmap_filename);
+	else
+		pNormalMap = nullptr;
 }
 
 Object::~Object()
@@ -64,11 +68,16 @@ void Object::init(const uint32_t &sizeof_ubuffer, const uint32_t &pipe_index)
 	prv_ModelMatrixPrevious = glm::mat4(1.0f);
 	pMesh->init();
 	pTexture->init();
+	if (pNormalMap) pNormalMap->init();
 
 	pipeline_index = pipe_index;
 	uniform_size_bytes = sizeof_ubuffer;
 	create_uniform_buffer();
-	create_descriptor_set();
+
+	if (pNormalMap)
+		create_descriptor_set_nm();
+	else
+		create_descriptor_set();
 }
 
 void Object::swap_color_format(const VkComponentSwizzle &r, const VkComponentSwizzle &g, const VkComponentSwizzle &b, const VkComponentSwizzle &a)
@@ -97,6 +106,12 @@ void Object::cleanup()
 	{
 		delete pTexture;
 		pTexture = nullptr;
+	}
+
+	if (pNormalMap)
+	{
+		delete pNormalMap;
+		pNormalMap = nullptr;
 	}
 
 	if (pMesh)
@@ -177,6 +192,76 @@ void Object::create_descriptor_set()
 		write_descriptor_set[1].pImageInfo = &descriptor_image_info;
 		write_descriptor_set[1].pTexelBufferView = nullptr;
 		write_descriptor_set[1].pNext = nullptr;
+
+		vkUpdateDescriptorSets(myContext.device.logical, CAST(uint32_t, write_descriptor_set.size()), write_descriptor_set.data(), 0, nullptr);
+	}
+
+}
+
+void Object::create_descriptor_set_nm()
+{
+	uint32_t swapchain_size = (uint32_t)myContext.swapchain.frame_buffers.size();
+	std::vector<VkDescriptorSetLayout> descriptor_set_layout_vector(swapchain_size, myContext.pipelines.pipelines[pipeline_index].descriptor_set_layout);
+
+	VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {};
+	descriptor_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	descriptor_set_allocate_info.descriptorSetCount = swapchain_size;
+	descriptor_set_allocate_info.descriptorPool = myContext.pipelines.pipelines[pipeline_index].descriptor_pool;
+	descriptor_set_allocate_info.pSetLayouts = descriptor_set_layout_vector.data();
+
+	descriptor_set.resize(swapchain_size);
+	vkAllocateDescriptorSets(myContext.device.logical, &descriptor_set_allocate_info, descriptor_set.data());
+
+	for (uint32_t i = 0; i < swapchain_size; ++i)
+	{
+		VkDescriptorBufferInfo descriptor_buffer_info = {};
+		descriptor_buffer_info.buffer = uniform_buffer[i];
+		descriptor_buffer_info.offset = 0;
+		descriptor_buffer_info.range = uniform_size_bytes;
+
+		VkDescriptorImageInfo descriptor_image_info = {};
+		descriptor_image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		descriptor_image_info.imageView = pTexture->image_view;
+		descriptor_image_info.sampler = pTexture->sampler;
+
+		VkDescriptorImageInfo descriptor_normal_image_info = {};
+		descriptor_normal_image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		descriptor_normal_image_info.imageView = pNormalMap->image_view;
+		descriptor_normal_image_info.sampler = pNormalMap->sampler;
+
+		std::array<VkWriteDescriptorSet, 3> write_descriptor_set;
+		write_descriptor_set[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_descriptor_set[0].dstSet = descriptor_set[i];
+		write_descriptor_set[0].dstBinding = 0;
+		write_descriptor_set[0].dstArrayElement = 0;
+		write_descriptor_set[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		write_descriptor_set[0].descriptorCount = 1;
+		write_descriptor_set[0].pBufferInfo = &descriptor_buffer_info;
+		write_descriptor_set[0].pImageInfo = nullptr;
+		write_descriptor_set[0].pTexelBufferView = nullptr;
+		write_descriptor_set[0].pNext = nullptr;
+
+		write_descriptor_set[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_descriptor_set[1].dstSet = descriptor_set[i];
+		write_descriptor_set[1].dstBinding = 1;
+		write_descriptor_set[1].dstArrayElement = 0;
+		write_descriptor_set[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		write_descriptor_set[1].descriptorCount = 1;
+		write_descriptor_set[1].pBufferInfo = nullptr;
+		write_descriptor_set[1].pImageInfo = &descriptor_image_info;
+		write_descriptor_set[1].pTexelBufferView = nullptr;
+		write_descriptor_set[1].pNext = nullptr;
+
+		write_descriptor_set[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write_descriptor_set[2].dstSet = descriptor_set[i];
+		write_descriptor_set[2].dstBinding = 2;
+		write_descriptor_set[2].dstArrayElement = 0;
+		write_descriptor_set[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		write_descriptor_set[2].descriptorCount = 1;
+		write_descriptor_set[2].pBufferInfo = nullptr;
+		write_descriptor_set[2].pImageInfo = &descriptor_normal_image_info;
+		write_descriptor_set[2].pTexelBufferView = nullptr;
+		write_descriptor_set[2].pNext = nullptr;
 
 		vkUpdateDescriptorSets(myContext.device.logical, CAST(uint32_t, write_descriptor_set.size()), write_descriptor_set.data(), 0, nullptr);
 	}
