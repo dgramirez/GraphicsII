@@ -12,16 +12,16 @@ layout(binding = 0) uniform mvp_object {
 } mvp;
 
 //Vertex Structure
-layout(location=0) in vec3 pos;
-layout(location=1) in vec3 color;
-layout(location=2) in vec2 uv;
-layout(location=3) in vec3 normal;
-layout(location=4) in vec3 tangent;
-layout(location=5) in vec3 binormal;
+layout(location=0) in vec4 position;
+layout(location=1) in vec4 tangent;
+layout(location=2) in vec4 binormal;
+layout(location=3) in vec4 normal;
+layout(location=4) in vec4 color;
+layout(location=5) in vec2 uv;
 
 //Sending Vertex info
 layout(location=0) out vec2 frag_uv;					//Texture's UVs
-layout(location=1) out mat3 frag_TBN;				//Texture's Normals
+layout(location=1) out mat3 frag_TBN;					//Texture's Normals
 layout(location=4) out vec3 frag_pos;					//Position of Fragment Pixel
 layout(location=5) out vec3 frag_viewpos;			//Camera Position
 
@@ -35,17 +35,17 @@ layout(location=9) out float frag_specularStrength; //For Specular Light
 void main()
 {
 	//Setup Position
-	gl_Position = mvp.projection * mvp.view * mvp.model * vec4(pos, 1.0f);
-	frag_pos = vec3(mvp.model * vec4(pos, 1.0f));
+	gl_Position = mvp.projection * mvp.view * mvp.model * position;
+	frag_pos = vec3(mvp.model * position);
 	frag_viewpos = vec3(mvp.view * vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	
 	//Send Texture UV
 	frag_uv = uv;
 	
 	//Setup TBN
-	vec3 normal = mat3(mvp.model_transposed_inversed) * normal;
-	vec3 tangent = mat3(mvp.model_transposed_inversed) * tangent;
-	vec3 binormal = mat3(mvp.model_transposed_inversed) * binormal;
+	vec3 normal = mat3(mvp.model_transposed_inversed) * vec3(normal);
+	vec3 tangent = mat3(mvp.model_transposed_inversed) * vec3(tangent);
+	vec3 binormal = mat3(mvp.model_transposed_inversed) * vec3(binormal);
 	
 	frag_TBN[0] = tangent;
 	frag_TBN[1] = binormal;

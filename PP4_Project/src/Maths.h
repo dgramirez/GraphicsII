@@ -4,31 +4,31 @@
 #include "pch.h"
 
 #pragma region Unique_Defines
-#define V_COLOR_BLACK	{ 0.0f, 0.0f, 0.0f }
-#define V_COLOR_RED		{ 1.0f, 0.0f, 0.0f }
-#define V_COLOR_GREEN	{ 0.0f, 1.0f, 0.0f }
-#define V_COLOR_BLUE	{ 0.0f, 0.0f, 1.0f }
-#define V_COLOR_MAGENTA	{ 1.0f, 0.0f, 1.0f }
-#define V_COLOR_CYAN	{ 0.0f, 1.0f, 1.0f }
-#define V_COLOR_YELLOW	{ 1.0f, 1.0f, 0.0f }
-#define V_COLOR_WHITE	{ 1.0f, 1.0f, 1.0f }
+#define V_COLOR_BLACK	{ 0.0f, 0.0f, 0.0f, 1.0f }
+#define V_COLOR_RED		{ 1.0f, 0.0f, 0.0f, 1.0f }
+#define V_COLOR_GREEN	{ 0.0f, 1.0f, 0.0f, 1.0f }
+#define V_COLOR_BLUE	{ 0.0f, 0.0f, 1.0f, 1.0f }
+#define V_COLOR_MAGENTA	{ 1.0f, 0.0f, 1.0f, 1.0f }
+#define V_COLOR_CYAN	{ 0.0f, 1.0f, 1.0f, 1.0f }
+#define V_COLOR_YELLOW	{ 1.0f, 1.0f, 0.0f, 1.0f }
+#define V_COLOR_WHITE	{ 1.0f, 1.0f, 1.0f, 1.0f }
 
 #define POSITION 0
-#define COLOR	 1
-#define UV		 2
+#define TANGENT	 1
+#define BINORMAL 2
 #define NORMAL	 3
-#define TANGENT	 4
-#define BINORMAL 5
+#define COLOR	 4
+#define UV		 5
 #pragma endregion
 
 struct Vertex
 {
-	glm::vec3 position;
-	glm::vec3 color;
+	glm::vec4 position;
+	glm::vec4 tangent;
+	glm::vec4 binormal;
+	glm::vec4 normal;
+	glm::vec4 color;
 	glm::vec2 uv;
-	glm::vec3 normal;
-	glm::vec3 tangent;
-	glm::vec3 binormal;
 
 	static VkVertexInputBindingDescription get_binding_description()
 	{
@@ -46,34 +46,34 @@ struct Vertex
 		std::array<VkVertexInputAttributeDescription, 6> attribute_description = {};
 
 		attribute_description[POSITION].binding = 0;
-		attribute_description[POSITION].location = 0;
+		attribute_description[POSITION].location = POSITION;
 		attribute_description[POSITION].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attribute_description[POSITION].offset = offsetof(Vertex, position);
 
-		attribute_description[COLOR].binding = 0;
-		attribute_description[COLOR].location = 1;
-		attribute_description[COLOR].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attribute_description[COLOR].offset = offsetof(Vertex, color);
-
-		attribute_description[UV].binding = 0;
-		attribute_description[UV].location = 2;
-		attribute_description[UV].format = VK_FORMAT_R32G32_SFLOAT;
-		attribute_description[UV].offset = offsetof(Vertex, uv);
-
-		attribute_description[NORMAL].binding = 0;
-		attribute_description[NORMAL].location = 3;
-		attribute_description[NORMAL].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attribute_description[NORMAL].offset = offsetof(Vertex, normal);
-
 		attribute_description[TANGENT].binding = 0;
-		attribute_description[TANGENT].location = 4;
+		attribute_description[TANGENT].location = TANGENT;
 		attribute_description[TANGENT].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attribute_description[TANGENT].offset = offsetof(Vertex, tangent);
 
 		attribute_description[BINORMAL].binding = 0;
-		attribute_description[BINORMAL].location = 5;
+		attribute_description[BINORMAL].location = BINORMAL;
 		attribute_description[BINORMAL].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attribute_description[BINORMAL].offset = offsetof(Vertex, binormal);
+
+		attribute_description[NORMAL].binding = 0;
+		attribute_description[NORMAL].location = NORMAL;
+		attribute_description[NORMAL].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attribute_description[NORMAL].offset = offsetof(Vertex, normal);
+
+		attribute_description[COLOR].binding = 0;
+		attribute_description[COLOR].location = COLOR;
+		attribute_description[COLOR].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attribute_description[COLOR].offset = offsetof(Vertex, color);
+
+		attribute_description[UV].binding = 0;
+		attribute_description[UV].location = UV;
+		attribute_description[UV].format = VK_FORMAT_R32G32_SFLOAT;
+		attribute_description[UV].offset = offsetof(Vertex, uv);
 
 		return attribute_description;
 	}

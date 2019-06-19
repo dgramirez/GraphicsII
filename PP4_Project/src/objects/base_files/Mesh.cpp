@@ -241,12 +241,12 @@ void Mesh::ImportFMD(const char *filename)
 	prv_Indices.resize(isize);
 	for (uint32_t i = 0; i < vsize; ++i)
 	{
-		prv_Vertices[i].position = glm::vec3(vertices[i].position.x, vertices[i].position.y, vertices[i].position.z);
-		prv_Vertices[i].normal	= glm::vec3(vertices[i].normal.x, vertices[i].normal.y, vertices[i].normal.z);
-		prv_Vertices[i].uv		= glm::vec2(vertices[i].uv.x, vertices[i].uv.y);
-		prv_Vertices[i].tangent	= glm::vec3(vertices[i].tangent.x, vertices[i].tangent.y, vertices[i].tangent.z);
-		prv_Vertices[i].binormal = glm::vec3(vertices[i].binormal.x, vertices[i].binormal.y, vertices[i].binormal.z);
-		prv_Vertices[i].color	= glm::vec3(vertices[i].color.x, vertices[i].color.y, vertices[i].color.z);
+		prv_Vertices[i].position	= glm::vec4(vertices[i].position.x, vertices[i].position.y, vertices[i].position.z, vertices[i].position.w);
+		prv_Vertices[i].tangent		= glm::vec4(vertices[i].tangent.x,	vertices[i].tangent.y,	vertices[i].tangent.z,	vertices[i].tangent.w);
+		prv_Vertices[i].binormal	= glm::vec4(vertices[i].binormal.x, vertices[i].binormal.y, vertices[i].binormal.z, vertices[i].binormal.w);
+		prv_Vertices[i].normal		= glm::vec4(vertices[i].normal.x,	vertices[i].normal.y,	vertices[i].normal.z,	vertices[i].normal.w);
+		prv_Vertices[i].color		= glm::vec4(vertices[i].color.x,	vertices[i].color.y,	vertices[i].color.z,	vertices[i].color.w);
+		prv_Vertices[i].uv			= glm::vec2(vertices[i].uv.x,		vertices[i].uv.y);
 	}
 	for (uint32_t i = 0; i < isize; ++i)
 		prv_Indices[i] = indices[i];
@@ -354,17 +354,17 @@ void Mesh::ProcessFbxMesh(FbxNode* node)
 				for (int j = 0; j < prv_Vertices.size(); j++)
 				{
 					FbxVector4 vert = mesh->GetControlPointAt(j);
-					prv_Vertices[j].position = { vert.mData[0] / scale, vert.mData[1] / scale, vert.mData[2] / scale };
+					prv_Vertices[j].position = { vert.mData[0] / scale, vert.mData[1] / scale, vert.mData[2] / scale, vert.mData[3] / scale };
 
 					// Generate random normal
-					vertices[j].normal = RAND_NORMAL;
+//					vertices[j].normal = RAND_NORMAL;
 				}
 
 				// align (expand) vertex array and set the normals
 				for (int j = 0; j < prv_Indices.size(); ++j)
 				{
 					vertices2[j].position = vertices[indices[j]].position;
-					vertices2[j].normal = glm::vec3(normalsVec[j].mData[0], normalsVec[j].mData[1], normalsVec[j].mData[2]);
+					vertices2[j].normal = glm::vec4(normalsVec[j].mData[0], normalsVec[j].mData[1], normalsVec[j].mData[2], normalsVec[j].mData[3]);
 					vertices2[j].uv = glm::vec2(TexUV[j].mData[0], TexUV[j].mData[1]);
 				}
 

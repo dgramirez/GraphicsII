@@ -4,13 +4,15 @@
 //Binding Texture
 layout(binding=1) uniform sampler2D uv_sampler;
 
-//From Vertex Shader
-layout(location=0) in vec2 frag_uv;
+//Object's info
+layout(location=0) in vec2 frag_uv;					//Texture's UVs
 
-//Out Color
+//Return Value
 layout(location=0) out vec4 out_color;
 
 void main()
 {
-	out_color = texture(uv_sampler, frag_uv);
+	//Get Object Color
+	vec4 object_color = texture(uv_sampler, frag_uv);
+	out_color = object_color;
 }

@@ -19,12 +19,12 @@ layout(binding = 0) uniform UBO_Ships {
 } ubo;
 
 //Vertex Structure
-layout(location=0) in vec3 pos;
-layout(location=1) in vec3 color;
-layout(location=2) in vec2 uv;
-layout(location=3) in vec3 normal;
-layout(location=4) in vec3 tangent;
-layout(location=5) in vec3 binormal;
+layout(location=0) in vec4 position;
+layout(location=1) in vec4 tangent;
+layout(location=2) in vec4 binormal;
+layout(location=3) in vec4 normal;
+layout(location=4) in vec4 color;
+layout(location=5) in vec2 uv;
 
 //Sending Vertex info
 layout(location=0) out vec2 frag_uv;			//Texture's UVs
@@ -50,11 +50,11 @@ layout(location=16) out float frag_coneouter;			//For Spotlight
 void main()
 {
 	//Setup Position
-	gl_Position = ubo.projection * ubo.view * ubo.model * vec4(pos, 1.0f);
-	frag_pos = vec3(ubo.model * vec4(pos, 1.0f));
+	gl_Position = ubo.projection * ubo.view * ubo.model * position;
+	frag_pos = vec3(ubo.model * position);
 	
 	//Setup Normals
-	frag_normal = mat3(ubo.TI_model) * normal;
+	frag_normal = mat3(ubo.TI_model) * vec3(normal);
 	
 	//Send Light Position
 	frag_light1pos = vec3(vec4(ubo.light1_pos.xyz, 1.0f));

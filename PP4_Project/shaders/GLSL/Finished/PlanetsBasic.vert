@@ -12,12 +12,12 @@ layout(binding = 0) uniform mvp_object {
 } mvp;
 
 //Vertex Structure
-layout(location=0) in vec3 pos;
-layout(location=1) in vec3 color;
-layout(location=2) in vec2 uv;
-layout(location=3) in vec3 normal;
-layout(location=4) in vec3 tangent;
-layout(location=5) in vec3 binormal;
+layout(location=0) in vec4 position;
+layout(location=1) in vec4 tangent;
+layout(location=2) in vec4 binormal;
+layout(location=3) in vec4 normal;
+layout(location=4) in vec4 color;
+layout(location=5) in vec2 uv;
 
 //Sending Vertex info
 layout(location=0) out vec2 frag_uv;					//Texture's UVs
@@ -35,15 +35,15 @@ layout(location=7) out float frag_specularStrength; //For Specular Light
 void main()
 {
 	//Setup Position
-	gl_Position = mvp.projection * mvp.view * mvp.model * vec4(pos, 1.0f);
-	frag_pos = vec3(mvp.model * vec4(pos, 1.0f));
+	gl_Position = mvp.projection * mvp.view * mvp.model * position;
+	frag_pos = vec3(mvp.model * position);
 	frag_viewpos = vec3(mvp.view * vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	
 	//Send Texture UV
 	frag_uv = uv;
 	
 	//Setup Normals
-	frag_normal = mat3(mvp.model_transposed_inversed) * normal;
+	frag_normal = mat3(mvp.model_transposed_inversed) * vec3(normal.xyz);
 	
 	//Send Light Color
 	frag_lightcolor = vec3(mvp.light_color);

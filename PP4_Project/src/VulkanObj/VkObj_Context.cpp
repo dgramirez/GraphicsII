@@ -65,14 +65,14 @@ bool VkObj_Context::init(SDL_Window *win)
 
 	//Create the pipelines
 	pipelines.init(device, swapchain);
-	pipelines.create_pipeline("shaders/Spir-V/vertBasic.spv", "shaders/Spir-V/fragBasic.spv");										//PIPELINE_TEXTURE
-	pipelines.create_pipeline("shaders/Spir-V/vertBasicTexture.spv", "shaders/Spir-V/fragBasicTexture.spv");						//PIPELINE_PLANETS
-	pipelines.create_pipeline("shaders/Spir-V/vertBasic.spv", "shaders/Spir-V/fragBasic.spv", true, VK_COMPARE_OP_LESS, false);		//PIPELINE_GRID
-	pipelines.create_pipeline("shaders/Spir-V/vertBasic.spv", "shaders/Spir-V/fragBasic.spv", false);								//PIPELINE_SKYBOX
-	pipelines.create_pipeline("shaders/Spir-V/vertShips.spv", "shaders/Spir-V/fragShips.spv");										//PIPELINE_PHONG
-	pipelines.create_pipeline("shaders/Spir-V/vertFlag.spv", "shaders/Spir-V/fragFlag.spv", true, VK_COMPARE_OP_LESS, false);		//PIPELINE_FLAG
-	pipelines.create_pipeline("shaders/Spir-V/vertBasic.spv", "shaders/Spir-V/fragBasic.spv", true, VK_COMPARE_OP_LESS, false);		//PIPELINE_HYD
-	pipelines.create_pipeline_normalmaps("shaders/Spir-V/NormalMapped.vert.spv", "shaders/Spir-V/NormalMapped.frag.spv");			//PIPELINE_EARTH_NORMAL
+	pipelines.create_pipeline("shaders/Spir-V/BasicTexture.vert.spv", "shaders/Spir-V/BasicTexture.frag.spv");										//PIPELINE_TEXTURE
+	pipelines.create_pipeline("shaders/Spir-V/PlanetsBasic.vert.spv", "shaders/Spir-V/PlanetsBasic.frag.spv");										//PIPELINE_PLANETS
+	pipelines.create_pipeline("shaders/Spir-V/BasicTexture.vert.spv", "shaders/Spir-V/BasicTexture.frag.spv", true, VK_COMPARE_OP_LESS, false);		//PIPELINE_GRID
+	pipelines.create_pipeline("shaders/Spir-V/BasicTexture.vert.spv", "shaders/Spir-V/BasicTexture.frag.spv", false);								//PIPELINE_SKYBOX
+	pipelines.create_pipeline("shaders/Spir-V/Ships.vert.spv", "shaders/Spir-V/Ships.frag.spv");													//PIPELINE_PHONG
+	pipelines.create_pipeline("shaders/Spir-V/Flag.vert.spv", "shaders/Spir-V/Flag.frag.spv", true, VK_COMPARE_OP_LESS, false);						//PIPELINE_FLAG
+	pipelines.create_pipeline("shaders/Spir-V/BasicTexture.vert.spv", "shaders/Spir-V/BasicTexture.frag.spv", true, VK_COMPARE_OP_LESS, false);		//PIPELINE_HUD
+	pipelines.create_pipeline_normalmaps("shaders/Spir-V/PlanetsNormalMap.vert.spv", "shaders/Spir-V/PlanetsNormalMap.frag.spv");					//PIPELINE_EARTH_NORMAL
 
 	return true;
 }
