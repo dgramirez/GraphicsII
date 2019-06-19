@@ -34,29 +34,29 @@ layout(location=9) out float frag_specularStrength; //For Specular Light
 
 void main()
 {
+	//Setup TBN
+	vec3 T =	normalize(mat3(mvp.model) * tangent.xyz);
+	vec3 N =	normalize(mat3(mvp.model) * normal.xyz);
+	
+	T = normalize(T - dot(T,N) * N);
+	
+	vec3 B = 	cross(N,T);
+	
+	frag_TBN = transpose(inverse(mat3(T, B, N)));
+	
 	//Setup Position
 	gl_Position = mvp.projection * mvp.view * mvp.model * position;
 	frag_pos = vec3(mvp.model * position);
-	frag_viewpos = vec3(mvp.view * vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	frag_viewpos = vec3(mvp.view[3]);
 	
 	//Send Texture UV
 	frag_uv = uv;
-	
-	//Setup TBN
-	vec3 normal = mat3(mvp.model_transposed_inversed) * vec3(normal);
-	vec3 tangent = mat3(mvp.model_transposed_inversed) * vec3(tangent);
-	vec3 binormal = mat3(mvp.model_transposed_inversed) * vec3(binormal);
-	
-	frag_TBN[0] = tangent;
-	frag_TBN[1] = binormal;
-	frag_TBN[2] = normal;
-	frag_TBN = transpose(frag_TBN);
 	
 	//Send Light Color
 	frag_lightcolor = vec3(mvp.light_color);
 	
 	//Send Sun Position
-	frag_lightpos = vec3(mvp.sun_pos);
+	frag_lightpos = frag_TBN * vec3(mvp.sun_pos);
 	
 	//Send Ambient Information
 	frag_ambientStrength = mvp.light_color.w;

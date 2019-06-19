@@ -26,16 +26,16 @@ void main()
 	//Get Object Color
 	vec4 object_color = texture(uv_sampler, frag_uv);
 	vec3 normal_map = vec3(texture(normal_map, frag_uv));
-	
+
 	//Normals Setup
-	vec3 new_normal = (normal_map * 2.0f) - 1.0f;
+	vec3 new_normal = normalize(normal_map * 2.0f - 1.0f);
 	
 	mat3 TBN = frag_TBN;
 	TBN[0] = normalize(TBN[0]);
 	TBN[1] = normalize(TBN[1]);
 	TBN[2] = normalize(TBN[2]);
 	
-	vec3 normal = TBN * new_normal;
+	vec3 normal = new_normal * TBN;
 	
 //	vec3 normal = normalize(frag_TBN[2]);
 	
