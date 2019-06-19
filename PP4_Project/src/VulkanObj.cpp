@@ -126,8 +126,8 @@ void VulkanObj::update_window_title()
 {
 	char buffer[255];
 	ZeroMemory(buffer, 255);
-	sprintf_s(buffer, sizeof(buffer), "Fov: %f | Near: %f | Far: %f | MovSpd: %f | Planet: %s | Attenuation: %f | x: %f | y: %f | z: %f", 
-										camera.fov, camera.nearplane, camera.farplane, camera.viewspd, camera.planet_name, camera.attenuation, camera.view[3].x, camera.view[3].y, camera.view[3].z);
+	sprintf_s(buffer, sizeof(buffer), "Fov: %f | Near: %f | Far: %f | MovSpd: %f | Planet: %s | Point Attenuation: %f | Spot Inner Cone Attenuation: %f | Spot Outer Cone Attenuation: %f", 
+										camera.fov, camera.nearplane, camera.farplane, camera.viewspd, camera.planet_name, camera.attenuation, camera.spot_light_strengths.x, camera.spot_light_strengths.y);
 
 	uint32_t length = (uint32_t)strlen(buffer);
 	char* title = new char[length + 1];

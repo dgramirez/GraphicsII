@@ -144,9 +144,8 @@ void Camera::Update_FunctionButtons(const SDL_Event &e)
 			glm::mat4 planet_model_matrix = obj->model_matrix;
 
 			LookAtPlanet();
-			float spacing = SIZE_SPHERE / obj->scale;
 			prv_View[3] = planet_model_matrix[3];
-			prv_View = glm::translate(prv_View, glm::vec3(0.0f, 0.0f, 10.0f * spacing));
+			prv_View = glm::translate(prv_View, glm::vec3(0.0f, 0.0f, 10.0f));
 			prv_ViewInv = glm::inverse(prv_View);
 
 			t_released = true;
@@ -172,49 +171,39 @@ void Camera::Update_FunctionButtons(const SDL_Event &e)
 				prv_Viewspd = 0.25f;
 		}
 
-		if (e.key.keysym.sym == SDLK_KP_PLUS && key != SDLK_RCTRL)
-			prv_Attenuation += 0.01f;
-
-		if (e.key.keysym.sym == SDLK_KP_MINUS && key != SDLK_RCTRL)
+		if (key == SDLK_KP_PLUS)
 		{
-			prv_Attenuation -= 0.01f;
-			if (prv_Attenuation < 0.01f)
-				prv_Attenuation = 0.01f;
-		}
-
-		if (key == SDLK_RCTRL)
-		{
-			if (e.key.keysym.sym == SDLK_KP_PLUS)
+			if (InputController::Rctrl)
 			{
-				prv_SpotLightStrengths.x += 0.01f;
-				// 			if (prv_SpotLightStrengths.x >= prv_SpotLightStrengths.y)
-				// 				prv_SpotLightStrengths.x = prv_SpotLightStrengths.y - 0.01f;
+				prv_SpotLightStrengths.x += 0.1f * (float)myTime.SmoothDelta();
 			}
-
-			if (e.key.keysym.sym == SDLK_KP_MINUS)
+			else if (InputController::Rshift)
 			{
-				prv_SpotLightStrengths.x -= 0.01f;
-				// 			if (prv_SpotLightStrengths.x < 0.01f)
-				// 				prv_SpotLightStrengths.x = 0.01f;
+				prv_SpotLightStrengths.y += 0.1f * (float)myTime.SmoothDelta();
+			}
+			else
+			{
+				prv_Attenuation += 0.01f;
 			}
 		}
-
-		if (key == SDLK_RSHIFT)
+		else if (key == SDLK_KP_MINUS)
 		{
-			if (e.key.keysym.sym == SDLK_KP_PLUS)
+			if (InputController::Rctrl)
 			{
-				prv_SpotLightStrengths.y += 0.01f;
-				// 			if (prv_SpotLightStrengths.y < prv_SpotLightStrengths.x)
-				// 				prv_SpotLightStrengths.y = prv_SpotLightStrengths.x + 0.1f;
+				prv_SpotLightStrengths.x -= 0.1f * (float)myTime.SmoothDelta();
 			}
-
-			if (e.key.keysym.sym == SDLK_KP_MINUS)
+			else if (InputController::Rshift)
 			{
-				prv_SpotLightStrengths.y -= 0.01f;
-				if (prv_SpotLightStrengths.y < 0.01f)
-					prv_SpotLightStrengths.y = 0.01f;
+				prv_SpotLightStrengths.y -= 0.1f * (float)myTime.SmoothDelta();
+			}
+			else
+			{
+				prv_Attenuation -= 0.01f;
+				if (prv_Attenuation < 0.01f)
+					prv_Attenuation = 0.01f;
 			}
 		}
+
 	}
 }
 
