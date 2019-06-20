@@ -35,7 +35,7 @@ void main()
 	TBN[1] = normalize(TBN[1]);
 	TBN[2] = normalize(TBN[2]);
 	
-	vec3 normal = new_normal * TBN;
+	vec3 normal = TBN * new_normal;
 	
 //	vec3 normal = normalize(frag_TBN[2]);
 	

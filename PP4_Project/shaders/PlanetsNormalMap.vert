@@ -35,14 +35,14 @@ layout(location=9) out float frag_specularStrength; //For Specular Light
 void main()
 {
 	//Setup TBN
-	vec3 T =	normalize(mat3(mvp.model) * tangent.xyz);
-	vec3 N =	normalize(mat3(mvp.model) * normal.xyz);
+	vec3 T =	normalize(mat3(mvp.model_transposed_inversed) * tangent.xyz);
+	vec3 N =	normalize(mat3(mvp.model_transposed_inversed) * normal.xyz);
 	
 	T = normalize(T - dot(T,N) * N);
 	
 	vec3 B = 	cross(N,T);
 	
-	frag_TBN = transpose(inverse(mat3(T, B, N)));
+	frag_TBN = mat3(T, B, N);
 	
 	//Setup Position
 	gl_Position = mvp.projection * mvp.view * mvp.model * position;

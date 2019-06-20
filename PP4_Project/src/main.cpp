@@ -28,7 +28,7 @@ int main(int argc, char* args[])
 	std::vector<Object*> *Object_List = new std::vector<Object*>(0);
 	Object_List->push_back(Skybox);
 	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Sun.fmd",		".\\assets\\solarsystem\\texture\\sunmap.png"		));
-	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Mercury.fmd",	".\\assets\\solarsystem\\texture\\mercurymap.png",	".\\assets\\solarsystem\\texture\\MercuryNormalMap.png"	));
+	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Mercury.fmd",	".\\assets\\solarsystem\\texture\\mercurymap.png",	".\\assets\\solarsystem\\texture\\MercuryNormalMap.png"));
 	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Venus.fmd",	".\\assets\\solarsystem\\texture\\venusmap.png",	".\\assets\\solarsystem\\texture\\VenusNormalMap.png"	));
 	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Earth.fmd",	".\\assets\\solarsystem\\texture\\earthmap1k.png",	".\\assets\\solarsystem\\texture\\EarthNormalMap.png"	));
 	Object_List->push_back(create_sphere(".\\assets\\solarsystem\\Mars.fmd",	".\\assets\\solarsystem\\texture\\marsmap1k.png",	".\\assets\\solarsystem\\texture\\mars_1k_normal.png"	));
