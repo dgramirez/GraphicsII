@@ -9,6 +9,8 @@
 struct VkStruct_Pipeline {
 	const char* vertex_shader_name;
 	const char* fragment_shader_name;
+	const char* geometry_shader_name;
+	uint32_t pipeline_mask;
 	bool culling_enabled;
 	bool depth_enabled;
 	VkCompareOp depth_op;

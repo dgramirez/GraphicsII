@@ -15,6 +15,9 @@ Texture::Texture(const int32_t &width, const int32_t &height, void *pixels, cons
 
 Texture::Texture(const char* filename)
 {
+#ifdef _DEBUG
+	LOG("Getting Texture from" << filename)
+#endif
 	void *stbi_data = stbi_load(filename, &prv_Width, &prv_Height, nullptr, 4);
 	uint32_t *color_data = (uint32_t *)stbi_data;
 	prv_Color.resize(prv_Width * prv_Height);
@@ -28,6 +31,9 @@ Texture::Texture(const char* filename)
 	prv_TextureType = TEXTURE_TYPE_STBI;
 	prv_Sampler = nullptr;
 	prv_Image = nullptr;
+#ifdef _DEBUG
+	LOG("Finished Getting Texture from" << filename)
+#endif
 }
 
 Texture::~Texture()

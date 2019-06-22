@@ -19,7 +19,6 @@
 #define PYRAMID 14
 #define SQUARE 15
 #define FLAG 16
-#define BALL 17
 
 #define SIZE_SPHERE			79.1f
 #define SIZE_SUN			SIZE_SPHERE / 139.2f
@@ -61,11 +60,10 @@ Object* create_fighter_ship();
 Object* create_square(const char* texture, float x1, float x2, float y1, float y2);
 Object* create_grid();
 Object* create_flag();
-Object* create_ball();
 #pragma endregion
 
 
-Object* create_sphere(const char* fbxfilepath, const char* texturelocation, const char *normal_filepath = nullptr);
+Object* create_sphere(const uint32_t &pipeline_index, const uint32_t &pipeline_mask, const uint32_t &sizeof_ubuffer, const char* fbxfilepath, const char* texturelocation, const char *normal_filepath = nullptr);
 
 void UniformMVP_Basic(const VkObj_Context &context, Object &obj, Camera &camera);
 void BallMVP_Basic(const VkObj_Context &context, Object &obj, Camera &camera);

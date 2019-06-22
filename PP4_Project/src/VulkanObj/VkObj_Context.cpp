@@ -64,15 +64,21 @@ bool VkObj_Context::init(SDL_Window *win)
 	swapchain.init(window, device, command_pool); 
 
 	//Create the pipelines
+	const uint32_t pmask_normal = PMASK_COLORMAP;
+	const uint32_t pmask_nocull = PMASK_COLORMAP | PMASK_NOCULLING;
+	const uint32_t pmask_skybox = pmask_nocull | PMASK_NODEPTH;
+	const uint32_t pmask_normalmap = PMASK_COLORMAP | PMASK_NORMALMAP;
+	const uint32_t pmask_earth = pmask_normal | PMASK_AMBIENTMAP | PMASK_SPECMAP;
+
 	pipelines.init(device, swapchain);
-	pipelines.create_pipeline("shaders/Spir-V/BasicTexture.vert.spv", "shaders/Spir-V/BasicTexture.frag.spv");										//PIPELINE_TEXTURE
-	pipelines.create_pipeline("shaders/Spir-V/PlanetsBasic.vert.spv", "shaders/Spir-V/PlanetsBasic.frag.spv");										//PIPELINE_PLANETS
-	pipelines.create_pipeline("shaders/Spir-V/BasicTexture.vert.spv", "shaders/Spir-V/BasicTexture.frag.spv", true, VK_COMPARE_OP_LESS, false);		//PIPELINE_GRID
-	pipelines.create_pipeline("shaders/Spir-V/BasicTexture.vert.spv", "shaders/Spir-V/BasicTexture.frag.spv", false);								//PIPELINE_SKYBOX
-	pipelines.create_pipeline("shaders/Spir-V/Ships.vert.spv", "shaders/Spir-V/Ships.frag.spv");													//PIPELINE_PHONG
-	pipelines.create_pipeline("shaders/Spir-V/Flag.vert.spv", "shaders/Spir-V/Flag.frag.spv", true, VK_COMPARE_OP_LESS, false);						//PIPELINE_FLAG
-	pipelines.create_pipeline("shaders/Spir-V/BasicTexture.vert.spv", "shaders/Spir-V/BasicTexture.frag.spv", true, VK_COMPARE_OP_LESS, false);		//PIPELINE_HUD
-	pipelines.create_pipeline_normalmaps("shaders/Spir-V/PlanetsNormalMap.vert.spv", "shaders/Spir-V/PlanetsNormalMap.frag.spv");					//PIPELINE_EARTH_NORMAL
+	pipelines.create_pipeline(pmask_normal, "shaders/Spir-V/BasicTexture.vert.spv", "shaders/Spir-V/BasicTexture.frag.spv");			//PIPELINE_TEXTURE
+	pipelines.create_pipeline(pmask_normal, "shaders/Spir-V/PlanetsBasic.vert.spv", "shaders/Spir-V/PlanetsBasic.frag.spv");			//PIPELINE_PLANETS
+	pipelines.create_pipeline(pmask_nocull, "shaders/Spir-V/BasicTexture.vert.spv", "shaders/Spir-V/BasicTexture.frag.spv");			//PIPELINE_GRID
+	pipelines.create_pipeline(pmask_skybox, "shaders/Spir-V/BasicTexture.vert.spv", "shaders/Spir-V/BasicTexture.frag.spv");			//PIPELINE_SKYBOX
+	pipelines.create_pipeline(pmask_normal, "shaders/Spir-V/Ships.vert.spv", "shaders/Spir-V/Ships.frag.spv");							//PIPELINE_PHONG
+	pipelines.create_pipeline(pmask_nocull, "shaders/Spir-V/Flag.vert.spv", "shaders/Spir-V/Flag.frag.spv");							//PIPELINE_FLAG
+	pipelines.create_pipeline(pmask_nocull, "shaders/Spir-V/BasicTexture.vert.spv", "shaders/Spir-V/BasicTexture.frag.spv");			//PIPELINE_HUD
+	pipelines.create_pipeline(pmask_normalmap, "shaders/Spir-V/PlanetsNormalMap.vert.spv", "shaders/Spir-V/PlanetsNormalMap.frag.spv");	//PIPELINE_PLANET_NORMALMAPPED
 
 	return true;
 }

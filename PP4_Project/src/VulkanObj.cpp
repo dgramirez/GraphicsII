@@ -9,27 +9,8 @@ bool VulkanObj::init(const char* title, SDL_Window* window, unsigned short win_w
 {
 	myContext.init(window);
 
-	
-	prv_ObjectList->at(SKYBOX)->init(sizeof(Uniform_MVP), PIPELINE_SKYBOX);
-
-	prv_ObjectList->at(SUN)->init(sizeof(Uniform_MVP), PIPELINE_TEXTURE);
-
-	for (uint32_t i = MERCURY; i <= PLUTO; ++i)
-	{
-		if (prv_ObjectList->at(i)->normal_map)
-			prv_ObjectList->at(i)->init(sizeof(Uniform_Planets), PIPELINE_PLANET_NORMALMAPPED);
-		else
-			prv_ObjectList->at(i)->init(sizeof(Uniform_Planets), PIPELINE_PLANETS);
-
-	}
-
-	prv_ObjectList->at(HFILE_SHIP)->init(sizeof(UBO_Ships), PIPELINE_PHONG);
-	prv_ObjectList->at(MODEL_SHIP)->init(sizeof(UBO_Ships), PIPELINE_PHONG);
-	prv_ObjectList->at(GRID)->init(sizeof(Uniform_MVP), PIPELINE_GRID);
-	prv_ObjectList->at(PYRAMID)->init(sizeof(Uniform_MVP), PIPELINE_GRID);
-	prv_ObjectList->at(SQUARE)->init(sizeof(UBO_Ships), PIPELINE_PHONG);
-	prv_ObjectList->at(FLAG)->init(sizeof(UBO_Ships), PIPELINE_FLAG);
-	prv_ObjectList->at(BALL)->init(sizeof(Uniform_MVP), PIPELINE_TEXTURE);
+	for (uint32_t i = 0; i < prv_ObjectList->size(); ++i)
+			prv_ObjectList->at(i)->init();
 
 	//Create Semaphores
 #if TRANSITION
@@ -73,7 +54,7 @@ bool VulkanObj::init(const char* title, SDL_Window* window, unsigned short win_w
 // 	CHECK_RESULT(vk_create_descriptor_pool(myContext.device.logical, myContext.swapchain.images, prv_Buffers_old.descriptor_pool), "Create Descriptor Pool Has Failed!");
 // 	CHECK_RESULT(vk_create_descriptor_sets(myContext.device.logical, myContext.swapchain.images, prv_Buffers_old.descriptor_pool, 
 // 		prv_Buffers_old.uniform, prv_Texture.texture_image_view, prv_Texture.sampler, prv_Buffers_old.descriptor_set_layout,
-// 		prv_Buffers_old.descriptor_sets), "Create Desriptor Sets Has Failed!");
+// 		prv_Buffers_old.descriptor_sets), "Create Descriptor Sets Has Failed!");
 // 	CHECK_RESULT(vk_create_command_buffer(myContext.device.logical, myContext.command_pool, myContext.swapchain.render_pass,
 // 		prv_RenderGraphicsPipeline.graphics_pipeline_layout, prv_RenderGraphicsPipeline.graphics_pipeline,
 // 		myContext.swapchain.extent2D, myContext.swapchain.frame_buffers, prv_Buffers_old.descriptor_sets, prv_Buffers_old.vertex, 0, 
@@ -100,10 +81,7 @@ void VulkanObj::reset_swapchain()
 	myContext.pipelines.reset_pipeline();
 
 	for (uint32_t i = 0; i < prv_ObjectList->size(); ++i)
-	{
-		prv_ObjectList->at(i)->create_uniform_buffer();
-		prv_ObjectList->at(i)->create_descriptor_set();
-	}
+		prv_ObjectList->at(i)->reset();
 }
 
 void VulkanObj::setup_object_list(uint32_t size)
@@ -267,7 +245,7 @@ void VulkanObj::CleanupSwapchain()
 
 	vkFreeCommandBuffers(myContext.device.logical, myContext.command_pool, CAST(uint32_t, myContext.swapchain.command_buffer.size()), myContext.swapchain.command_buffer.data());
 	for (uint32_t i = 0; i < prv_ObjectList->size(); ++i)
-		prv_ObjectList->at(i)->reset();
+		prv_ObjectList->at(i)->clear();
 
 	if (myContext.swapchain.render_pass)	vkDestroyRenderPass(myContext.device.logical, myContext.swapchain.render_pass, nullptr);
 

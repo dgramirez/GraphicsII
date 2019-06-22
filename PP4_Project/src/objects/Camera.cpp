@@ -364,7 +364,6 @@ void Camera::Update_CameraMovement(const SDL_Event &e)
 
 void Camera::Normalize_View_Matrix()
 {
-	glm::vec3 curY = glm::vec3(prv_View[1].x, prv_View[1].y, prv_View[1].z);
 	glm::vec3 curZ = glm::vec3(prv_View[2].x, prv_View[2].y, prv_View[2].z);
 	glm::vec3 worldY = glm::vec3(0.0f, -1.0f, 0.0f);
 
