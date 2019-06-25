@@ -82,6 +82,7 @@ bool VkObj_DeviceProperties::CreateLogicalDevice()
 	VkPhysicalDeviceFeatures device_features = {};
 	device_features.samplerAnisotropy = true;
 	device_features.sampleRateShading = VK_TRUE;
+	device_features.geometryShader = true;
 
 	//Setup Logical device create info
 	VkDeviceCreateInfo create_info = {};

@@ -23,7 +23,7 @@ void Camera::init(glm::mat4 translation, bool infinite_perspective, float rotati
 	prv_SpotLight = glm::vec4(-6.0f, -4.0f, 0.0f, 1.0f);
 	prv_SpotLightDir = glm::vec4(0.5f, 0.5f, 0.0f, 1.0f);
 	prv_SpotLightColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-	prv_SpotLightStrengths = glm::vec4(0.5f, 0.49f, 0.0f, 0.0f);
+	prv_SpotLightStrengths = glm::vec4(0.5f, 0.49f, 0.1f, 1.0f);
 
 	if (prv_InfinitePerspective)
 	{

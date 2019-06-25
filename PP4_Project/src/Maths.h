@@ -116,8 +116,13 @@ struct UBO_Ships
 	glm::vec4 light3_pos = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	glm::vec4 light3_dir = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 	glm::vec4 light3_color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-	glm::vec4 strengths = glm::vec4(0.25f, 0.75f, 0.1f, 1.0f);		//x=ambient, y=diffuse, z=attenuation, w=spotlight_ratio
-	glm::vec4 cone_strength = glm::vec4(0.01f, 0.1f, 0.0f, 0.0f);
+	glm::mat4 material = glm::mat4
+	(
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),	//x=Rmaterial, y=Gmaterial, z=Bmaterial, w=1.0f, Ambient
+		glm::vec4(1.0f, 1.0f, 1.0f, 0.1f),	//x=Rmaterial, y=Gmaterial, z=Bmaterial, w=ATN, Diffuse
+		glm::vec4(1.0f, 1.0f, 1.0f, 0.75f), //x=Rmaterial, y=Gmaterial, z=Bmaterial, w=SHN, Specular
+		glm::vec4(0.1f, 0.01f, 0.0f, 0.0f)	//x=pAttenuation, y=sInConeAtten, z=sOutConeAtten, w=spotlight_ratio
+	);
 };
 
 struct UBO_Flag

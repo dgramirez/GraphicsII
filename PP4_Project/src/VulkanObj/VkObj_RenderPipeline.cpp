@@ -162,17 +162,6 @@ void VkObj_RenderPipeline::CreateDescriptorSetLayout(const uint32_t &pipeline_ma
 	uint32_t binding = 0;
 	std::vector< VkDescriptorSetLayoutBinding> bindings;
 
-	VkDescriptorSetLayoutBinding gs_ubo_layout_binding = {};
-	if (pipeline_mask & PMASK_GEOSHADER)
-	{
-		gs_ubo_layout_binding.binding = binding++;
-		gs_ubo_layout_binding.descriptorCount = 1;
-		gs_ubo_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		gs_ubo_layout_binding.pImmutableSamplers = nullptr;
-		gs_ubo_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		bindings.push_back(gs_ubo_layout_binding);
-	}
-
 	VkDescriptorSetLayoutBinding vs_ubo_layout_binding = {};
 	vs_ubo_layout_binding.binding = binding++;
 	vs_ubo_layout_binding.descriptorCount = 1;
@@ -180,7 +169,6 @@ void VkObj_RenderPipeline::CreateDescriptorSetLayout(const uint32_t &pipeline_ma
 	vs_ubo_layout_binding.pImmutableSamplers = nullptr;
 	vs_ubo_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	bindings.push_back(vs_ubo_layout_binding);
-
 	
 	VkDescriptorSetLayoutBinding colormap_layout = {};
 	if (pipeline_mask & PMASK_COLORMAP)
@@ -224,6 +212,17 @@ void VkObj_RenderPipeline::CreateDescriptorSetLayout(const uint32_t &pipeline_ma
 		specmap_layout.pImmutableSamplers = nullptr;
 		specmap_layout.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 		bindings.push_back(specmap_layout);
+	}
+
+	VkDescriptorSetLayoutBinding gs_ubo_layout_binding = {};
+	if (pipeline_mask & PMASK_GEOSHADER)
+	{
+		gs_ubo_layout_binding.binding = binding++;
+		gs_ubo_layout_binding.descriptorCount = 1;
+		gs_ubo_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		gs_ubo_layout_binding.pImmutableSamplers = nullptr;
+		gs_ubo_layout_binding.stageFlags = VK_SHADER_STAGE_GEOMETRY_BIT;
+		bindings.push_back(gs_ubo_layout_binding);
 	}
 
 	VkDescriptorSetLayoutCreateInfo create_info = {};
@@ -455,6 +454,18 @@ void VkObj_RenderPipeline::CreateGraphicsPipeline(const uint32_t & pipeline_mask
 	//Stage Setup
 	std::vector<VkPipelineShaderStageCreateInfo> shader_stages;
 
+	//Vertex Shader
+	std::vector<char> shader_vertex_file = vk_read_shader_file(vertex_shader);
+	VkShaderModule shader_vertex_module = vk_create_shader_module(pDevice->logical, shader_vertex_file);
+
+	VkPipelineShaderStageCreateInfo vertex_shader_create_info = {};
+	vertex_shader_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	vertex_shader_create_info.stage = VK_SHADER_STAGE_VERTEX_BIT;
+	vertex_shader_create_info.module = shader_vertex_module;
+	vertex_shader_create_info.pName = "main";
+
+	shader_stages.push_back(vertex_shader_create_info);
+
 	//Geometry Shader
 	std::vector<char> shader_geometry_file;
 	VkShaderModule shader_geometry_module = nullptr;
@@ -472,18 +483,6 @@ void VkObj_RenderPipeline::CreateGraphicsPipeline(const uint32_t & pipeline_mask
 		shader_stages.push_back(geometry_shader_create_info);
 	}
 
-	//Vertex Shader
-	std::vector<char> shader_vertex_file = vk_read_shader_file(vertex_shader);
-	VkShaderModule shader_vertex_module = vk_create_shader_module(pDevice->logical, shader_vertex_file);
-
-	VkPipelineShaderStageCreateInfo vertex_shader_create_info = {};
-	vertex_shader_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	vertex_shader_create_info.stage = VK_SHADER_STAGE_VERTEX_BIT;
-	vertex_shader_create_info.module = shader_vertex_module;
-	vertex_shader_create_info.pName = "main";
-
-	shader_stages.push_back(vertex_shader_create_info);
-
 	//Fragment Shader
 	std::vector<char> shader_fragment_file = vk_read_shader_file(fragment_shader);
 	VkShaderModule shader_fragment_module = vk_create_shader_module(pDevice->logical, shader_fragment_file);
@@ -495,6 +494,7 @@ void VkObj_RenderPipeline::CreateGraphicsPipeline(const uint32_t & pipeline_mask
 	fragment_shader_create_info.pName = "main";
 
 	shader_stages.push_back(fragment_shader_create_info);
+
 #pragma endregion
 
 #pragma region Assembly and Vertex Input

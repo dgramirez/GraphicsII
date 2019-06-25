@@ -44,6 +44,15 @@ Object* create_normal_ship()
 		".\\assets\\misc\\Trident_UV_Dekol_Color.png");
 	Ship->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-3.0f, -2.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	Ship->uniform_function = AxeRotation;
+
+	Ship->material = glm::mat4
+	(
+		glm::vec4(0.19225f, 0.19225f, 0.19225f, 1.00f),
+		glm::vec4(0.50754f, 0.50754f, 0.50754f, 0.10f),
+		glm::vec4(0.508273f, 0.508273f, 0.508273f, 0.4f * 128.0f),
+		glm::vec4(0.1f, 0.01f, 0.75f, 1.0f)
+	);
+
 	return Ship;
 }
 Object* create_fighter_ship()
@@ -60,6 +69,14 @@ Object* create_fighter_ship()
 	myFighter->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(165.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	myFighter->uniform_function = AxeRotation;
 	LOG("Fighter Plane Finished" << std::endl)
+
+	myFighter->material = glm::mat4
+	(
+		glm::vec4(0.25f, 0.25f, 0.25f, 1.00f),
+		glm::vec4(0.40f, 0.40f, 0.40f, 0.10f),
+		glm::vec4(0.774597f, 0.774597f, 0.774597f, 0.6f * 128.0f),
+		glm::vec4(0.1f, 0.01f, 0.75f, 1.0f)
+	);
 
 	return myFighter;
 }
@@ -134,13 +151,22 @@ Object* create_square(const char* texture, float x1, float x2, float y1, float y
 	Square->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	Square->uniform_function = AxeRotation;
 
+	Square->material = glm::mat4
+	(
+		glm::vec4(0.1745f, 0.01175f, 0.01175f, 1.00f),
+		glm::vec4(0.61424f, 0.04136f, 0.44136f, 0.10f),
+		glm::vec4(0.727811, 0.626959, 0.626959, 0.6f * 128.0f),
+		glm::vec4(0.1f, 0.01f, 0.75f, 1.0f)
+	);
+
 	return Square;
 }
-Object* create_sphere(const uint32_t &pipeline_index, const uint32_t &pipeline_mask, const uint32_t &sizeof_ubuffer, const char* fbmfilepath, const char* texturelocation, const char *normal_filepath)
+Object* create_sphere(const uint32_t &pipeline_index, const uint32_t &pipeline_mask, const uint32_t &sizeof_ubuffer, const char* fbmfilepath, 
+	const char* texturelocation, const char *normal_filepath, const char *ambient_map, const char *specular_map)
 {
 	Object *mySphere = new Object(
-		fbmfilepath, pipeline_index, pipeline_mask, sizeof(Uniform_Planets), 0,
-		texturelocation, normal_filepath);
+		fbmfilepath, pipeline_index, pipeline_mask, sizeof_ubuffer, 0,
+		texturelocation, normal_filepath, ambient_map, specular_map);
 	return mySphere;
 }
 Object* create_flag()
@@ -200,13 +226,17 @@ void AxeRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 	ubo.light3_dir = camera.spot_light_dir;
 	ubo.light3_color = camera.spot_light_color;
 
-	ubo.strengths = glm::vec4(0.25f, 0.75f, camera.attenuation, 0.25f);
-	ubo.cone_strength = camera.spot_light_strengths;
+	ubo.material = obj.material;
+	ubo.material[1][3] = camera.attenuation;
+	ubo.material[3] = camera.spot_light_strengths;
+//	ubo.strengths = glm::vec4(0.25f, 0.75f, camera.attenuation, 0.25f);
+//	ubo.cone_strength = camera.spot_light_strengths;
 
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.vs_uniform_memory, ubo);
 
 	obj.model_matrix = ubo.mvp.model;
 }
+
 void PyramidRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 {
 	Uniform_MVP mvp;

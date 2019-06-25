@@ -41,26 +41,34 @@ void main()
 	
 //	vec3 normal = normalize(frag_TBN[2]);
 	
-	
+	//Light Color
+	vec3 earth_lights = vec3(texture(ambient_map, frag_uv));
 	
 	//Ambient Light Setup
-	vec3 ambient = vec3(texture(ambient_map, frag_uv)) * frag_lightcolor;
+	vec4 ambient = vec4(earth_lights, 1.0f) * object_color;
 	
 	//Diffuse Light Setup
-	vec3 direction = normalize(frag_lightpos - frag_pos);
-	float diffuse_strength = clamp(dot(normal, direction), 0.0f, 1.0f);
-	vec3 diffuse = diffuse_strength * frag_lightcolor;
+	vec3 light_dir = normalize(frag_lightpos - frag_pos);
+	float light_ratio = clamp(dot(light_dir, normal), 0.0f, 1.0f);
+	vec4 diffuse = vec4(light_ratio * frag_lightcolor, 1.0f) * object_color;
+	
+	//Point Light Addition
+//	vec3 point_light = frag_lightcolor * earth_lights;
 	
 	//Specular Light Setup
-//	vec3 view = normalize(frag_viewpos - frag_pos);
-//	vec3 reflection = reflect(-direction, normal);
-//	float shiningness = pow(max(dot(view,reflection),0.0f),256);
-//	vec3 specular = frag_specularStrength * shiningness * light_color;
+	vec3 viewdir = normalize(frag_viewpos - frag_pos);
+	vec3 half_vec = normalize( (light_dir) + viewdir );
+	float intensity = max(pow(dot(normal, half_vec),32),0.0f);
+	vec3 specular = vec3(1.0f, 1.0f, 1.0f) * frag_specularStrength * intensity;
+	
+//	vec3 reflection = reflect(-light_dir, normal);
+//	float shiningness = pow(clamp(dot(viewdir,reflection),0.0f, 1.0f),32);
+//	vec3 specular = vec3(1.0f, 1.0f, 1.0f) * shiningness * vec3(texture(specular_map, frag_uv));
 	
 	//Total Light
-	vec3 light_color = ambient + diffuse;
-//	vec3 light_color = ambient + diffuse + specular;
+//	vec3 light_color = ambient + diffuse;
+	vec4 light_color = ambient + diffuse + (diffuse * texture(ambient_map, frag_uv)) + vec4(specular,1.0f);
 
 	//Returning Color
-	out_color = vec4(light_color,1.0f) * object_color;
+	out_color = light_color;
 }

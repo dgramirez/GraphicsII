@@ -15,6 +15,7 @@
 #define PIPELINE_HUD 6
 #define PIPELINE_PLANET_NORMALMAPPED 7
 #define PIPELINE_PLANET_EARTH 8
+#define PIPELINE_GEOMETRY_PLANE 9
 
 #define PMASK_COLORMAP 0x01
 #define PMASK_NORMALMAP 0x02
@@ -23,7 +24,7 @@
 #define PMASK_GEOSHADER 0x10
 #define PMASK_TESSELATION 0x20
 
-#define PMASK_NODEPTH 0x100
+#define PMASK_NODEPTH	0x100
 #define PMASK_NOCULLING 0x200
 #define PMASK_WIREFRAME	0x8000
 
@@ -33,9 +34,7 @@ public:
 	VkObj_RenderPipeline() = default;
 
 	void init(VkObj_DeviceProperties &device, VkObj_Swapchain &swapchain);
-//	void create_pipeline(const char *vertex_shader, const char *fragment_shader, bool enable_depth = true, VkCompareOp depth_op = VK_COMPARE_OP_LESS, bool enable_culling = true);
 	void create_pipeline(const uint32_t &pipeline_mask, const char *vertex_shader, const char *fragment_shader, const char *geometry_shader = nullptr);
-//	void create_pipeline_normalmaps(const char *vertex_shader, const char *fragment_shader, bool enable_depth = true, VkCompareOp depth_op = VK_COMPARE_OP_LESS, bool enable_culling = true);
 	void shutdown();
 	void clean_pipeline();
 	void reset_pipeline();

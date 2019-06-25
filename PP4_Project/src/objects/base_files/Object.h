@@ -68,7 +68,7 @@ public:
 	__declspec(property(get = get_model_matrix, put = set_model_matrix)) glm::mat4 model_matrix;
 	__declspec(property(get = get_model_matrix_previous)) glm::mat4 model_matrix_previous;
 
-//	glm::mat4 model_matrix;
+	glm::mat4 material;
 private:
 	Mesh *pMesh;
 	Texture *pColorMap;

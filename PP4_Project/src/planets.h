@@ -63,7 +63,8 @@ Object* create_flag();
 #pragma endregion
 
 
-Object* create_sphere(const uint32_t &pipeline_index, const uint32_t &pipeline_mask, const uint32_t &sizeof_ubuffer, const char* fbxfilepath, const char* texturelocation, const char *normal_filepath = nullptr);
+Object* create_sphere(const uint32_t &pipeline_index, const uint32_t &pipeline_mask, const uint32_t &sizeof_ubuffer, const char* fbxfilepath, 
+	const char* texturelocation, const char *normal_filepath = nullptr, const char *ambient_map = nullptr, const char *specular_map = nullptr);
 
 void UniformMVP_Basic(const VkObj_Context &context, Object &obj, Camera &camera);
 void BallMVP_Basic(const VkObj_Context &context, Object &obj, Camera &camera);
