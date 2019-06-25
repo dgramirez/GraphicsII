@@ -19,6 +19,7 @@
 #define PYRAMID 14
 #define SQUARE 15
 #define FLAG 16
+#define MOON 17
 
 #define SIZE_SPHERE			79.1f
 #define SIZE_SUN			SIZE_SPHERE / 139.2f
@@ -86,6 +87,7 @@ void PlutoRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void EarthMoonRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void skybox_uniform(const VkObj_Context &context, Object &obj, Camera &camera);
 void flag_uniform(const VkObj_Context &context, Object &obj, Camera &camera);
+void MoonRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 //void write_to_buffer(const VkDevice &device, const uint32_t &current_image, std::vector<VkDeviceMemory> &uniform_memory, const Uniform_Planets &ubo);
 //void write_to_buffer(const VkDevice &device, const uint32_t &current_image, std::vector<VkDeviceMemory> &uniform_memory, const Uniform_MVP &mvp);
 

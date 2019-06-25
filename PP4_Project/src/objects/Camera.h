@@ -71,6 +71,9 @@ public:
 	glm::vec4 get_spotlight_strength() { return prv_SpotLightStrengths; }
 	__declspec(property(get = get_spotlight_strength)) glm::vec4 spot_light_strengths;
 
+	std::vector<Object*>* get_object() { return pObjectList; }
+	__declspec(property(get = get_object)) std::vector<Object*> *object_list;
+
 private:
 	glm::mat4 prv_View;
 	glm::mat4 prv_ViewInv;
@@ -89,7 +92,6 @@ private:
 	glm::vec4 prv_SpotLightDir;
 	glm::vec4 prv_SpotLightColor;
 	glm::vec4 prv_SpotLightStrengths;
-	
 	
 	const float prv_DirLightDistance = 10.0f;
 	float prv_DirLightY;

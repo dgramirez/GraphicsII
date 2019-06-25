@@ -76,6 +76,10 @@ int main(int argc, char* args[])
 	Object_List->push_back(square);
 	Object_List->push_back(flag);
 
+	Object_List->push_back(create_sphere(PIPELINE_PLANETS, 1, sizeof(Uniform_Planets), ".\\assets\\solarsystem\\Moon.fmd", ".\\assets\\solarsystem\\texture\\moonmap1k.png"));
+	Object_List->at(MOON)->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(DISTANCE_EARTH + 2.5f, 0.0f, 0.0f));
+	Object_List->at(MOON)->uniform_function = MoonRotation;
+
 	myWindow->setup_object_list(Object_List);
 
 #ifdef _DEBUG

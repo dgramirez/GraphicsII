@@ -45,7 +45,7 @@ void Camera::set_object_list(std::vector<Object*> *object_list)
 
 void Camera::set_planet_lookup(const uint32_t &x)
 {
-	if (x > PLUTO)
+	if (x > MOON)
 		prv_PlanetLookup = MERCURY;
 	else if (x < MERCURY)
 		prv_PlanetLookup = PLUTO;
@@ -80,6 +80,27 @@ void Camera::set_planet_lookup(const uint32_t &x)
 		break;
 	case PLUTO:
 		prv_PlanetName = "Pluto";
+		break;
+	case HFILE_SHIP:
+		prv_PlanetName = "Ship 1";
+		break;
+	case MODEL_SHIP:
+		prv_PlanetName = "Ship 2";
+		break;
+	case GRID:
+		prv_PlanetName = "Grid";
+		break;
+	case PYRAMID:
+		prv_PlanetName = "Pyramid";
+		break;
+	case SQUARE:
+		prv_PlanetName = "Square";
+		break;
+	case FLAG:
+		prv_PlanetName = "Flag";
+		break;
+	case MOON:
+		prv_PlanetName = "Moon";
 		break;
 	}
 }

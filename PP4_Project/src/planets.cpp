@@ -354,6 +354,42 @@ void PlutoRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.vs_uniform_memory, mvp);
 }
 
+void MoonRotation(const VkObj_Context &context, Object &obj, Camera &camera)
+{
+	Uniform_Planets ubo;
+	
+	float earth_rotation_time = (float)myTime.Delta() * glm::radians(72.0f); //1 Second = 72 Degrees Rotation. 5 Seconds = 360 Degrees Rotation. 1 Earth Day = 5 Seconds Simulation
+	float planet_rotation = earth_rotation_time;
+	float sun_rotation = earth_rotation_time / 365.25f;
+
+	if (InputController::stop_rot)
+	{
+		planet_rotation *= 365.0f;
+		sun_rotation *= 365.0f;
+	}
+
+	//Rotation around the Earth (Origin)
+	ubo.mvp.model = (camera.object_list->at(EARTH)->model_matrix * glm::translate(glm::mat4(1.0f), glm::vec3(2.5f, 0.0f, 0.0f))) * glm::rotate(glm::mat4(1.0f), -sun_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+
+// 	//Translation for model
+// 	ubo.mvp.model *= obj.model_matrix;
+// 
+// 	//Rotation on itself
+// 	ubo.mvp.model *= glm::rotate(glm::mat4(1.0f), -planet_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	//Transposed-Inversed Model
+	ubo.TI_model = glm::transpose(glm::inverse(ubo.mvp.model));
+	obj.model_matrix = ubo.mvp.model;
+
+	ubo.mvp.view = camera.view_inverse;
+	ubo.mvp.projection = camera.perspective;
+	ubo.mvp.projection[1][1] = -ubo.mvp.projection[1][1];
+	ubo.light_color = glm::vec4(1.0f, 1.0f, 1.0f, 0.25f);
+//	PlanetaryRotation(context.swapchain.swapchain_aspect, ubo, obj, camera, 1.0f, 365.25f);
+
+	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.vs_uniform_memory, ubo);
+}
+
 void PlanetaryRotation(float aspect_ratio, Uniform_Planets &ubo, Object &obj, Camera &camera, const float &planet_rotation_earth_days, const float &sun_rotation_earth_days, bool planet_clockwise)
 {
 	float earth_rotation_time = (float)myTime.Delta() * glm::radians(72.0f); //1 Second = 72 Degrees Rotation. 5 Seconds = 360 Degrees Rotation. 1 Earth Day = 5 Seconds Simulation
