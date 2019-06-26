@@ -10,13 +10,10 @@ Q	- Up
 W	- Down
 
 Camera Rotation:
-Left Arrow		- Yaw(+)
-Right Arrow		- Yaw(-)
+Left Arrow	- Yaw(+)
+Right Arrow	- Yaw(-)
 Up Arrow		- Pitch(+)
 Down Arrow	- Pitch(-)
-
-Right Ctrl		- Roll(-)
-Left Ctrl			- Roll(+)
 
 +----------------------------------------------------------+
 Helpful Features:
@@ -26,19 +23,19 @@ Misc:
 	F1		- Toggle Infinite Perspective		{WT}
 	
 Camera Manipulation:
-	+/=		- Camera Speed Increase		{WT}
-	-/_		- Camera Speed Decrease		{WT}
-	Alt+X	- Camera Zoom Increase		{WT}
-	Alt+Z	- Camera Zoom Decrease		{WT}
+	+/=		- Camera Speed Increase			{WT}
+	-/_		- Camera Speed Decrease			{WT}
+	Alt+X	- Camera Zoom Increase			{WT}
+	Alt+Z	- Camera Zoom Decrease			{WT}
 	Shift+X	- Camera Nearplane Increase	{WT}
 	Shift+Z	- Camera Nearplane Decrease	{WT}
-	Ctrl+X	- Camera Farplane Increase	{WT}
-	Ctrl+Z	- Camera Farplane Decrease	{WT}
+	Ctrl+X	- Camera Farplane Increase		{WT}
+	Ctrl+Z	- Camera Farplane Decrease		{WT}
 
 Planet Fun:
-	F2		- Toggle Planet Selection 		{WT} {1}
+	F2		- Toggle Planet Selection 			{WT}	{1}
 	Ctrl+F	- Look-At Planet
-	T			- Teleport to Planet				{1}
+	T			- Teleport to Planet								{1}
 	
 Light Fun:
 	Numpad +			- Increase Point Light Attenuation
@@ -53,6 +50,22 @@ Light Fun:
 Key:
 	{WT} = Window Title 
 	{1} = Once upon RELEASE
+	
++----------------------------------------------------------+
+Milestone III Help
++----------------------------------------------------------+
+Milestone 3 Help:
+Lights demonstrate popular specular
+	- Press "F2" Twice. This should switch planet view to "Earth"
+	- Press "T" to teleport to earth.
+	- This uses a specular map, The continents should not shine but the water does
+	
+Space Theme:
+	- Skybox is Space
+	- Looking at the Window Title, You can see "Mercury". Pressing F2 will toggle between Mercury to Pluto (And all other objects present!). 
+	  Pressing (Ctrl+F) will allow you to look at the object selected, or (T) for Teleporting.
+	- Two Spaceships inside the sun, and one going around the orbit
+	- Earth Contains a moon.
 
 +----------------------------------------------------------+
 Milestone II Help
