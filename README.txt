@@ -62,9 +62,8 @@ Lights demonstrate popular specular
 	
 Space Theme:
 	- Skybox is Space
-	- Looking at the Window Title, You can see "Mercury". Pressing F2 will toggle between Mercury to Pluto (And all other objects present!). 
-	  Pressing (Ctrl+F) will allow you to look at the object selected, or (T) for Teleporting.
-	- Two Spaceships inside the sun, and one going around the orbit
+	- Looking at the Window Title, You can see "Mercury". Pressing F2 will toggle between Mercury to Pluto (And all other objects present!). Pressing (Ctrl+F) will allow you to look at the object selected, or (T) for Teleporting.
+	- Two Spaceships inside the sun, and one going around the orbit (Ship 3 is the one going around Orbit.)
 	- Earth Contains a moon.
 
 +----------------------------------------------------------+
@@ -110,7 +109,7 @@ Infinite Skybox (3)
 	- The skybox is the blue-ish background with the white stars.
 	
 Unique Shader that modifies outgoing data based on position, time and a wave (3)
-	- The Japanese Flag should demonstrate it. In “./shaders/GLSL” there should be a file 	called “vertFlag.vert” with the position, time sent, and sin as sine wave.
+	- The Japanese Flag should demonstrate it. In “./shaders/GLSL” there should be a file called “vertFlag.vert” with the position, time sent, and sin as sine wave.
 
 Use Obj2Header to generate a complex mesh (3)
 	- The Ship in the middle should have the “HFILE” Mesh Drawn.
@@ -119,7 +118,7 @@ Drawing proceduraly created 3D line mesh (2)
 	- The Grid should be seen on start
 
 Drawing indexed model loaded from file (4)
-	- The Ship on the right side is loaded from FBX loader. Also pressing “T” will 		   	teleport you to Mercury, which is also loaded from FBX Loader
+	- The Ship on the right side is loaded from FBX loader. Also pressing “T” will teleport you to Mercury, which is also loaded from FBX Loader
 
 MSAA applied to rasterized geometry (2)
 	- It should be applied to all Geometry, as I force it to use the supported MSAA from 	device
