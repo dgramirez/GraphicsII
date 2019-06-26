@@ -20,26 +20,26 @@ Helpful Features:
 +----------------------------------------------------------+
 Misc:
 	F11 	- Toggle Fullscreen
-	F1		- Toggle Infinite Perspective		{WT}
+	F1	- Toggle Infinite Perspective	{WT}
 	
 Camera Manipulation:
-	+/=		- Camera Speed Increase			{WT}
-	-/_		- Camera Speed Decrease			{WT}
-	Alt+X	- Camera Zoom Increase			{WT}
-	Alt+Z	- Camera Zoom Decrease			{WT}
+	+/=	- Camera Speed Increase		{WT}
+	-/_	- Camera Speed Decrease		{WT}
+	Alt+X	- Camera Zoom Increase		{WT}
+	Alt+Z	- Camera Zoom Decrease		{WT}
 	Shift+X	- Camera Nearplane Increase	{WT}
 	Shift+Z	- Camera Nearplane Decrease	{WT}
-	Ctrl+X	- Camera Farplane Increase		{WT}
-	Ctrl+Z	- Camera Farplane Decrease		{WT}
+	Ctrl+X	- Camera Farplane Increase	{WT}
+	Ctrl+Z	- Camera Farplane Decrease	{WT}
 
 Planet Fun:
-	F2		- Toggle Planet Selection 			{WT}	{1}
+	F2	- Toggle Planet Selection 	{WT}	{1}
 	Ctrl+F	- Look-At Planet
-	T			- Teleport to Planet								{1}
+	T	- Teleport to Planet			{1}
 	
 Light Fun:
-	Numpad +			- Increase Point Light Attenuation
-	Numpad -				- Decrease Point Light Attenuation
+	Numpad +	- Increase Point Light Attenuation
+	Numpad -	- Decrease Point Light Attenuation
 	
 	Ctrl+(Numpad+)	- Increase Inner Cone's Attenuation
 	Ctrl+(Numpad-)	- Decrease Inner Cone's Attenuation
