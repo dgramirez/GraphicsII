@@ -61,6 +61,7 @@ Object* create_fighter_ship();
 Object* create_square(const char* texture, float x1, float x2, float y1, float y2);
 Object* create_grid();
 Object* create_flag();
+Object* create_ship();
 #pragma endregion
 
 
@@ -84,6 +85,7 @@ void SaturnRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void UranusRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void NeptuneRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void PlutoRotation(const VkObj_Context &context, Object &obj, Camera &camera);
+void ShipRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void EarthMoonRotation(const VkObj_Context &context, Object &obj, Camera &camera);
 void skybox_uniform(const VkObj_Context &context, Object &obj, Camera &camera);
 void flag_uniform(const VkObj_Context &context, Object &obj, Camera &camera);

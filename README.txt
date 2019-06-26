@@ -28,8 +28,8 @@ Misc:
 Camera Manipulation:
 	+/=		- Camera Speed Increase		{WT}
 	-/_		- Camera Speed Decrease		{WT}
-	Alt+X		- Camera Zoom Increase		{WT}
-	Alt+Z		- Camera Zoom Decrease		{WT}
+	Alt+X	- Camera Zoom Increase		{WT}
+	Alt+Z	- Camera Zoom Decrease		{WT}
 	Shift+X	- Camera Nearplane Increase	{WT}
 	Shift+Z	- Camera Nearplane Decrease	{WT}
 	Ctrl+X	- Camera Farplane Increase	{WT}

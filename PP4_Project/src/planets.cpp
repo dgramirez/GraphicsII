@@ -178,6 +178,17 @@ Object* create_flag()
 	Flag->uniform_function = flag_uniform;
 	return Flag;
 }
+Object* create_ship()
+{
+	Object *Ship = new Object(
+		"assets\\Trident-A10.fmd", PIPELINE_PLANETS, 1, sizeof(Uniform_Planets), 0,
+		".\\assets\\misc\\Trident_UV_Dekol_Color.png");
+	
+	Ship->model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(DISTANCE_VENUS + 10.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	Ship->uniform_function = ShipRotation;
+
+	return Ship;
+}
 
 void UniformMVP_Basic(const VkObj_Context &context, Object &obj, Camera &camera)
 {
@@ -371,11 +382,26 @@ void MoonRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 	//Rotation around the Earth (Origin)
 	ubo.mvp.model = (camera.object_list->at(EARTH)->model_matrix * glm::translate(glm::mat4(1.0f), glm::vec3(2.5f, 0.0f, 0.0f))) * glm::rotate(glm::mat4(1.0f), -sun_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
 
-// 	//Translation for model
-// 	ubo.mvp.model *= obj.model_matrix;
-// 
-// 	//Rotation on itself
-// 	ubo.mvp.model *= glm::rotate(glm::mat4(1.0f), -planet_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+	//Transposed-Inversed Model
+	ubo.TI_model = glm::transpose(glm::inverse(ubo.mvp.model));
+	obj.model_matrix = ubo.mvp.model;
+
+	ubo.mvp.view = camera.view_inverse;
+	ubo.mvp.projection = camera.perspective;
+	ubo.mvp.projection[1][1] = -ubo.mvp.projection[1][1];
+	ubo.light_color = glm::vec4(1.0f, 1.0f, 1.0f, 0.25f);
+
+	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.vs_uniform_memory, ubo);
+}
+void ShipRotation(const VkObj_Context &context, Object &obj, Camera &camera)
+{
+	Uniform_Planets ubo;
+
+	//Rotation around the Sun (Origin)
+	ubo.mvp.model = glm::rotate(glm::mat4(1.0f), ( (float)myTime.Delta() * glm::radians(72.0f) ) * 0.0078125f, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	//Translation for model
+	ubo.mvp.model *= obj.model_matrix;
 
 	//Transposed-Inversed Model
 	ubo.TI_model = glm::transpose(glm::inverse(ubo.mvp.model));
@@ -385,7 +411,6 @@ void MoonRotation(const VkObj_Context &context, Object &obj, Camera &camera)
 	ubo.mvp.projection = camera.perspective;
 	ubo.mvp.projection[1][1] = -ubo.mvp.projection[1][1];
 	ubo.light_color = glm::vec4(1.0f, 1.0f, 1.0f, 0.25f);
-//	PlanetaryRotation(context.swapchain.swapchain_aspect, ubo, obj, camera, 1.0f, 365.25f);
 
 	write_to_buffer(context.device.logical, context.swapchain.image_index, obj.vs_uniform_memory, ubo);
 }
